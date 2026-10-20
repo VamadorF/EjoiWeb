@@ -27,5 +27,26 @@
     "basic_limits": "Siempre activos: {{limits}}",
     "suggest_name": "Sugerir",
     "cta_create": "Crear a {{name}} y conversar"
+  },
+  "chat": {
+    "creating_title": "Creando a {{name}}",
+    "step_personality": "Personalidad",
+    "step_interests": "Intereses",
+    "step_portrait": "Retrato",
+    "step_greeting": "Saludo",
+    "can_write": "Ya puedes escribirle. Le llegará apenas esté lista.",
+    "pending": "Pendiente",
+    "online": "En línea",
+    "based_on": "Basado en tus intereses y su personalidad",
+    "portrait_on_way": "Retrato en camino",
+    "portrait_retry": "Reintentar retrato",
+    "error_banner": "No pudimos terminar de crear a {{name}}. Tus elecciones y tu mensaje están guardados.",
+    "retry": "Reintentar",
+    "back_to_step3": "Volver a ajustar"
+  },
+  "menu": {
+    "chat": "Conversación",
+    "edit": "Editar eJoi",
+    "logout": "Cerrar sesión"
   }
 }
