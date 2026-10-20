@@ -1,6 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import type { Gender, OnboardingData, VisualStyle } from '@/features/onboarding/types';
+import { ONBOARDING_STEPS } from '@/features/onboarding/constants/onboardingSteps';
+import type {
+  CompanionIntensity,
+  Gender,
+  OnboardingData,
+  VisualStyle,
+} from '@/features/onboarding/types';
+
+export const DEFAULT_COMO_STEP = ONBOARDING_STEPS.name;
 
 import {
   buildPutBody,
@@ -83,6 +91,10 @@ export function useCreationDraft({ webView, step = DEFAULT_WHO_STEP }: UseCreati
           for (const interest of merged.interests) timeline.push(`interest:${interest}`);
           if (merged.ethnicity?.trim()) timeline.push('ethnicity');
           if (typeof merged.age === 'number') timeline.push('age');
+          if (merged.persona) timeline.push('persona');
+          if (merged.intensity) timeline.push('intensity');
+          for (const boundary of merged.boundaries) timeline.push(`boundary:${boundary}`);
+          if (merged.companionName?.trim()) timeline.push('name');
           setTagTimeline(timeline);
           lastSentRef.current = persistSnapshotKey(buildPutBody(step, merged, webView));
         }
@@ -156,6 +168,49 @@ export function useCreationDraft({ webView, step = DEFAULT_WHO_STEP }: UseCreati
     [patchData],
   );
 
+  const setPersona = useCallback(
+    (persona: string) => {
+      patchData({ persona });
+      setTagTimeline((t) => upsertTimelineId(t, 'persona'));
+    },
+    [patchData],
+  );
+
+  const setIntensity = useCallback(
+    (intensity: CompanionIntensity) => {
+      patchData({ intensity });
+      setTagTimeline((t) => upsertTimelineId(t, 'intensity'));
+    },
+    [patchData],
+  );
+
+  const toggleBoundary = useCallback((boundary: string) => {
+    let removing = false;
+    setData((prev) => {
+      removing = prev.boundaries.includes(boundary);
+      return {
+        ...prev,
+        boundaries: removing
+          ? prev.boundaries.filter((b) => b !== boundary)
+          : [...prev.boundaries, boundary],
+      };
+    });
+    const tagId = `boundary:${boundary}`;
+    setTagTimeline((order) =>
+      removing ? removeTimelineId(order, tagId) : upsertTimelineId(order, tagId),
+    );
+  }, []);
+
+  const setCompanionName = useCallback(
+    (companionName: string) => {
+      patchData({ companionName });
+      setTagTimeline((t) =>
+        companionName.trim() ? upsertTimelineId(t, 'name') : removeTimelineId(t, 'name'),
+      );
+    },
+    [patchData],
+  );
+
   const toggleInterest = useCallback((interest: string) => {
     let removing = false;
     setData((prev) => {
@@ -190,11 +245,16 @@ export function useCreationDraft({ webView, step = DEFAULT_WHO_STEP }: UseCreati
     data,
     tagTimeline,
     loaded,
+    patchData,
     setGender,
     setVisualStyle,
     setEthnicity,
     setAge,
     toggleInterest,
+    setPersona,
+    setIntensity,
+    toggleBoundary,
+    setCompanionName,
     saveWithWebView,
     flushSave,
   };

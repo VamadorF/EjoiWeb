@@ -13,6 +13,21 @@
   color: var(--c-ink);
 }
 
+.creation-preview__name {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--c-ink);
+}
+
+.creation-preview__greeting {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  color: var(--c-ink-muted, var(--c-ink));
+  font-style: italic;
+}
+
 .creation-preview__portrait-wrap {
   flex: 1;
   min-height: 0;

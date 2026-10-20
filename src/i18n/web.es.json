@@ -19,6 +19,13 @@
     "style_realistic": "Realista",
     "interests_counter": "{{count}} de 3 intereses",
     "missing": "Falta: {{items}}",
-    "continue": "Continuar"
+    "continue": "Continuar",
+    "presence_soft": "Suave",
+    "presence_balanced": "Equilibrada",
+    "presence_intense": "Activa",
+    "avoid_other": "Otro",
+    "basic_limits": "Siempre activos: {{limits}}",
+    "suggest_name": "Sugerir",
+    "cta_create": "Crear a {{name}} y conversar"
   }
 }

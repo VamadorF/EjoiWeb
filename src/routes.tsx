@@ -5,7 +5,7 @@ import { SessionRouting } from '~/features/auth/useWebSession';
 
 const AccessPage = lazy(() => import('~/pages/Access/AccessPage'));
 const CreateWhoPage = lazy(() => import('~/pages/CreateWho/CreateWhoPage'));
-const CreateComoPage = lazy(() => import('~/pages/CreateComoPage'));
+const CreateHowPage = lazy(() => import('~/pages/CreateHow/CreateHowPage'));
 const ChatPage = lazy(() => import('~/pages/ChatPage'));
 const ChatEditPage = lazy(() => import('~/pages/ChatEditPage'));
 
@@ -13,7 +13,7 @@ export const routeConfig: RouteObject[] = [
   { path: '/', element: <Navigate to="/acceso" replace /> },
   { path: '/acceso', element: <AccessPage /> },
   { path: '/crear/quien', element: <CreateWhoPage /> },
-  { path: '/crear/como', element: <CreateComoPage /> },
+  { path: '/crear/como', element: <CreateHowPage /> },
   { path: '/chat', element: <ChatPage /> },
   { path: '/chat/editar', element: <ChatEditPage /> },
 ];
