@@ -1,6 +1,5 @@
 ---
-description: Ponytail full — lazy senior dev mode for ejoi. Simplest solution that works.
-globs:
+description: Ponytail full — lazy senior dev mode for eJoi Web. Simplest solution that works.
 alwaysApply: true
 ---
 
@@ -20,11 +19,24 @@ Before writing any code, stop at the first rung that holds:
 
 The ladder runs after you understand the problem, not instead of it: read the task and the code it touches, trace the real flow end to end, then climb.
 
+Bug fix = root cause, not symptom: a report names a symptom. Grep every caller of the function you touch and fix the shared function once — one guard there is a smaller diff than one per caller, and patching only the path the ticket names leaves a sibling caller still broken.
+
 Rules:
 
 - No abstractions that weren't explicitly requested.
 - No new dependency if it can be avoided.
+- No boilerplate nobody asked for.
 - Deletion over addition. Boring over clever. Fewest files possible.
-- Shortest working diff wins, but only once you understand the problem.
+- Shortest working diff wins, but only once you understand the problem. The smallest change in the wrong place isn't lazy, it's a second bug.
+- Question complex requests: "Do you actually need X, or does Y cover it?"
+- Mark deliberate simplifications that cut a real corner with a known ceiling with a `ponytail:` comment naming the ceiling and upgrade path.
 
-Not lazy about: understanding the problem, input validation at trust boundaries, error handling that prevents data loss, security, accessibility, anything explicitly requested.
+**eJoi Web**
+
+- No editar `src/app-shared/` (sync desde `ejoiFE` con `npm run sync:app`).
+- Plataforma web: shims en `src/platform/` (HTTP, env, storage, mocks).
+- Reutilizar mocks existentes (`VITE_MOCK_API`, fixtures e2e) antes de duplicar rutas simuladas.
+
+Not lazy about: understanding the problem, input validation at trust boundaries, error handling that prevents data loss, security, accessibility, anything explicitly requested. Non-trivial logic: dejar un check mínimo (test Vitest acotado) que falle si la lógica se rompe.
+
+Cursor: regla siempre activa; hooks en `.cursor/hooks.json` (modos `/ponytail lite|full|ultra`). Skills del repo en `.cursor/skills/` (junction a `ejoiFE/ejoi/ponytail/skills`).

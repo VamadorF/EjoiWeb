@@ -26,7 +26,7 @@ Cliente web de escritorio de eJoi. Usa el mismo backend que la app móvil (`eJoi
 - `src/` — código de la SPA
 - `src/app-shared/` — módulos sincronizados desde `ejoiFE` (se añade en la tarjeta WEB-00b)
 - `src/platform/` — shims de plataforma (HTTP, almacenamiento, env)
-- `.cursor/rules/ponytail.mdc` — regla de desarrollo Ponytail para Cursor
+- **Ponytail** (lazy senior dev): `.cursor/rules/ponytail.mdc` (siempre activa), `.cursor/hooks.json` (modos `/ponytail`), skills en `.cursor/skills/`. Detalle en [`AGENTS.md`](AGENTS.md). Fuente: `../ejoiFE/ejoi/ponytail`.
 
 ## Sincronización con la app
 
@@ -43,6 +43,19 @@ Los imports de plataforma (`HTTP`, almacenamiento, env) se resuelven a `src/plat
 ## Variables de entorno
 
 Copia `.env.example` a `.env.local` y ajusta según el entorno. En desarrollo, las peticiones a `/api` se proxyean al backend local (`VITE_DEV_API_PROXY_TARGET`).
+
+### Modo mock (sin backend)
+
+Con `VITE_MOCK_API=true` la SPA responde en el cliente con datos de demo (misma idea que el mock de Playwright). En `/acceso` aparece **Entrar en modo demo**. Desactiva la variable (`false` u omítela) y reinicia Vite/preview para usar eJoi-BE real.
+
+```powershell
+# .env.local
+VITE_MOCK_API=true
+npm run dev
+# preview: la variable se embebe en el build
+npm run build
+npm run preview
+```
 
 ## QA e2e (SCRUM-116)
 

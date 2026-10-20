@@ -9,6 +9,10 @@ export default defineConfig(({ mode }) => ({
   },
   resolve: {
     alias: [
+      {
+        find: '@/features/companion/api/image.api',
+        replacement: fileURLToPath(new URL('./src/platform/image.api.shim.ts', import.meta.url)),
+      },
       { find: '@/shared/services/http/client', replacement: fileURLToPath(new URL('./src/platform/http.ts', import.meta.url)) },
       { find: '@/shared/services/storage/secure', replacement: fileURLToPath(new URL('./src/platform/secure.ts', import.meta.url)) },
       { find: '@/shared/services/storage/keyValue', replacement: fileURLToPath(new URL('./src/platform/keyValue.ts', import.meta.url)) },

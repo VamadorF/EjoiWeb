@@ -1,4 +1,5 @@
-import { API_URL } from './env';
+import { API_URL, MOCK_API } from './env';
+import { handleMockApiRequest } from './mockApi';
 
 let accessToken: string | null = null;
 let userDataJson: string | null = null;
@@ -77,6 +78,26 @@ export async function refresh(): Promise<string> {
 }
 
 async function doRefresh(startedGeneration: number): Promise<string> {
+  if (MOCK_API) {
+    const mocked = handleMockApiRequest<{ accessToken?: string; access_token?: string }>(
+      `${API_URL}/auth/refresh`,
+      { method: 'POST' },
+    );
+    const token = mocked?.data.accessToken ?? mocked?.data.access_token;
+    if (token) {
+      accessToken = token;
+      refreshGeneration = startedGeneration + 1;
+      lastRefreshAt = Date.now();
+      authChannel?.postMessage({
+        type: 'refreshed',
+        at: lastRefreshAt,
+        generation: refreshGeneration,
+        accessToken: token,
+      });
+      return token;
+    }
+  }
+
   const response = await fetch(`${API_URL}/auth/refresh`, {
     method: 'POST',
     credentials: 'include',
