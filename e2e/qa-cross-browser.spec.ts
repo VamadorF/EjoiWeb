@@ -91,7 +91,7 @@ test.describe('QA cross-browser SCRUM-116', () => {
 
     await page.waitForSelector('[data-testid="chat-composer"]');
     await page.locator('.chat-composer__input').fill('Mensaje pendiente e2e');
-    await page.getByRole('button', { name: 'Enviar' }).click();
+    await page.getByRole('button', { name: 'Enviar mensaje' }).click();
     await expect(page.getByText('Mensaje pendiente e2e')).toBeVisible();
 
     await expect(page.getByTestId('chat-error-banner')).toBeVisible({ timeout: 15_000 });

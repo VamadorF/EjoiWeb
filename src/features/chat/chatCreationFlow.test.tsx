@@ -84,7 +84,7 @@ describe('chat creation flow', () => {
     expect(screen.getByTestId('chat-creating-panel')).toBeTruthy();
     const user = userEvent.setup();
     await user.type(screen.getByRole('textbox'), 'Hola Luna');
-    await user.click(screen.getByRole('button', { name: 'Enviar' }));
+    await user.click(screen.getByRole('button', { name: 'Enviar mensaje' }));
 
     await waitFor(() => {
       expect(screen.getByText('Hola Luna')).toBeTruthy();
