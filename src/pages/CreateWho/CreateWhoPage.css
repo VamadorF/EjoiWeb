@@ -1,0 +1,113 @@
+.create-who {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  height: 100%;
+  min-height: 0;
+  overflow: auto;
+}
+
+.create-who__header {
+  font-weight: 600;
+}
+
+.create-who__section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.create-who__label {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.create-who__optional {
+  font-weight: 400;
+  color: var(--c-ink-muted, var(--c-ink));
+}
+
+.create-who__interests-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.create-who__counter {
+  font-size: 0.875rem;
+  color: var(--c-ink-muted, var(--c-ink));
+}
+
+.create-who__counter--ok {
+  color: var(--c-ok);
+  font-weight: 700;
+}
+
+.create-who__age {
+  width: 5rem;
+  min-height: calc(var(--size-control, 56) * 1px);
+  padding: 0 0.75rem;
+  border-radius: calc(var(--radius-control) * 1px);
+  border: calc(var(--border-card) * 1px) solid var(--c-line);
+  background: var(--c-surface);
+  color: var(--c-ink);
+}
+
+.create-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-height: calc(var(--size-control, 56) * 1px);
+  padding: 0.5rem;
+  border-radius: calc(var(--radius-control) * 1px);
+  border: calc(var(--border-card) * 1px) solid var(--c-line);
+  background: var(--c-surface);
+  color: var(--c-ink);
+  text-align: center;
+}
+
+.create-option--selected {
+  border-color: var(--c-accent, var(--c-ink));
+  box-shadow: 0 0 0 1px var(--c-accent, var(--c-ink));
+}
+
+.create-option__thumb {
+  width: 100%;
+  max-height: 72px;
+  object-fit: cover;
+  border-radius: calc(var(--radius-control) * 0.5px);
+}
+
+.create-who__footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1rem;
+  width: 100%;
+}
+
+.create-who__missing {
+  margin: 0;
+  flex: 1;
+  font-size: 0.875rem;
+  color: var(--c-ink-muted, var(--c-ink));
+}
+
+.create-who__continue {
+  min-height: calc(var(--size-control, 56) * 1px);
+  padding: 0 1.5rem;
+  border: none;
+  border-radius: calc(var(--radius-control) * 1px);
+  background: var(--c-accent, var(--c-ink));
+  color: var(--c-on-accent, var(--c-bg));
+  font-weight: 700;
+}
+
+.create-who__continue:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}

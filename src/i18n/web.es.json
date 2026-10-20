@@ -10,5 +10,15 @@
     "error_generic": "No pudimos iniciar sesión. Inténtalo de nuevo.",
     "apple_continue": "Continuar con Apple",
     "have_code": "Tengo un código"
+  },
+  "create": {
+    "step2": "Paso 2 de 3",
+    "step3": "Paso 3 de 3",
+    "preview_title": "Tu eJoi va tomando forma",
+    "style_illustrated": "Ilustrado",
+    "style_realistic": "Realista",
+    "interests_counter": "{{count}} de 3 intereses",
+    "missing": "Falta: {{items}}",
+    "continue": "Continuar"
   }
 }

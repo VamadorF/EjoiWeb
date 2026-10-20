@@ -4,7 +4,7 @@ import { createBrowserRouter, Navigate, Outlet, type RouteObject } from 'react-r
 import { SessionRouting } from '~/features/auth/useWebSession';
 
 const AccessPage = lazy(() => import('~/pages/Access/AccessPage'));
-const CreateQuienPage = lazy(() => import('~/pages/CreateQuienPage'));
+const CreateWhoPage = lazy(() => import('~/pages/CreateWho/CreateWhoPage'));
 const CreateComoPage = lazy(() => import('~/pages/CreateComoPage'));
 const ChatPage = lazy(() => import('~/pages/ChatPage'));
 const ChatEditPage = lazy(() => import('~/pages/ChatEditPage'));
@@ -12,7 +12,7 @@ const ChatEditPage = lazy(() => import('~/pages/ChatEditPage'));
 export const routeConfig: RouteObject[] = [
   { path: '/', element: <Navigate to="/acceso" replace /> },
   { path: '/acceso', element: <AccessPage /> },
-  { path: '/crear/quien', element: <CreateQuienPage /> },
+  { path: '/crear/quien', element: <CreateWhoPage /> },
   { path: '/crear/como', element: <CreateComoPage /> },
   { path: '/chat', element: <ChatPage /> },
   { path: '/chat/editar', element: <ChatEditPage /> },
