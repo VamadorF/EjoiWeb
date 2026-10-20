@@ -16,7 +16,9 @@ Cliente web de escritorio de eJoi. Usa el mismo backend que la app móvil (`eJoi
 | `npm run typecheck` | Solo TypeScript |
 | `npm run lint` | ESLint |
 | `npm run test` | Vitest (una pasada) |
-| `npm run verify` | typecheck + lint + test + build |
+| `npm run sync:app` | Copia módulos y assets desde `ejoiFE` (requiere `C:\ejoi\ejoiFE\ejoi` al lado) |
+| `npm run sync:check` | Verifica manifiesto `SYNC.json` (CI, sin red) |
+| `npm run verify` | sync:check + typecheck + lint + test + build |
 
 ## Estructura (prevista)
 
@@ -25,9 +27,17 @@ Cliente web de escritorio de eJoi. Usa el mismo backend que la app móvil (`eJoi
 - `src/platform/` — shims de plataforma (HTTP, almacenamiento, env)
 - `.cursor/rules/ponytail.mdc` — regla de desarrollo Ponytail para Cursor
 
-## Relación con ejoiFE
+## Sincronización con la app
 
-La lógica compartida con la app se copiará a `src/app-shared/` desde un commit conocido de `ejoiFE`, con manifiesto verificable en CI. Hasta entonces este repositorio solo contiene el bootstrap Vite + React + TypeScript.
+Parte de la lógica (API clients, catálogos de onboarding, i18n base, tokens UX, tipos) vive en `ejoiFE` y se **copia generada** a `src/app-shared/` para no duplicar a mano ni diverger. El commit de origen queda en `src/app-shared/SYNC.json` (`ref`, `sha`, hash por archivo).
+
+- **`npm run sync:app`**: lee archivos con `git show` desde `../ejoiFE/ejoi` (no hace checkout ni escribe en ejoiFE). Requiere `git fetch` en ese repo.
+- **`npm run sync:check`**: comprueba que nadie editó `src/app-shared/` ni los assets listados en el manifiesto (sin acceder a ejoiFE).
+- **No editar** archivos bajo `src/app-shared/`; cambios van en ejoiFE + nueva sincronización, o en shims bajo `src/platform/`.
+- **Agregar un módulo**: añadir su ruta en `sync.config.json` → `entries` y volver a `sync:app`.
+- **Cambiar versión de la app**: actualizar `ref` en `sync.config.json` (p. ej. `origin/develop`) y `sync:app`.
+
+Los imports de plataforma (`HTTP`, almacenamiento, env) se resuelven a `src/platform/` vía alias (misma interfaz que la app).
 
 ## Variables de entorno
 

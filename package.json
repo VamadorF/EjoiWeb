@@ -10,7 +10,9 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "test": "vitest run",
-    "verify": "npm run typecheck && npm run lint && npm test && npm run build"
+    "sync:app": "node scripts/sync-app.mjs",
+    "sync:check": "node scripts/sync-app.mjs --check",
+    "verify": "npm run sync:check && npm run typecheck && npm run lint && npm test && npm run build"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.91.0",
@@ -34,6 +36,7 @@
     "typescript": "~5.9.2",
     "typescript-eslint": "^8.35.0",
     "vite": "^7.0.0",
+    "sharp": "^0.34.0",
     "vitest": "^4.1.0"
   }
 }

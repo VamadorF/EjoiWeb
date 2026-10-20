@@ -1,0 +1,21 @@
+{
+  "v2": {
+    "step_hint": "Paso {{step}} de {{total}} · ~{{seconds}} s",
+    "step_hint_count": "Paso {{step}} de {{total}} · {{claimed}} de {{max}} fundadores",
+    "close_confirm_title": "¿Salir del asistente?",
+    "close_confirm_body": "Tu progreso se guardará y podrás continuar después.",
+    "close_confirm_stay": "Seguir creando",
+    "close_confirm_leave": "Salir",
+    "draft_save_failed": "No pudimos guardar tu avance",
+    "cta_disabled_reason": "Completa: {{reason}}",
+    "adult_consent": "Confirmo que tengo 18 años o más",
+    "adult_confirm_label": "Confirmo que tengo 18 años o más",
+    "interests_min_hint": "Elige al menos 3 intereses para continuar",
+    "interests_need": "Elige al menos {{count}} intereses ({{selected}} seleccionados)",
+    "boundaries_basic": "Estos límites básicos están siempre activos por tu seguridad",
+    "greeting_preview": "«Hola, soy {{name}}»",
+    "preview_title": "Tu compañer@ va tomando forma",
+    "preview_interests_count": "{{count}} intereses",
+    "preview_crumb_a11y": "Editar: {{label}}"
+  }
+}
