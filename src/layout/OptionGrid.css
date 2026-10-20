@@ -1,0 +1,17 @@
+.option-grid {
+  display: grid;
+  gap: calc(var(--radius-control) * 1px);
+  padding: calc(var(--radius-control) * 1px);
+}
+
+.option-grid[data-cols='3'] {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.option-grid[data-cols='4'] {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.option-grid[data-cols='6'] {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}

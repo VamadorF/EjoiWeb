@@ -1,0 +1,489 @@
+{
+  "common": {
+    "loading": "Cargando...",
+    "loadingFonts": "Cargando fuentes...",
+    "loadingFontsError": "Error cargando fuentes!",
+    "close": "Cerrar",
+    "cancel": "Cancelar",
+    "ok": "OK",
+    "retry": "Reintentar",
+    "understood": "Entendido",
+    "back": "Volver",
+    "send": "Enviar",
+    "save": "Guardar",
+    "saved": "¡Guardado!",
+    "error": "Error",
+    "generic_retry": "Ups, inténtalo de nuevo.",
+    "now_not": "Ahora no",
+    "open_settings": "Abrir ajustes",
+    "progress": "Progreso",
+    "copy": "Copiar",
+    "copied": "Copiado",
+    "copy_message": "Copiar mensaje"
+  },
+  "subscription": {
+    "identity_error": "No pudimos verificar tu cuenta para comprar. Inténtalo nuevamente. No se realizó ningún cobro.",
+    "activation_pending_title": "Compra completada",
+    "activation_pending_body": "Tu pago fue procesado, pero eJoi todavía está activando el plan. No vuelvas a comprar; inténtalo nuevamente en unos segundos.",
+    "restore_pending_title": "Restauración en proceso",
+    "restore_pending_body": "Encontramos la compra y eJoi está verificando su activación. No vuelvas a comprar; revisa nuevamente en unos segundos.",
+    "restore_none_title": "No encontramos compras",
+    "restore_none_body": "No encontramos una suscripción activa para esta cuenta. Puedes elegir un plan para suscribirte.",
+    "activation_active_title": "Suscripción activada"
+  },
+  "auth": {
+    "login": {
+      "google": "Google",
+      "continue_google": "Continuar con Google",
+      "continue_apple": "Continuar con Apple",
+      "terms_prefix": "Al registrarte, aceptas los",
+      "terms_link": "Términos y Condiciones",
+      "and_privacy": " y la ",
+      "privacy_link": "Política de Privacidad",
+      "terms_suffix": ".",
+      "age_gate": "Declaro que soy mayor de 18 años.",
+      "legal_gate_prefix": "Acepto los",
+      "legal_gate_suffix": ", y autorizo el tratamiento de las conversaciones (incluidos datos sensibles que yo entregue) solo para operar el servicio.",
+      "legal_gate_a11y": "Aceptar términos, privacidad y tratamiento de conversaciones",
+      "consent_required_title": "Confirma tu consentimiento",
+      "consent_required_body": "Para continuar debes confirmar que eres mayor de 18 años y aceptar los términos, la privacidad y el tratamiento de tus conversaciones.",
+      "consent_gate_title": "Antes de continuar",
+      "consent_gate_body": "Necesitamos tu consentimiento expreso para tratar tu cuenta y las conversaciones. Puedes ejercer tus derechos más tarde en Gestionar mi cuenta.",
+      "consent_continue": "Continuar",
+      "google_not_initialized": "Google Auth no está inicializado todavía.",
+      "no_id_token": "No se recibió idToken desde Google",
+      "unknown_error": "Error desconocido",
+      "referral_title": "¿Tienes un código de invitación?",
+      "referral_banner_title": "¿Te invitaron a eJoi?",
+      "referral_trigger": "¿Tienes un código?",
+      "referral_trigger_action": "Ingresar código de invitación",
+      "referral_placeholder": "EJ***",
+      "referral_save": "Guardar código",
+      "referral_hint": "Pega aquí el código de invitación que te envió un amigo para registrarte en eJoi.",
+      "referral_saved_confirmation": "Código guardado",
+      "referral_continue": "Continuar",
+      "referral_invalid": "El código debe tener el formato EJ + 6 caracteres.",
+      "referral_saved": "Código guardado. Continúa con tu registro.",
+      "referral_saved_short": "Código de invitación guardado",
+      "value_tagline": "Tu compañía conversacional, hecha a tu medida",
+      "value_seal_1": "Conversaciones que recuerdan lo que importa",
+      "value_seal_2": "Privacidad y control en tus manos",
+      "value_seal_3": "Lista para hablar en minutos"
+    },
+    "switch_account": "Usar otra cuenta"
+  },
+  "drawer": {
+    "title": "Tu cuenta",
+    "subtitle": "Ajustes y sesión",
+    "open_menu": "Abrir menú",
+    "user_avatar_a11y": "Avatar de {{name}}",
+    "nav_chat": "Chat",
+    "nav_profile": "Perfil",
+    "nav_memories": "Recuerdos",
+    "appearance_theme": "Apariencia y tema",
+    "logout": "Cerrar sesión",
+    "upgrade_title": "Mejora tu plan",
+    "upgrade_a11y": "Mejora tu plan",
+    "theme_section": "Apariencia",
+    "theme_auto": "Auto",
+    "theme_light": "Claro",
+    "theme_dark": "Oscuro",
+    "pack_section": "Estilo",
+    "pack_default": "Joi",
+    "pack_romantic": "Romántico",
+    "pack_minimal": "Minimal",
+    "pack_cyber": "Cyber",
+    "pack_kawaii": "Kawaii",
+    "session_section": "Sesión",
+    "privacy_section": "Privacidad y datos",
+    "manage_account": "Gestionar mi cuenta",
+    "manage_account_a11y": "Gestionar mi cuenta"
+  },
+  "account": {
+    "title": "Gestionar mi cuenta",
+    "legal_section": "Documentos legales",
+    "privacy_policy": "Política de privacidad",
+    "terms": "Términos de servicio",
+    "data_section": "Tus datos",
+    "data_name": "Nombre",
+    "data_email": "Email",
+    "data_provider": "Inicio de sesión",
+    "data_unavailable": "No disponible",
+    "provider_google": "Google",
+    "provider_apple": "Apple",
+    "rights_section": "Tus derechos",
+    "rights_hint": "Puedes pedir acceso, corrección, oposición, portabilidad o bloqueo. Abrimos un correo a contacto@ejoi.cl con tu solicitud. El borrado de cuenta está más abajo.",
+    "rights_access": "Pedir una copia de mis datos",
+    "rights_rectification": "Corregir mis datos",
+    "rights_opposition": "Oponerme a un tratamiento",
+    "rights_portability": "Exportar mis datos",
+    "rights_block": "Bloquear el tratamiento temporalmente",
+    "rights_email_error_title": "No se pudo abrir el correo",
+    "rights_email_error_body": "Escribe a {{email}} indicando el derecho que quieres ejercer.",
+    "proactivity_section": "Cómo te habla",
+    "proactivity_hint": "Elige qué tipo de mensajes proactivos quieres recibir. El follow-up empático continúa una conversación abierta; no es más emojis ni fotos AFK.",
+    "proactivity_greetings": "Saludos espontáneos",
+    "proactivity_greetings_hint": "Check-ins breves para retomar el hilo cuando no hayas escrito.",
+    "proactivity_followups": "Follow-ups",
+    "proactivity_followups_hint": "Continuar algo que le contaste, con tono empático.",
+    "proactivity_special_dates": "Fechas especiales",
+    "proactivity_special_dates_hint": "Cumpleaños, aniversarios y otros días importantes.",
+    "proactivity_reminders": "Recordatorios",
+    "proactivity_reminders_hint": "Eventos o plazos que mencionaste en el chat.",
+    "proactivity_update_error": "No se pudieron guardar tus preferencias. Inténtalo de nuevo.",
+    "quiet_hours_section": "Horario tranquilo",
+    "quiet_hours_hint": "eJoi no te envía saludos ni follow-ups espontáneos en esta ventana. Las horas son las de tu reloj local. También puedes pedirlo en el chat: “no me hables de 23 a 7”.",
+    "quiet_hours_enabled": "Silenciar en este horario",
+    "quiet_hours_enabled_hint": "La ventana puede cruzar medianoche (por ejemplo 23:00–07:00).",
+    "quiet_hours_start": "Desde",
+    "quiet_hours_end": "Hasta",
+    "quiet_hours_invalid": "Usa el formato HH:mm (00:00–23:59).",
+    "timezone_label": "Zona horaria",
+    "timezone_value": "{{timezone}} · se toma de tu dispositivo",
+    "timezone_pending": "Se sincronizará con la zona de tu dispositivo al abrir la app.",
+    "danger_section": "Cuenta",
+    "delete_account": "Eliminar mi cuenta",
+    "delete_account_hint": "Esta acción es permanente. Se borrarán tu cuenta, conversaciones y recuerdos. Una suscripción activa en {{store}} no se cancela al eliminar la cuenta.",
+    "name_hint": "Tu nombre es el que ven tus companions en el chat. El correo es tu identificador de acceso y no se puede cambiar.",
+    "name_add": "Agregar",
+    "name_edit_a11y_label": "Nombre: {{name}}",
+    "name_edit_a11y_label_empty": "Nombre sin definir",
+    "name_edit_a11y_hint": "Toca para editar tu nombre",
+    "email_locked_a11y_hint": "No se puede modificar",
+    "name_modal_title": "Cambiar tu nombre",
+    "name_modal_message": "Es el nombre que verás en la app y con el que te llamarán tus companions.",
+    "name_field_label": "Nombre",
+    "name_field_placeholder": "¿Cómo te llamas?",
+    "name_counter_a11y": "{{count}} de {{max}} caracteres",
+    "name_error_empty": "El nombre no puede estar vacío.",
+    "name_error_invalid_chars": "Usa solo letras, espacios, apóstrofes ('), guiones (-) y puntos. Sin emojis, números ni símbolos.",
+    "name_error_too_long": "Máximo 80 caracteres.",
+    "name_error_rejected": "No pudimos aceptar ese nombre. Revisa que no esté vacío ni tenga más de 80 caracteres.",
+    "name_error_rate_limit": "Demasiados intentos seguidos. Espera un momento e inténtalo de nuevo.",
+    "name_error_generic": "No pudimos guardar tu nombre. Revisa tu conexión e inténtalo de nuevo.",
+    "name_updated": "Nombre actualizado"
+  },
+  "deleteAccount": {
+    "title": "Eliminar cuenta",
+    "message": "Se borrarán tu cuenta, conversaciones, recuerdos y datos asociados. No podrás recuperarlos.",
+    "subscriptionDisclaimer": "Importante: eliminar tu cuenta eJoi no cancela una suscripción activa. Si tienes un plan de pago, gestiona o cancela la renovación en {{store}} (Ajustes → Suscripciones). Conservarás el acceso al periodo ya pagado aunque borres la cuenta, y al crear una cuenta nueva con el mismo {{store}} la suscripción puede volver a asociarse.",
+    "confirm": "Eliminar mi cuenta",
+    "loading": "Eliminando cuenta…",
+    "error": "No se pudo eliminar la cuenta. Inténtalo de nuevo más tarde."
+  },
+  "logout": {
+    "title": "Cerrar sesión",
+    "message": "Podrás volver a iniciar sesión cuando quieras.",
+    "confirm": "Cerrar sesión",
+    "loading": "Cerrando sesión…"
+  },
+  "permissions": {
+    "alert_title": "Permisos pendientes",
+    "alert_body": "Para usar todas las funcionalidades de eJoi, habilita estos permisos:\n\n{{list}}",
+    "speech_label": "Micrófono y reconocimiento de voz"
+  },
+  "chat": {
+    "quota": {
+      "remaining": "{{count}} mensajes restantes",
+      "remaining_a11y": "{{count}} mensajes restantes en plan {{plan}}. Tocar para ver planes.",
+      "remaining_out_a11y": "Sin mensajes disponibles en plan {{plan}}. Tocar para mejorar plan.",
+      "count_compact_a11y": "{{remaining}} de {{limit}} mensajes restantes en plan {{plan}}. Tocar para ver planes."
+    },
+    "header": {
+      "back": "Volver",
+      "avatar_alt": "Avatar de {{name}}",
+      "typing": "Escribiendo…",
+      "online": "En línea",
+      "listening": "Escuchando…",
+      "thinking": "Pensando…",
+      "recording": "Grabando…",
+      "away": "Ausente",
+      "away_last_seen": "Ausente · {{time}}",
+      "offline": "Sin conexión",
+      "offline_last_seen": "Sin conexión · {{time}}",
+      "reconnecting": "Reconectando…",
+      "last_seen": "Última vez {{time}}"
+    },
+    "bubble": {
+      "sending": "· Enviando",
+      "retry": "Reintentar",
+      "copy_message": "Copiar mensaje",
+      "copied": "Copiado",
+      "long_press_hint": "Mantén pulsado para reaccionar",
+      "image_a11y": "Imagen adjunta en el mensaje",
+      "play_tts": "Leer en voz alta",
+      "stop_tts": "Detener audio"
+    },
+    "attach": {
+      "a11y": "Adjuntar imagen desde la galería",
+      "remove": "Quitar imagen adjunta",
+      "error_title": "No se pudo adjuntar",
+      "file_too_large": "La imagen es demasiado grande. Elige otra más ligera.",
+      "pick_failed": "No se pudo abrir la galería. Inténtalo de nuevo."
+    },
+    "reactions": {
+      "title": "Reacciona a este mensaje",
+      "close": "Cerrar"
+    },
+    "instant_reaction": {
+      "a11y_label": "{{name}} reacciona: {{label}}",
+      "kinds": {
+        "surprise": "sorprendid@",
+        "shock": "muy sorprendid@",
+        "question": "con dudas",
+        "thinking": "pensativ@",
+        "curious": "intrigad@",
+        "typing": "procesando",
+        "tender": "conmovid@",
+        "celebrate": "celebrando",
+        "fire": "motivad@ · eso es fuego",
+        "perfect": "de acuerdo total · 💯",
+        "laugh": "riendo",
+        "disgust": "incómod@",
+        "love": "enternecid@",
+        "bored": "aburrid@",
+        "sleepy": "con sueño",
+        "moai": "indiferente · sin interés o aburrido/a",
+        "dancing": "bailando",
+        "confused": "confundid@",
+        "proud": "orgullos@ de ti",
+        "shy": "tímid@",
+        "nostalgic": "nostálgic@",
+        "uncomfortable": "incómod@ con el tema",
+        "greeting": "saludando",
+        "farewell": "despidiéndose",
+        "excited": "emocionad@",
+        "agree": "de acuerdo",
+        "mindblown": "alucinad@",
+        "flirty": "coqueteand@",
+        "playful": "juguetón@"
+      }
+    },
+    "voice": {
+      "stop": "Detener dictado",
+      "start": "Dictar mensaje"
+    },
+    "composer": {
+      "placeholder": "Escribe un mensaje…",
+      "placeholder_listening": "Escuchando…",
+      "placeholder_no_quota": "Sin mensajes disponibles, mejora tu plan",
+      "send": "Enviar",
+      "upgrade_plan_a11y": "Mejora tu plan"
+    },
+    "history": {
+      "loading": "Cargando conversación…",
+      "load_error": "No se pudo cargar el historial.",
+      "updating_companion": "Actualizando compañer@…"
+    },
+    "empty": {
+      "title": "Empieza la conversación",
+      "body_prefix": "{{name}} está aquí.",
+      "body_suffix": "Escribe o envía un audio para comenzar.",
+      "no_companion_title": "No tienes un/a compañer@ aún",
+      "no_companion_body": "Completa el onboarding para crear tu compañer@ virtual y comenzar a chatear.",
+      "create_companion_cta": "Crear mi compañer@"
+    },
+    "date": {
+      "today": "Hoy",
+      "yesterday": "Ayer"
+    },
+    "proactivity": {
+      "prefs_updated": "Preferencias actualizadas"
+    },
+    "icebreaker": {
+      "section_label": "Ideas para empezar",
+      "fallback_1": "Hola, ¿cómo estás hoy?",
+      "fallback_2": "Me gustaría conocerte mejor.",
+      "chip_a11y": "Usar sugerencia: {{text}}"
+    }
+  },
+  "home": {
+    "tabs": {
+      "chat": "Chat",
+      "profile": "Perfil",
+      "memories": "Recuerdos"
+    },
+    "profile": {
+      "bond_label": "Vínculo",
+      "subtab_character": "Carácter",
+      "subtab_physical": "Físico",
+      "physical_realistic": "Realista",
+      "physical_anime": "Anime",
+      "gender_feminine": "Femenino",
+      "gender_masculine": "Masculino",
+      "gender_neutral": "Neutro",
+      "ethnicity_prefix": "Etnia: {{value}}",
+      "age_prefix": "Edad aparente: {{age}} años",
+      "demo_voice_title": "Voz del chat (demo)",
+      "demo_voice_hint": "Elige una voz para probar el audio en el chat. Solo para la demo de hoy.",
+      "edit_boundaries_title": "Editar límites",
+      "edit_boundaries_subtitle": "Solo se usarán los límites que tú selecciones (opcional)",
+      "edit_boundaries_save": "Guardar límites",
+      "edit_boundaries_saved": "Cambios guardados",
+      "edit_boundaries_error_title": "No se pudieron guardar",
+      "edit_boundaries_error_body": "Hubo un problema al actualizar tus límites. Inténtalo de nuevo."
+    },
+    "memories": {
+      "book_title": "Nuestros Recuerdos",
+      "book_subtitle": "Un viaje a través de momentos compartidos con {{name}}",
+      "stat_moments": "Momentos",
+      "stat_this_week": "Esta semana",
+      "stat_favorites": "Favoritos",
+      "empty_title": "Las páginas están en blanco",
+      "empty_body": "Tu libro de recuerdos con {{name}} aún espera su primera historia. Conversa y crea momentos inolvidables.",
+      "empty_cta": "Empieza a conversar",
+      "section_special": "Momento Especial",
+      "section_this_week": "Esta semana",
+      "section_this_month": "Este mes",
+      "section_older": "Hace tiempo"
+    },
+    "anniversary": {
+      "title_one": "Hoy hace 1 año que empezamos a hablar",
+      "title_other": "Hoy hace {{count}} años que empezamos a hablar",
+      "subtitle": "Gracias por seguir compartiendo este camino con tu compañer@.",
+      "close": "Cerrar"
+    }
+  },
+  "memories": {
+    "relative": {
+      "today": "Hoy",
+      "yesterday": "Ayer",
+      "days_ago": "Hace {{count}} días",
+      "one_week_ago": "Hace 1 semana",
+      "weeks_ago": "Hace {{count}} semanas",
+      "one_month_ago": "Hace 1 mes",
+      "months_ago": "Hace {{count}} meses"
+    },
+    "full_date": "{{day}} de {{month}}, {{year}}",
+    "months": {
+      "0": "enero",
+      "1": "febrero",
+      "2": "marzo",
+      "3": "abril",
+      "4": "mayo",
+      "5": "junio",
+      "6": "julio",
+      "7": "agosto",
+      "8": "septiembre",
+      "9": "octubre",
+      "10": "noviembre",
+      "11": "diciembre"
+    },
+    "moods": {
+      "first_meeting": "Esperanzador",
+      "first_memory_saved": "Emocionante",
+      "first_deep_conversation": "Reflexivo",
+      "relationship_shift": "Reconfortante",
+      "fallback": "Significativo"
+    }
+  },
+  "onboarding": {
+    "name": {
+      "title": "¿Cómo la/lo llamarás?",
+      "placeholder_femenino": "Luna",
+      "placeholder_masculino": "Leo",
+      "placeholder_neutro": "Alex",
+      "helper": "Solo letras, sin números ni símbolos",
+      "generate": "Generar nombre",
+      "generate_hint": "¿Sin ideas?",
+      "field_a11y": "Nombre"
+    },
+    "dev": {
+      "exit_preview": "Salir del preview"
+    },
+    "age": {
+      "title": "Elige su edad",
+      "category": "Físico",
+      "context": "Edad aparente",
+      "editable_hint_a11y": "Más o menos, atajos o lista deslizable.",
+      "hero_a11y": "Edad, {{age}} años",
+      "value_label": "{{age}} años",
+      "years_unit": "años",
+      "decrease_a11y": "Disminuir edad",
+      "increase_a11y": "Aumentar edad"
+    },
+    "progress": {
+      "reason_account": "Tu cuenta ya está lista",
+      "reason_test": "Tu test ya cuenta para tu conexión",
+      "taking_shape": "Está tomando forma"
+    },
+    "v2": {
+      "step_hint": "Paso {{step}} de {{total}} · ~15 s"
+    },
+    "close": {
+      "title": "¿Salir del asistente?",
+      "body": "Si sales ahora perderás las elecciones de esta sesión.",
+      "confirm": "Salir"
+    },
+    "preview": {
+      "gender": "Género",
+      "style": "Estilo",
+      "body": "Físico",
+      "essence": "Esencia",
+      "name": "Nombre",
+      "unnamed": "Sin nombre aún",
+      "gender_femenino": "Femenino",
+      "gender_masculino": "Masculino",
+      "gender_neutro": "Neutro",
+      "style_realista": "Realista",
+      "style_anime": "Anime",
+      "segment_a11y": "Editar {{label}}"
+    }
+  },
+  "companion": {
+    "create": {
+      "no_onboarding_data": "No se encontraron datos de onboarding",
+      "back": "Volver",
+      "no_name": "Sin nombre",
+      "generating": "Generando {{companion}}...",
+      "creating": "Creando...",
+      "generating_image": "Generando imagen...",
+      "create_cta": "Crear {{companion}}",
+      "consent_title": "Para continuar",
+      "consent_cta_hint": "Marca las dos casillas para crear",
+      "consent_required_title": "Confirma tu edad y consentimiento",
+      "consent_required_body": "Para crear tu companion debes confirmar que eres mayor de 18 años y aceptar los términos, la privacidad y el tratamiento de tus conversaciones.",
+      "regenerate": "Regenerar imagen",
+      "regenerate_remaining": "Regenerar ({{count}} restantes)",
+      "choose_image": "Elegir imagen",
+      "profile_changed_title": "Nueva imagen",
+      "profile_changed_body": "Cambiar el perfil genera una imagen nueva. Puedes regenerar hasta {{count}} veces más ({{max}} imágenes en total).",
+      "generate_failed_title": "No se pudo generar la imagen",
+      "generate_failed_body": "Pulsa Regenerar para intentarlo otra vez. No puedes crear el companion hasta que la imagen esté lista."
+    },
+    "avatar_catalog": {
+      "title": "Elige tu imagen",
+      "title_limit": "Elige una imagen para continuar",
+      "subtitle": "{{count}} de {{max}} imágenes generadas",
+      "subtitle_limit": "Ya generaste {{count}} imágenes. Elige cuál quieres usar.",
+      "limit_banner": "Alcanzaste el límite de imágenes. Debes elegir una para seguir creando tu companion.",
+      "badge_new": "Nueva",
+      "confirm": "Usar esta imagen",
+      "generate_another": "Generar otra",
+      "generate_another_remaining": "Generar otra ({{count}} restantes)",
+      "generating": "Generando imagen…",
+      "generating_title": "Creando una nueva imagen",
+      "generating_body": "Esto puede tardar unos segundos. No cierres la pantalla.",
+      "error_title": "No se pudo generar",
+      "error_no_data": "Faltan los datos del companion para generar otra imagen.",
+      "error_generate": "Hubo un problema al generar la imagen. Inténtalo de nuevo.",
+      "back": "Volver",
+      "tile_a11y": "Imagen {{index}}"
+    },
+    "creando": {
+      "default_name": "Tu Compañer@",
+      "error_title": "Error",
+      "error_body": "No se pudo crear tu compañer@. Inténtalo de nuevo."
+    },
+    "card": {
+      "age": "Edad: {{age}} años"
+    },
+    "ready": {
+      "title_feminine": "¡{{name}} está lista!",
+      "title_masculine": "¡{{name}} está listo!",
+      "title_neutral": "¡{{name}} está liste!",
+      "title_default": "¡{{name}} está list@!",
+      "start_chat": "Iniciar conversación"
+    }
+  }
+}

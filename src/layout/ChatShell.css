@@ -1,0 +1,99 @@
+.skip-to-content {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  z-index: 100;
+  padding: 0.75rem 1rem;
+  border-radius: calc(var(--radius-control) * 1px);
+  background: var(--c-surface);
+  color: var(--c-ink);
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: var(--state-hover-shadow);
+}
+
+.skip-to-content:focus {
+  left: 1rem;
+  top: 1rem;
+}
+
+.chat-shell {
+  display: grid;
+  grid-template-columns:
+    var(--chat-menu-w)
+    minmax(var(--chat-read-min), var(--chat-read-max))
+    var(--chat-profile-w);
+  justify-content: center;
+  gap: calc(var(--radius-control) * 1px);
+  height: 100%;
+  min-height: 0;
+  max-width: var(--bp-reference);
+  margin: 0 auto;
+  padding: calc(var(--radius-card) * 1px);
+  background: var(--c-bg);
+}
+
+.chat-shell__menu,
+.chat-shell__read,
+.chat-shell__profile {
+  min-height: 0;
+  overflow: hidden;
+  background: var(--c-surface);
+  border-radius: calc(var(--radius-card) * 1px);
+  border: calc(var(--border-card) * 1px) solid var(--c-line);
+}
+
+.chat-shell__menu {
+  padding: calc(var(--radius-control) * 1px);
+}
+
+.chat-shell__read {
+  padding: calc(var(--radius-card) * 1px);
+}
+
+.chat-shell__profile {
+  padding: calc(var(--radius-control) * 1px);
+}
+
+.chat-shell__mobile-bar {
+  display: none;
+}
+
+.chat-shell__scrim {
+  display: none;
+}
+
+@media (max-width: 1023px) {
+  .chat-shell {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .chat-shell__mobile-bar {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0;
+  }
+
+  .chat-shell__mobile-toggle {
+    flex: 1;
+    min-height: calc(var(--size-control, 56) * 1px);
+    border-radius: calc(var(--radius-control) * 1px);
+    border: calc(var(--border-card) * 1px) solid var(--c-line);
+    background: var(--c-surface);
+    color: var(--c-ink);
+    font-weight: 600;
+  }
+
+  .chat-shell__scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 30;
+    border: none;
+    padding: 0;
+    background: color-mix(in srgb, var(--c-ink) 35%, transparent);
+    cursor: pointer;
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "creando": {
+    "timeout_error": "Tardó más de lo esperado. Puedes reintentar sin perder tus elecciones."
+  },
+  "ready": {
+    "start_chat": "Empezar a conversar",
+    "edit": "Editar eJoi"
+  }
+}

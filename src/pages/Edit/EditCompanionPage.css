@@ -1,0 +1,44 @@
+.edit-companion__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.edit-companion__regen {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 12px;
+  background: var(--surface-2, #f5f0eb);
+}
+
+.edit-companion__regen-compare {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 0.75rem;
+}
+
+.edit-companion__regen-compare figure {
+  margin: 0;
+  text-align: center;
+}
+
+.edit-companion__regen-compare img {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.edit-companion__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.edit-companion__error {
+  color: var(--danger, #b42318);
+  margin-top: 0.5rem;
+}

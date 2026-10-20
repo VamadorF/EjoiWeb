@@ -1,0 +1,198 @@
+{
+  "landing": {
+    "eyebrow": "Founders 1000",
+    "title_prefix": "Sé de los primeros",
+    "title_number": "1000",
+    "title": "Sé de los primeros 1000",
+    "subtitle": "Los fundadores obtienen medallas exclusivas, mensajes extra y acceso anticipado. Para siempre.",
+    "counter": "{{claimed}} de {{max}} lugares reclamados",
+    "counter_suffix": "de {{max}} lugares reclamados",
+    "counter_placeholder": "Cupos limitados: solo 1000 lugares",
+    "cta_test": "Descubre tu compatibilidad",
+    "cta_create": "Crea tu conexión y sé fundador",
+    "footnote": "Menos de 2 minutos. Seguro y privado.",
+    "benefits": {
+      "speed": "Menos de 2 minutos",
+      "privacy": "Seguro y privado"
+    },
+    "closed_title": "Cupos agotados",
+    "closed_subtitle": "Los 1000 lugares de fundador ya fueron reclamados. Igual puedes crear tu conexión y ser parte de la comunidad.",
+    "closed_cta": "Crear mi conexión",
+    "invited_by": "Te invitó {{name}}"
+  },
+  "test": {
+    "header_title": "Test de compatibilidad",
+    "guide": "¿Qué tipo de compañero virtual conecta mejor contigo?",
+    "next": "Siguiente",
+    "finish": "Ver mi resultado",
+    "questions": {
+      "conversation": {
+        "title": "¿Qué buscas más en una conversación?",
+        "options": {
+          "empathetic": "Que me escuchen y me comprendan",
+          "fun": "Reír y pasarla bien",
+          "direct": "Ideas claras y al grano",
+          "protective": "Sentirme en confianza y sin juicios",
+          "reflective": "Explorar ideas profundas"
+        }
+      },
+      "hard_day": {
+        "title": "Después de un día difícil, ¿qué te haría bien?",
+        "options": {
+          "empathetic": "Un mensaje cálido que me contenga",
+          "fun": "Algo que me haga reír",
+          "direct": "Un plan concreto para resolverlo",
+          "protective": "Saber que alguien está pendiente de mí",
+          "reflective": "Conversar sobre lo que significó ese día"
+        }
+      },
+      "communication": {
+        "title": "¿Cómo prefieres que te digan las cosas?",
+        "options": {
+          "empathetic": "Con suavidad y empatía",
+          "fun": "Con humor y liviandad",
+          "direct": "Sin rodeos, directo",
+          "protective": "Con calma y seguridad",
+          "reflective": "Con matices y contexto"
+        }
+      },
+      "ideal_plan": {
+        "title": "¿Qué plan suena mejor?",
+        "options": {
+          "empathetic": "Una charla íntima de sobremesa",
+          "fun": "Una aventura espontánea",
+          "direct": "Avanzar en mis metas",
+          "protective": "Una tarde tranquila, sin preocupaciones",
+          "reflective": "Un museo, un libro, una idea nueva"
+        }
+      },
+      "most_valued": {
+        "title": "¿Qué valoras más en alguien cercano?",
+        "options": {
+          "empathetic": "Su capacidad de entenderme",
+          "fun": "Su energía y alegría",
+          "direct": "Su honestidad",
+          "protective": "Su lealtad y protección",
+          "reflective": "Su profundidad"
+        }
+      },
+      "ideal_companion": {
+        "title": "Tu compañía ideal es alguien que...",
+        "options": {
+          "empathetic": "Siempre sabe cómo me siento",
+          "fun": "Convierte lo cotidiano en diversión",
+          "direct": "Me impulsa a lograr lo que quiero",
+          "protective": "Me da estabilidad y calma",
+          "reflective": "Me hace pensar distinto"
+        }
+      }
+    }
+  },
+  "result": {
+    "eyebrow": "Tu resultado",
+    "title": "Conectas mejor con una compañía...",
+    "share_cta": "Compartir",
+    "create_cta": "Crear mi conexión",
+    "share_unavailable": "Compartir no está disponible en este dispositivo.",
+    "personalities": {
+      "empathetic": {
+        "name": "Empática",
+        "description": "Conectas con quien te escucha de verdad. Tu conexión ideal es cálida, atenta y siempre está ahí para contenerte.",
+        "tagline": "Alguien que siempre sabe cómo te sientes"
+      },
+      "fun": {
+        "name": "Divertida",
+        "description": "Conectas con la energía y la risa. Tu conexión ideal convierte cualquier momento en algo entretenido.",
+        "tagline": "Alguien que convierte lo cotidiano en diversión"
+      },
+      "direct": {
+        "name": "Directa",
+        "description": "Conectas con la claridad. Tu conexión ideal te habla sin rodeos y te impulsa a lograr tus metas.",
+        "tagline": "Alguien que te impulsa sin rodeos"
+      },
+      "protective": {
+        "name": "Protectora",
+        "description": "Conectas con la estabilidad. Tu conexión ideal te da calma, seguridad y una presencia constante.",
+        "tagline": "Alguien que te da calma y seguridad"
+      },
+      "reflective": {
+        "name": "Reflexiva",
+        "description": "Conectas con la profundidad. Tu conexión ideal explora ideas contigo y te hace ver el mundo distinto.",
+        "tagline": "Alguien que te hace pensar distinto"
+      }
+    }
+  },
+  "share_card": {
+    "headline": "Mi conexión ideal es"
+  },
+  "onboarding": {
+    "test_banner": "Basado en tu test: personalidad {{personality}}",
+    "wizard_hint": "El nacimiento de tu conexión · Campaña Founders 1000",
+    "wizard_hint_final": "El nacimiento de tu conexión · {{claimed}} de {{max}} fundadores"
+  },
+  "founder_card": {
+    "eyebrow": "El nacimiento de tu conexión",
+    "title": "Ya eres parte de la historia",
+    "counter": "{{claimed}} de {{max}} lugares reclamados",
+    "share_cta": "Compartir",
+    "invite_cta": "Invitar amigos",
+    "chat_cta": "Ir al chat",
+    "share_unavailable": "Compartir no está disponible en este dispositivo.",
+    "invite_message": "Estoy entre los primeros 1000 fundadores de eJoi. Crea tu conexión aquí: {{url}}",
+    "share_headline": "Soy fundador de eJoi",
+    "share_companion": "Junto a {{name}}",
+    "share_footer": "Crea tu conexión en",
+    "ambassador_medal": "Embajador"
+  },
+  "benefits": {
+    "section_title": "Beneficios activos",
+    "section_subtitle": "Founders 1000",
+    "empty_title": "Aún no tienes beneficios",
+    "empty_message": "Participa en la campaña Founders 1000 para desbloquear medallas, mensajes extra y más.",
+    "extra_messages": "+{{count}} mensajes extra",
+    "expires_at": "Expira el {{date}}",
+    "upcoming_title": "Próximos hitos",
+    "badges": {
+      "BADGE_GENESIS": "Medalla Génesis",
+      "BADGE_EMBAJADOR": "Medalla Embajador"
+    },
+    "rewards": {
+      "EXTRA_MESSAGES_50": "+50 mensajes",
+      "EXTRA_MESSAGES_100": "+100 mensajes",
+      "EARLY_ACCESS": "Acceso anticipado",
+      "PERSONALIZATION_PACK": "Pack de personalización",
+      "PREMIUM_7D": "Premium por 7 días",
+      "PREMIUM_30D": "Premium por 30 días",
+      "SPECIAL_BUNDLE": "Bundle especial",
+      "BADGE_GENESIS": "Medalla Génesis",
+      "BADGE_EMBAJADOR": "Medalla Embajador"
+    },
+    "milestones": {
+      "referral_milestone_3": "Invita a 3 amigos",
+      "referral_milestone_5": "Invita a 5 amigos",
+      "referral_milestone_10": "Invita a 10 amigos",
+      "referral_milestone_25": "Invita a 25 amigos"
+    },
+    "error": "No pudimos cargar tus beneficios. Reintenta.",
+    "retry": "Reintentar"
+  },
+  "invite": {
+    "eyebrow": "Founders 1000",
+    "title": "Invitar amigos",
+    "subtitle": "Comparte tu link. Cuando un invitado cree su conexión y tenga su primera conversación, ambos ganan recompensas.",
+    "entry_cta": "Invitar amigos",
+    "link_label": "Tu link de invitación",
+    "link_loading": "Cargando tu link…",
+    "copy_cta": "Copiar link",
+    "share_cta": "Compartir",
+    "copied": "¡Link copiado!",
+    "share_message": "Estoy en eJoi y te invito a crear tu conexión. Únete aquí: {{url}}",
+    "stat_registered": "Registrados",
+    "stat_activated": "Activados",
+    "milestones_title": "Hitos de embajador",
+    "next_milestone": "Te falta {{count}} invitado activado para el próximo hito",
+    "next_milestone_other": "Te faltan {{count}} invitados activados para el próximo hito",
+    "all_milestones_done": "¡Alcanzaste todos los hitos! Eres leyenda de eJoi.",
+    "ambassador_unlocked": "¡Medalla Embajador desbloqueada!"
+  }
+}

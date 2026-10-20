@@ -1,0 +1,43 @@
+{
+  "section_title": "Insignias de campaña",
+  "section_subtitle": "Founders 1000",
+  "tiers": {
+    "founder": "Fundador",
+    "genesis": "Génesis"
+  },
+  "number": {
+    "founder": "Fundador #{{n}}",
+    "genesis": "Génesis #{{n}}"
+  },
+  "card": {
+    "claimable_title": "Reclama tu lugar",
+    "claimable_body": "Eres parte de la campaña Founders 1000. Reclama tu insignia y desbloquea tus beneficios.",
+    "claim_cta": "Reclamar insignia",
+    "claiming": "Reclamando…",
+    "activate_body": "Tu insignia está lista, pero tus beneficios (mensajes extra y acceso anticipado) aún no están activos. Actívalos ahora.",
+    "activate_cta": "Activar beneficios",
+    "claimed_founder_body": "Insignia de fundador activa. Gracias por acompañarnos desde el inicio.",
+    "claimed_genesis_body": "Insignia Génesis: uno de los primeros 33. Tu lugar en la historia de la app.",
+    "loading": "Cargando tu estado de campaña…",
+    "retry": "Reintentar"
+  },
+  "benefits": {
+    "title": "Beneficios activos",
+    "extra_messages": "+{{count}} mensajes",
+    "early_access": "Acceso anticipado"
+  },
+  "states": {
+    "preview_note": "Vista previa (QA)"
+  },
+  "errors": {
+    "generic": "No pudimos cargar tus insignias. Reintenta.",
+    "claim_generic": "No se pudo reclamar la insignia. Reintenta.",
+    "ONBOARDING_INCOMPLETE": "Completa el onboarding y crea tu compañer@ para reclamar tu insignia.",
+    "CAMPAIGN_FULL": "Los cupos de este tier se agotaron."
+  },
+  "kinds": {
+    "decorative": "Decorativa",
+    "claimable": "Reclamable",
+    "benefit_active": "Beneficio activo"
+  }
+}

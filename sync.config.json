@@ -1,0 +1,50 @@
+{
+  "appDir": "../ejoiFE/ejoi",
+  "ref": "origin/develop",
+  "entries": [
+    "src/shared/theme/tokens.ts",
+    "src/shared/i18n/index.ts",
+    "src/shared/lib/queryKeys.ts",
+    "src/shared/utils/uuid.ts",
+    "src/shared/utils/companionImagePrompt.ts",
+    "src/features/onboarding/types.ts",
+    "src/features/onboarding/constants/onboardingSteps.ts",
+    "src/features/onboarding/data/interestOptions.ts",
+    "src/features/onboarding/data/personalityOptions.ts",
+    "src/features/onboarding/data/boundaryOptions.ts",
+    "src/features/onboarding/data/companionIntensity.ts",
+    "src/features/onboarding/data/getRandomCompanionName.ts",
+    "src/features/auth/types.ts",
+    "src/features/auth/assets/legalDocuments.ts",
+    "src/features/companion/types.ts",
+    "src/features/companion/api/companion.api.ts",
+    "src/features/companion/api/image.api.ts",
+    "src/features/chat/types.ts",
+    "src/features/chat/api/chat.api.ts",
+    "src/features/chat/utils/mergeChatPages.ts"
+  ],
+  "shims": {
+    "@/shared/services/http/client": "src/platform/http.ts",
+    "@/shared/services/storage/secure": "src/platform/secure.ts",
+    "@/shared/services/storage/keyValue": "src/platform/keyValue.ts",
+    "@/app/config/env": "src/platform/env.ts"
+  },
+  "allowedPackages": ["react", "i18next", "react-i18next", "@tanstack/react-query"],
+  "typeOnlyPackages": ["@expo/vector-icons"],
+  "assets": [
+    { "from": "assets/fonts/ApisRegular.ttf", "to": "public/fonts/ApisRegular.ttf" },
+    { "from": "assets/fonts/ApisMedium.ttf", "to": "public/fonts/ApisMedium.ttf" },
+    { "from": "assets/fonts/ApisBold.ttf", "to": "public/fonts/ApisBold.ttf" },
+    { "from": "assets/fonts/ApisExtraBold.ttf", "to": "public/fonts/ApisExtraBold.ttf" },
+    { "from": "public/logos/cropped/eJoi_logo-principal.png", "to": "public/logos/principal.png" },
+    { "from": "public/logos/cropped/eJoi_logo-principal@2x.png", "to": "public/logos/principal@2x.png" },
+    { "from": "public/logos/cropped/eJoi_logo-mono.png", "to": "public/logos/mono.png" },
+    { "from": "public/logos/cropped/eJoi_logo-mono@2x.png", "to": "public/logos/mono@2x.png" },
+    { "from": "public/logos/cropped/eJoi_logo-invertido.png", "to": "public/logos/invertido.png" },
+    { "from": "public/logos/cropped/eJoi_logo-invertido@2x.png", "to": "public/logos/invertido@2x.png" },
+    { "from": "public/IMG/arquetipos/Anfitriona.jpg", "to": "public/portraits/realista-femenino.webp", "resize": 640 },
+    { "from": "public/IMG/arquetipos/Protector.png", "to": "public/portraits/realista-masculino.webp", "resize": 640 },
+    { "from": "public/IMG/anime/Anime_anfitriona.png", "to": "public/portraits/ilustrado-femenino.webp", "resize": 640 },
+    { "from": "public/IMG/anime/Anime_Protector.jpg", "to": "public/portraits/ilustrado-masculino.webp", "resize": 640 }
+  ]
+}

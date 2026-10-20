@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "useDefineForClassFields": true,
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "strict": true,
+    "noUncheckedIndexedAccess": false,
+    "resolveJsonModule": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/shared/services/http/client": ["src/platform/http.ts"],
+      "@/shared/services/storage/secure": ["src/platform/secure.ts"],
+      "@/shared/services/storage/keyValue": ["src/platform/keyValue.ts"],
+      "@/app/config/env": ["src/platform/env.ts"],
+      "@/*": ["src/app-shared/*"],
+      "~/*": ["src/*"]
+    }
+  },
+  "include": ["src", "scripts/sync-lib.test.mjs"]
+}

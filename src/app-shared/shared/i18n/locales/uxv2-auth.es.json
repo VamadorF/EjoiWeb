@@ -1,0 +1,23 @@
+{
+  "login": {
+    "value_tagline": "Tu compañía conversacional, hecha a tu medida",
+    "value_seal_1": "Conversaciones que recuerdan lo que importa",
+    "value_seal_2": "Privacidad y control en tus manos",
+    "value_seal_3": "Lista para hablar en minutos",
+    "headline_prefix": "Tu compañía de IA para ",
+    "headline_highlight": "conversar",
+    "headline_suffix": ", crecer y sentirte mejor",
+    "subtitle": "Crea la tuya en un minuto y empieza a conversar.",
+    "pill_safe": "Espacio seguro",
+    "pill_support": "Apoyo emocional",
+    "pill_habits": "Hábitos",
+    "google_continue": "Continuar con Google",
+    "invite_code": "Tengo un código",
+    "invite_code_a11y": "Ingresar código de invitación",
+    "terms_prefix": "Al continuar aceptas los",
+    "terms_link": "Términos",
+    "and_privacy": " y la ",
+    "privacy_link": "Política de Privacidad",
+    "terms_suffix": "."
+  }
+}
