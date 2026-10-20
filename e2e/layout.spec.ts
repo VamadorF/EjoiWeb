@@ -21,7 +21,62 @@ test.describe('Desktop shell 1440×900', () => {
   });
 
   test('medidas del shell de chat', async ({ page }) => {
+    await page.route('**/api/**', async (route) => {
+      const path = new URL(route.request().url()).pathname.replace(/^\/api/, '');
+      if (path.includes('/auth/refresh')) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ accessToken: 'e2e-layout' }),
+        });
+        return;
+      }
+      if (path.includes('/companion/me/creation')) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            state: 'ready',
+            profile: { id: 'c1', name: 'Luna', visualStyle: 'realista' },
+            firstMessage: { id: 'm1', content: 'Hola', meta: {} },
+          }),
+        });
+        return;
+      }
+      if (path.includes('/companion/me')) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            id: 'c1',
+            name: 'Luna',
+            visualStyle: 'realista',
+            interests: [],
+            boundaries: [],
+          }),
+        });
+        return;
+      }
+      if (path.includes('/chat/')) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ messages: [], hasMore: false }),
+        });
+        return;
+      }
+      if (path.includes('/subscription/me')) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ remainingMessages: 12 }),
+        });
+        return;
+      }
+      await route.fulfill({ status: 200, contentType: 'application/json', body: '{}' });
+    });
     await page.goto('/chat');
+    await page.waitForSelector('[data-testid="chat-read"]');
     const menu = page.getByTestId('chat-menu');
     const read = page.getByTestId('chat-read');
     const profile = page.getByTestId('chat-profile');
@@ -34,5 +89,43 @@ test.describe('Desktop shell 1440×900', () => {
     expect(readBox?.width).toBeGreaterThanOrEqual(680);
     expect(readBox?.width).toBeLessThanOrEqual(720);
     expect(profileBox?.width).toBe(320);
+  });
+});
+
+test.describe('Desktop shell 1280×800', () => {
+  test.use({ viewport: { width: 1280, height: 800 } });
+
+  test('preview lateral 360 px', async ({ page }) => {
+    await page.goto('/crear/quien');
+    await expect(page.getByTestId('shell-preview')).toHaveCSS('width', '360px');
+  });
+});
+
+test.describe('Desktop shell 1024×768', () => {
+  test.use({ viewport: { width: 1024, height: 768 } });
+
+  test('franja preview 72 px', async ({ page }) => {
+    await page.route('**/api/**', async (route) => {
+      const path = new URL(route.request().url()).pathname.replace(/^\/api/, '');
+      if (path.includes('/auth/refresh')) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ accessToken: 'e2e-layout-1024' }),
+        });
+        return;
+      }
+      if (path.includes('/users/me/onboarding-draft')) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ draft: null }),
+        });
+        return;
+      }
+      await route.fulfill({ status: 200, contentType: 'application/json', body: '{}' });
+    });
+    await page.goto('/crear/quien');
+    await expect(page.getByTestId('shell-preview')).toHaveCSS('height', '72px');
   });
 });
