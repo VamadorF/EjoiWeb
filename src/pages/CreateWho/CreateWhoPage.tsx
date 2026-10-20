@@ -4,12 +4,12 @@ import { useNavigate } from 'react-router';
 
 import { INTEREST_OPTIONS, INTEREST_OPTION_ICONS } from '@/features/onboarding/data/interestOptions';
 import { ETHNICITY_IDS } from '@/features/onboarding/data/companionNames';
-import type { Gender, VisualStyle } from '@/features/onboarding/types';
+import type { Gender } from '@/features/onboarding/types';
 import { COMPANION_MAX_AGE, COMPANION_MIN_AGE } from '@/features/onboarding/constants/onboardingSteps';
 
 import { AppIcon } from '~/components/AppIcon';
 import { CreationPreview } from '~/features/creation/CreationPreview';
-import { stylePortraitSrcForCard } from '~/features/creation/portraits';
+import { stylePortraitSrcForCard, visualStyleSelectorOptions } from '~/features/creation/portraits';
 import { useCreationDraft } from '~/features/creation/useCreationDraft';
 import { canContinueWho, listWhoMissing } from '~/features/creation/whoValidation';
 import { ENABLE_AGE, ENABLE_ETHNICITY } from '~/platform/env';
@@ -23,11 +23,6 @@ const GENDERS: { id: Gender; label: string }[] = [
   { id: 'femenino', label: 'Femenino' },
   { id: 'masculino', label: 'Masculino' },
   { id: 'neutro', label: 'Neutro' },
-];
-
-const STYLES: { id: VisualStyle; labelKey: 'create.style_realistic' | 'create.style_illustrated' }[] = [
-  { id: 'realista', labelKey: 'create.style_realistic' },
-  { id: 'anime', labelKey: 'create.style_illustrated' },
 ];
 
 const ETHNICITY_LABELS: Record<(typeof ETHNICITY_IDS)[number], string> = {
@@ -56,6 +51,7 @@ export default function CreateWhoPage() {
     saveWithWebView,
   } = useCreationDraft({ webView: 'quien' });
 
+  const styleOptions = useMemo(() => visualStyleSelectorOptions(), []);
   const missing = useMemo(() => listWhoMissing(data), [data]);
   const canContinue = canContinueWho(data);
   const missingText = missing.length > 0 ? t('create.missing', { items: missing.join(', ') }) : '';
@@ -125,7 +121,7 @@ export default function CreateWhoPage() {
             Estilo visual
           </h3>
           <OptionGroup mode="radio" aria-labelledby="create-who-style" cols={3}>
-            {STYLES.map(({ id, labelKey }) => (
+            {styleOptions.map(({ id, labelKey }) => (
               <button
                 key={id}
                 type="button"

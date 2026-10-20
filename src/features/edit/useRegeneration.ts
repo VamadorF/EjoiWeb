@@ -4,6 +4,7 @@ import type { QueryClient } from '@tanstack/react-query';
 import { generateCompanionImage } from '@/features/companion/api/image.api';
 import { generateCompanionImagePrompt } from '@/shared/utils/companionImagePrompt';
 
+import { buildCompanionAvatarImageRequest } from '~/features/chat/usePortraitGeneration';
 import { httpClient } from '~/platform/http';
 import {
   fetchCompanionProfile,
@@ -56,11 +57,7 @@ export function useRegeneration(options: {
     try {
       const onboardingData = editFormToOnboardingData(options.values);
       const prompt = generateCompanionImagePrompt(onboardingData, 'avatar');
-      const image = await generateCompanionImage({
-        prompt,
-        quality: 'hd',
-        style: 'natural',
-      });
+      const image = await generateCompanionImage(buildCompanionAvatarImageRequest(prompt));
       setPendingPortrait({ fileUrl: image.fileUrl, storagePath: image.storagePath });
       setPhase('compare');
     } catch {

@@ -9,6 +9,18 @@ import type { CreationSteps } from './useCreationStatus';
 
 export type PortraitGenerationState = 'idle' | 'generating' | 'ready' | 'error';
 
+export const COMPANION_AVATAR_IMAGE_SIZE = '1024x1024' as const;
+
+/** Mismo tamaño y parámetros C15 para realista e ilustrado; solo cambia el prompt. */
+export function buildCompanionAvatarImageRequest(prompt: string) {
+  return {
+    prompt,
+    size: COMPANION_AVATAR_IMAGE_SIZE,
+    quality: 'hd' as const,
+    style: 'natural' as const,
+  };
+}
+
 export function usePortraitGeneration(options: {
   steps: CreationSteps;
   onboardingData: OnboardingData | null;
@@ -33,11 +45,7 @@ export function usePortraitGeneration(options: {
     setState('generating');
     try {
       const prompt = generateCompanionImagePrompt(options.onboardingData, 'avatar');
-      const image = await generateCompanionImage({
-        prompt,
-        quality: 'hd',
-        style: 'natural',
-      });
+      const image = await generateCompanionImage(buildCompanionAvatarImageRequest(prompt));
       await patchCompanion({
         avatarUrl: image.fileUrl,
         avatarStoragePath: image.storagePath,
