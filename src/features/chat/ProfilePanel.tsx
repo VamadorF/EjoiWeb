@@ -42,6 +42,7 @@ export type ProfilePanelProps = {
   portraitPendingLabel?: string | null;
   onRetryPortrait?: () => void;
   showOnline?: boolean;
+  unsaved?: boolean;
 };
 
 function mergeProfileView(
@@ -82,6 +83,7 @@ export function ProfilePanel({
   portraitPendingLabel,
   onRetryPortrait,
   showOnline,
+  unsaved,
 }: ProfilePanelProps) {
   const { t } = useTranslation('web');
   const view = mergeProfileView(profile, draft);
@@ -139,6 +141,11 @@ export function ProfilePanel({
           ) : null}
 
           <h2 className="chat-profile-panel__name">{view.name}</h2>
+          {unsaved ? (
+            <span className="pill" data-testid="chat-profile-unsaved">
+              {t('edit.unsaved')}
+            </span>
+          ) : null}
           {showOnline ? <p className="chat-profile-panel__online">{t('chat.online')}</p> : null}
 
           {view.persona ? (

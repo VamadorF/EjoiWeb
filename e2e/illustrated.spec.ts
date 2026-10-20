@@ -153,6 +153,9 @@ test.describe('Estilo ilustrado end-to-end (SCRUM-115)', () => {
   });
 
   test('editar: opción ilustrado con miniatura de asset', async ({ page }) => {
+    await page.addInitScript(() => {
+      sessionStorage.setItem('ejoi-mock-demo-logged-in', '1');
+    });
     await page.route('**/api/**', async (route) => {
       const path = new URL(route.request().url()).pathname.replace(/^\/api/, '');
 
@@ -165,7 +168,10 @@ test.describe('Estilo ilustrado end-to-end (SCRUM-115)', () => {
         return;
       }
 
-      if (path.includes('/companion/me/profile')) {
+      if (
+        path.includes('/companion/me/profile') ||
+        (path.includes('/companion/me') && route.request().method() === 'GET')
+      ) {
         await route.fulfill({
           status: 200,
           contentType: 'application/json',
@@ -178,6 +184,7 @@ test.describe('Estilo ilustrado end-to-end (SCRUM-115)', () => {
             intensity: 'balanced',
             interests: ['Música'],
             boundaries: [],
+            voiceKey: 'NORAH',
             avatarUrl: 'https://example.com/old.jpg',
           }),
         });
@@ -188,6 +195,7 @@ test.describe('Estilo ilustrado end-to-end (SCRUM-115)', () => {
     });
 
     await page.goto('/chat/editar');
+    await page.getByTestId('edit-companion-page').waitFor();
     const illustrated = page.getByRole('radio', { name: /Ilustrado/i });
     await expect(illustrated).toBeVisible();
     await expect(illustrated.locator('img')).toHaveAttribute('src', /ilustrado-femenino\.webp/);

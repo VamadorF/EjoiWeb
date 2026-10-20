@@ -193,7 +193,7 @@ test.describe('Teclado desktop (SCRUM-113)', () => {
 
     await page.goto('/chat/editar');
     await page.waitForSelector('[data-testid="edit-companion-page"]');
-    const nameInput = page.locator('.create-how__name-input').last();
+    const nameInput = page.locator('[aria-labelledby="edit-name"]').last();
     await nameInput.focus();
     await page.keyboard.press('End');
     await page.keyboard.type('a');
