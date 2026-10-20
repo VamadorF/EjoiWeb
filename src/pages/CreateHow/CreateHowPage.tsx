@@ -149,6 +149,7 @@ export default function CreateHowPage() {
   });
 
   return (
+    <div data-testid="page-como">
     <DesktopShell
       header={
         <CreationShellHeader
@@ -382,5 +383,6 @@ export default function CreateHowPage() {
         </section>
       </form>
     </DesktopShell>
+    </div>
   );
 }

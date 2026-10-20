@@ -73,6 +73,7 @@ export default function CreateWhoPage() {
   });
 
   return (
+    <div data-testid="page-quien">
     <DesktopShell
       header={<CreationShellHeader step={2} stepLabel={t('create.step2')} />}
       preview={<CreationPreview data={data} tagTimeline={tagTimeline} />}
@@ -270,5 +271,6 @@ export default function CreateWhoPage() {
         </section>
       </div>
     </DesktopShell>
+    </div>
   );
 }

@@ -191,6 +191,15 @@ function unauthorized<T>(): MockApiResponse<T> {
   return { data: {} as T, status: 401, statusText: 'Unauthorized' };
 }
 
+function serverError<T>(): MockApiResponse<T> {
+  return { data: {} as T, status: 500, statusText: 'Internal Server Error' };
+}
+
+function shouldFailCompanionCreateOnce(): boolean {
+  if (typeof window === 'undefined') return false;
+  return new URLSearchParams(window.location.search).get('demoFail') === 'create';
+}
+
 export function handleMockApiRequest<T>(
   absoluteOrRelativeUrl: string,
   config: MockRequestConfig,
@@ -237,6 +246,13 @@ export function handleMockApiRequest<T>(
   }
 
   if (path.includes('/companion/me/creation') && method === 'GET') {
+    if (
+      creation.state === 'creating' &&
+      creation.creatingSince > 0 &&
+      Date.now() - creation.creatingSince >= 3000
+    ) {
+      creation.state = 'ready';
+    }
     const companion = getMockCompanion(userId);
     const profileSummary = {
       id: companion.id,
@@ -277,7 +293,11 @@ export function handleMockApiRequest<T>(
 
   if (path.endsWith('/companion/me') && method === 'POST') {
     creation.companion = companionFromPost((config.body ?? {}) as Record<string, unknown>);
-    creation.state = 'ready';
+    if (shouldFailCompanionCreateOnce()) {
+      creation.state = 'error';
+      return serverError<T>();
+    }
+    creation.state = 'creating';
     creation.creatingSince = Date.now();
     const created = getMockCompanion(userId);
     return ok({ id: created.id, name: created.name } as T);
