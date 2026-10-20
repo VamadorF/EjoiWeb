@@ -1,19 +1,36 @@
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   handleMockApiRequest,
   MOCK_DEMO_SESSION_KEY,
   normalizeApiPath,
+  resetMockApiStoresForTests,
   setMockDemoLoggedIn,
 } from './mockApi';
+import { INTEREST_QUICK_REPLIES } from './mockGreeting';
+
+const demoInterests = ['Música', 'Viajes', 'Literatura'];
+
+function tokenFor(userId: string): string {
+  const enc = (value: object) =>
+    btoa(JSON.stringify(value))
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '');
+  return `${enc({ alg: 'none' })}.${enc({ userId, sub: userId })}.mock`;
+}
 
 describe('mockApi', () => {
+  beforeEach(() => {
+    resetMockApiStoresForTests();
+    sessionStorage.removeItem(MOCK_DEMO_SESSION_KEY);
+  });
+
   it('normaliza rutas con prefijo /api', () => {
     expect(normalizeApiPath('http://localhost:5173/api/auth/refresh')).toBe('/auth/refresh');
   });
 
   it('refresh devuelve 401 hasta login demo', () => {
-    sessionStorage.removeItem(MOCK_DEMO_SESSION_KEY);
     const denied = handleMockApiRequest('/api/auth/refresh', { method: 'POST' });
     expect(denied?.status).toBe(401);
     setMockDemoLoggedIn();
@@ -38,5 +55,77 @@ describe('mockApi', () => {
     });
     const read = handleMockApiRequest('/api/users/me/onboarding-draft', { method: 'GET' });
     expect((read?.data as { draft: typeof draft }).draft).toEqual(draft);
+  });
+
+  it('greeting-preview y primer mensaje citan música y viajes con Música, Viajes y Literatura', () => {
+    const authToken = tokenFor('user-greeting');
+    const preview = handleMockApiRequest('/api/companion/greeting-preview', {
+      method: 'POST',
+      authToken,
+      body: { name: 'Sofía', interests: demoInterests },
+    });
+    const previewData = preview?.data as { greeting: string };
+    expect(previewData.greeting).toContain('Vi que te interesan música y viajes');
+
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-01-01T12:00:00Z'));
+    handleMockApiRequest('/api/companion/me', {
+      method: 'POST',
+      authToken,
+      body: { name: 'Sofía', interests: demoInterests, persona: 'Amigable', intensity: 'balanced' },
+    });
+    vi.advanceTimersByTime(3100);
+    const creation = handleMockApiRequest('/api/companion/me/creation', { method: 'GET', authToken });
+    const first = (creation?.data as { firstMessage?: { content: string } }).firstMessage;
+    expect(first?.content).toContain('Vi que te interesan música y viajes');
+
+    const history = handleMockApiRequest('/api/chat/history', { method: 'GET', authToken });
+    const messages = (history?.data as { messages: { content: string }[] }).messages;
+    expect(messages[0]?.content).toContain('Vi que te interesan música y viajes');
+    vi.useRealTimers();
+  });
+
+  it('respuestas rápidas coinciden con INTEREST_QUICK_REPLIES del catálogo', () => {
+    const authToken = tokenFor('user-qr');
+    const preview = handleMockApiRequest('/api/companion/greeting-preview', {
+      method: 'POST',
+      authToken,
+      body: { name: 'Sofía', interests: demoInterests },
+    });
+    const quickReplies = (preview?.data as { quickReplies: string[] }).quickReplies;
+    expect(quickReplies).toEqual([
+      INTEREST_QUICK_REPLIES.Música[0],
+      INTEREST_QUICK_REPLIES.Música[1],
+      INTEREST_QUICK_REPLIES.Viajes[0],
+    ]);
+  });
+
+  it('la edad del perfil refleja creación y PATCH', () => {
+    const authToken = tokenFor('user-age');
+    handleMockApiRequest('/api/companion/me', {
+      method: 'POST',
+      authToken,
+      body: { name: 'Sofía', age: 26, interests: demoInterests },
+    });
+    let profile = handleMockApiRequest('/api/companion/me/profile', { method: 'GET', authToken });
+    expect((profile?.data as { age?: number }).age).toBe(26);
+
+    handleMockApiRequest('/api/companion/me', {
+      method: 'PATCH',
+      authToken,
+      body: { age: 31 },
+    });
+    profile = handleMockApiRequest('/api/companion/me/profile', { method: 'GET', authToken });
+    expect((profile?.data as { age?: number }).age).toBe(31);
+  });
+
+  it('respuesta demo neutra al enviar un mensaje', () => {
+    const authToken = tokenFor('user-chat');
+    const reply = handleMockApiRequest('/api/chat/message', {
+      method: 'POST',
+      authToken,
+      body: { message: 'Hola', clientMessageId: 'c1' },
+    });
+    expect((reply?.data as { content: string }).content).toBe('Cuéntame más sobre eso.');
   });
 });
