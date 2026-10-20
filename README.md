@@ -60,6 +60,29 @@ npm run shots -- vista-2 chat-listo
 
 La hoja de componentes base vive en `src/theme/ui.css` (tokens en `src/theme/cssVars.ts`). `npm test` incluye `cssGuard.test.ts`, que falla si hay variables CSS inventadas o colores literales fuera de `src/theme/`.
 
+## Revisión visual
+
+Regenerar las 42 capturas de referencia (7 pantallas × claro/oscuro × 1440/1280/1024):
+
+```powershell
+cd C:\ejoi\EjoiWeb
+npm run build:demo
+npm run shots
+# docs/screens/<pantalla>-<claro|oscuro>-<ancho>.png
+```
+
+Antes de commitear capturas nuevas, abrir cada PNG en claro y oscuro y comprobar:
+
+- nada pegado al borde del viewport;
+- nada cortado (texto, avatares, botones);
+- la selección se distingue por borde, fondo y check;
+- un solo botón primario destacado por pantalla;
+- texto secundario más tenue que el principal;
+- sin azul de enlace del navegador ni botones grises por defecto;
+- en tema oscuro, sin sombras de elevación.
+
+Los estilos computados se validan en e2e con `e2e/visual-tokens.spec.ts` (claro y oscuro).
+
 ```powershell
 # .env.local
 VITE_MOCK_API=true

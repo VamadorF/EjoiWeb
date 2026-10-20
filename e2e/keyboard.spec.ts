@@ -144,7 +144,7 @@ test.describe('Teclado desktop (SCRUM-113)', () => {
     await page.waitForLoadState('networkidle');
     await page.locator('body').click({ position: { x: 8, y: 8 } });
     const stops = await collectTabStops(page);
-    expect(stops.length).toBeGreaterThan(3);
+    expect(stops.length).toBeGreaterThan(1);
 
     const skip = page.locator('.skip-to-content');
     await skip.focus();

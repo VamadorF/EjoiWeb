@@ -71,6 +71,9 @@ test.describe('Estilo ilustrado end-to-end (SCRUM-115)', () => {
           contentType: 'application/json',
           body: JSON.stringify({
             draft: {
+              schemaVersion: 1,
+              step: 3,
+              updatedAt: '2026-01-01T00:00:00.000Z',
               data: {
                 gender: 'femenino',
                 visualStyle: 'anime',
@@ -91,14 +94,14 @@ test.describe('Estilo ilustrado end-to-end (SCRUM-115)', () => {
           contentType: 'application/json',
           body: JSON.stringify({
             state: 'creating',
-            steps: { personality: true, portrait: false },
+            steps: { personality: true, interests: true, greeting: false, portrait: false },
             profile: { id: 'c1', name: 'Luna', visualStyle: 'anime' },
           }),
         });
         return;
       }
 
-      if (path.includes('/companion/me/profile')) {
+      if (path.includes('/companion/me')) {
         await route.fulfill({
           status: 200,
           contentType: 'application/json',
@@ -145,11 +148,11 @@ test.describe('Estilo ilustrado end-to-end (SCRUM-115)', () => {
     await page.route('**/api/**', handleChatApi);
 
     await page.goto('/chat');
-    await page.waitForSelector('[data-testid="chat-read"]');
+    await page.getByTestId('chat-creating-panel').waitFor();
 
     const sample = page.locator('.chat-profile-card__portrait');
     await expect(sample).toHaveAttribute('src', /ilustrado-femenino\.webp/);
-    await expect(page.getByText('Ilustrado')).toBeVisible();
+    await expect(page.getByTestId('chat-creating-panel').getByText('Ilustrado')).toBeVisible();
   });
 
   test('editar: opción ilustrado con miniatura de asset', async ({ page }) => {

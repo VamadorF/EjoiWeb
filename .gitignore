@@ -1,5 +1,6 @@
 node_modules/
 dist/
+dist-demo/
 coverage/
 .env
 .env.*
@@ -7,6 +8,7 @@ coverage/
 !.env.demo
 test-results/
 playwright-report/
+# Las capturas de referencia (docs/screens/*.png) se versionan a propósito (SCRUM-104 UI-WEB-07).
 .vite/
 .cursor/hooks.json
 .cursor/skills/

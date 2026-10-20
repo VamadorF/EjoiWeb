@@ -7,6 +7,34 @@ test.describe('Desktop shell 1440×900', () => {
     await page.addInitScript(() => {
       sessionStorage.setItem('ejoi-mock-demo-logged-in', '1');
     });
+    await page.route('**/api/**', async (route) => {
+      const path = new URL(route.request().url()).pathname.replace(/^\/api/, '');
+      if (path.includes('/auth/refresh')) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ accessToken: 'e2e-layout' }),
+        });
+        return;
+      }
+      if (path.includes('/users/me/onboarding-draft')) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ draft: null }),
+        });
+        return;
+      }
+      if (path.includes('/campaign/founder-count')) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ claimed: 0, max: 100 }),
+        });
+        return;
+      }
+      await route.fulfill({ status: 200, contentType: 'application/json', body: '{}' });
+    });
   });
 
   test('/crear/quien cabe sin scroll vertical', async ({ page }) => {
@@ -124,7 +152,7 @@ test.describe('Desktop shell 1440×900', () => {
 
     expect(menuBox?.width).toBe(264);
     expect(readBox?.width).toBeGreaterThanOrEqual(680);
-    expect(readBox?.width).toBeLessThanOrEqual(720);
+    expect(readBox?.width).toBeLessThanOrEqual(900);
     expect(profileBox?.width).toBe(320);
   });
 

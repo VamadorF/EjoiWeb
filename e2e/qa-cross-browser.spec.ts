@@ -37,12 +37,12 @@ test.describe('QA cross-browser SCRUM-116', () => {
     await page.getByRole('button', { name: 'Continuar' }).click();
     await page.getByRole('radio', { name: 'Amigable y empática' }).click();
     await page.getByRole('radio', { name: 'Equilibrada' }).click();
-    await page.locator('.create-how__name-input').fill('Luna');
-    await page.locator('.create-how__consent input[type="checkbox"]').nth(0).check();
-    await page.locator('.create-how__consent input[type="checkbox"]').nth(1).check();
+    await page.locator('#create-how-form .field__control').first().fill('Luna');
+    await page.locator('.check__input').nth(0).check();
+    await page.locator('.check__input').nth(1).check();
     await page.waitForTimeout(400);
     await page.reload();
-    await expect(page.locator('.create-how__name-input')).toHaveValue('Luna');
+    await expect(page.locator('#create-how-form .field__control').first()).toHaveValue('Luna');
   });
 
   test('nuevo contexto con storageState retoma vista y elecciones', async ({ browser }) => {
@@ -83,9 +83,9 @@ test.describe('QA cross-browser SCRUM-116', () => {
     await page.getByRole('button', { name: 'Continuar' }).click();
     await page.getByRole('radio', { name: 'Amigable y empática' }).click();
     await page.getByRole('radio', { name: 'Equilibrada' }).click();
-    await page.locator('.create-how__name-input').fill('Luna');
-    await page.locator('.create-how__consent input[type="checkbox"]').nth(0).check();
-    await page.locator('.create-how__consent input[type="checkbox"]').nth(1).check();
+    await page.locator('#create-how-form .field__control').first().fill('Luna');
+    await page.locator('.check__input').nth(0).check();
+    await page.locator('.check__input').nth(1).check();
     await page.getByRole('button', { name: /Crear a Luna/ }).click();
     await page.waitForURL('**/chat');
 
@@ -113,7 +113,7 @@ test.describe('QA cross-browser SCRUM-116', () => {
     await sendChatWithKeyboard(page, 'Hola teclado QA');
     await page.goto('/chat/editar');
     await page.waitForSelector('[data-testid="edit-companion-page"]');
-    const nameInput = page.locator('.create-how__name-input').last();
+    const nameInput = page.locator('[aria-labelledby="edit-name"]').last();
     await nameInput.focus();
     await page.keyboard.press('End');
     await page.keyboard.type('a');

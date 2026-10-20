@@ -103,9 +103,11 @@ async function prepareScreen(page, id) {
     case 'chat-listo':
       await demoLogin(page);
       await page.goto('/chat');
+      await page.getByTestId('chat-read').waitFor({ timeout: 20_000 });
       await page
         .getByTestId('chat-messages')
         .or(page.getByTestId('chat-creating-panel'))
+        .or(page.getByTestId('chat-composer'))
         .waitFor({ timeout: 20_000 });
       break;
     case 'chat-error':
@@ -151,8 +153,8 @@ async function main() {
             baseURL: baseUrl,
           });
           const page = await context.newPage();
-          await setTheme(page, theme === 'oscuro' ? 'dark' : 'light');
           await prepareScreen(page, screen);
+          await setTheme(page, theme === 'oscuro' ? 'dark' : 'light');
           const file = path.join(outDir, `${screen}-${theme}-${width}.png`);
           await page.screenshot({ path: file, fullPage: false });
           await context.close();

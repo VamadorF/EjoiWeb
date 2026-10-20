@@ -133,12 +133,36 @@ test.describe('Tema claro/oscuro (SCRUM-112)', () => {
   });
 
   test('sin saltos de layout al cambiar tema', async ({ page }) => {
+    await page.route('**/api/**', async (route) => {
+      const path = new URL(route.request().url()).pathname.replace(/^\/api/, '');
+      if (path.includes('/auth/refresh')) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ accessToken: 'e2e-theme-layout' }),
+        });
+        return;
+      }
+      if (path.includes('/users/me/onboarding-draft')) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ draft: null }),
+        });
+        return;
+      }
+      await route.fulfill({ status: 200, contentType: 'application/json', body: '{}' });
+    });
+
     await page.goto('/crear/quien');
-    await page.waitForSelector('[data-testid="shell-header"]');
+    await page.getByTestId('shell-footer').waitFor();
     const headerBefore = await page.getByTestId('shell-header').boundingBox();
     const footerBefore = await page.getByTestId('shell-footer').boundingBox();
 
     await applyTheme(page, 'dark');
+    await page.waitForFunction(
+      () => !document.documentElement.classList.contains('theme-transition'),
+    );
     const headerAfter = await page.getByTestId('shell-header').boundingBox();
     const footerAfter = await page.getByTestId('shell-footer').boundingBox();
 
