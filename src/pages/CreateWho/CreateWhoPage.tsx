@@ -12,6 +12,7 @@ import { CreationPreview } from '~/features/creation/CreationPreview';
 import { stylePortraitSrcForCard, visualStyleSelectorOptions } from '~/features/creation/portraits';
 import { useCreationDraft } from '~/features/creation/useCreationDraft';
 import { canContinueWho, listWhoMissing } from '~/features/creation/whoValidation';
+import { logoutWeb } from '~/features/auth/api/auth.api';
 import { ENABLE_AGE, ENABLE_ETHNICITY } from '~/platform/env';
 import { CreationShellHeader, DesktopShell } from '~/layout/DesktopShell';
 import { OptionGroup } from '~/layout/OptionGroup';
@@ -66,8 +67,14 @@ export default function CreateWhoPage() {
     void navigate('/crear/como');
   };
 
+  const onConfirmLeave = async () => {
+    await saveWithWebView('quien');
+    await logoutWeb();
+    void navigate('/acceso');
+  };
+
   useDesktopShortcuts({
-    escapeTo: '/acceso',
+    escapeEnabled: false,
     canContinue,
     onEnterContinue: () => void onContinue(),
   });
@@ -75,7 +82,7 @@ export default function CreateWhoPage() {
   return (
     <div data-testid="page-quien">
     <DesktopShell
-      header={<CreationShellHeader step={2} stepLabel={t('create.step2')} />}
+      header={<CreationShellHeader step={2} onConfirmLeave={onConfirmLeave} />}
       preview={<CreationPreview data={data} tagTimeline={tagTimeline} />}
       footer={
         <div className="creation-shell-footer">
@@ -87,15 +94,23 @@ export default function CreateWhoPage() {
           ) : (
             <span />
           )}
-          <button
-            type="button"
-            className="btn btn--primary btn--l creation-shell-footer__primary"
-            disabled={!canContinue || !loaded}
-            aria-describedby={!canContinue ? missingId : undefined}
-            onClick={() => void onContinue()}
-          >
-            {t('create.continue')}
-          </button>
+          <div className="creation-shell-footer__actions">
+            {data.interests.length >= 3 ? (
+              <p className="creation-shell-footer__counter" data-testid="interests-counter-done">
+                <AppIcon name="checkmark-circle" />
+                {t('create.interests_done', { count: data.interests.length })}
+              </p>
+            ) : null}
+            <button
+              type="button"
+              className="btn btn--primary btn--l creation-shell-footer__primary"
+              disabled={!canContinue || !loaded}
+              aria-describedby={!canContinue ? missingId : undefined}
+              onClick={() => void onContinue()}
+            >
+              {t('create.continue')}
+            </button>
+          </div>
         </div>
       }
     >
@@ -239,19 +254,15 @@ export default function CreateWhoPage() {
         ) : null}
 
         <section className="create-who__section" aria-labelledby="create-who-interests">
-          <div className="create-who__interests-head">
-            <h2 id="create-who-interests" className="create-who__section-title">
-              Intereses
-            </h2>
-            <span
-              className={
-                data.interests.length >= 3 ? 'pill create-who__counter--ok' : 'pill create-who__counter'
-              }
-            >
-              {t('create.interests_counter', { count: data.interests.length })}
-            </span>
-          </div>
-          <OptionGroup mode="toggle" aria-labelledby="create-who-interests" cols={6}>
+          <h2 id="create-who-interests" className="create-who__section-title">
+            Intereses
+          </h2>
+          <OptionGroup
+            mode="toggle"
+            aria-labelledby="create-who-interests"
+            cols={6}
+            className="create-who__interests-mosaic"
+          >
             {INTEREST_OPTIONS.map((interest) => {
               const selected = data.interests.includes(interest);
               return (
@@ -259,11 +270,12 @@ export default function CreateWhoPage() {
                   key={interest}
                   type="button"
                   aria-pressed={selected}
-                  className="chip"
+                  className="opt opt--interest"
+                  data-testid="interest-tile"
                   onClick={() => toggleInterest(interest)}
                 >
-                  <AppIcon name={INTEREST_OPTION_ICONS[interest]} />
-                  <span>{interest}</span>
+                  <AppIcon name={INTEREST_OPTION_ICONS[interest]} className="opt--interest__icon" />
+                  <span className="opt--interest__label">{interest}</span>
                 </button>
               );
             })}

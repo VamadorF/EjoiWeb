@@ -64,6 +64,22 @@
   color: var(--c-ink2);
 }
 
+.create-mobile [aria-labelledby='mobile-interests'] .create-option {
+  height: 88px;
+  min-height: 88px;
+  max-height: 88px;
+}
+
+.create-mobile [aria-labelledby='mobile-interests'] .create-option span:last-child {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  font-size: 13px;
+  line-height: 16px;
+  text-align: center;
+}
+
 /* ponytail: CreateMobilePage.tsx aún usa create-option; desktop usa .opt de ui.css */
 .create-mobile .create-option {
   position: relative;

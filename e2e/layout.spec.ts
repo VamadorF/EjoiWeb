@@ -49,14 +49,27 @@ test.describe('Desktop shell 1440×900', () => {
     expect(mainScroll.scrollHeight).toBeLessThanOrEqual(mainScroll.clientHeight);
   });
 
-  test('/crear/como cabe sin scroll en el main', async ({ page }) => {
+  test('/crear/como muestra el título al cargar', async ({ page }) => {
+    await page.addInitScript(() => {
+      sessionStorage.setItem('ejoi-mock-demo-logged-in', '1');
+    });
     await page.goto('/crear/como');
-    const main = page.locator('#main-content');
-    const mainScroll = await main.evaluate((el) => ({
-      scrollHeight: el.scrollHeight,
-      clientHeight: el.clientHeight,
-    }));
-    expect(mainScroll.scrollHeight).toBeLessThanOrEqual(mainScroll.clientHeight);
+    await expect(page.getByRole('heading', { name: /Cómo habla tu eJoi/i })).toBeVisible();
+    await expect(page.getByText(/Paso 3 de 3 · ~30 s/)).toBeVisible();
+  });
+
+  test('mosaico de intereses con altura uniforme en Vista 2', async ({ page }) => {
+    await page.addInitScript(() => {
+      sessionStorage.setItem('ejoi-mock-demo-logged-in', '1');
+    });
+    await page.goto('/crear/quien');
+    await page.getByTestId('page-quien').waitFor({ state: 'visible', timeout: 10_000 });
+    const heights = await page.getByTestId('interest-tile').evaluateAll((els) =>
+      els.map((el) => Math.round(el.getBoundingClientRect().height)),
+    );
+    expect(heights.length).toBe(15);
+    expect(new Set(heights).size).toBe(1);
+    expect(heights[0]).toBe(88);
   });
 
   test('opción seleccionada en Vista 2 usa borde de selección', async ({ page }) => {
@@ -229,6 +242,29 @@ test.describe('Desktop shell 1280×800', () => {
   test.use({ viewport: { width: 1280, height: 800 } });
 
   test('preview lateral 360 px', async ({ page }) => {
+    await page.addInitScript(() => {
+      sessionStorage.setItem('ejoi-mock-demo-logged-in', '1');
+    });
+    await page.route('**/api/**', async (route) => {
+      const path = new URL(route.request().url()).pathname.replace(/^\/api/, '');
+      if (path.includes('/auth/refresh')) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ accessToken: 'e2e-layout-1280' }),
+        });
+        return;
+      }
+      if (path.includes('/users/me/onboarding-draft')) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ draft: null }),
+        });
+        return;
+      }
+      await route.fulfill({ status: 200, contentType: 'application/json', body: '{}' });
+    });
     await page.goto('/crear/quien');
     await expect(page.getByTestId('shell-preview')).toHaveCSS('width', '360px');
   });

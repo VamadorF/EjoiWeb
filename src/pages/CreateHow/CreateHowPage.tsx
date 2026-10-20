@@ -16,6 +16,7 @@ import type { CompanionIntensity } from '@/features/onboarding/types';
 import { CAMPAIGN_LANDING_URL } from '~/platform/env';
 
 import { AppIcon } from '~/components/AppIcon';
+import { logoutWeb } from '~/features/auth/api/auth.api';
 import { CreationPreview } from '~/features/creation/CreationPreview';
 import { canSubmitCreateForm, isValidCompanionName } from '~/features/creation/nameValidation';
 import {
@@ -38,12 +39,23 @@ const OPTIONAL_BOUNDARIES = BOUNDARY_OPTIONS.filter(
   (option) => !(BASIC_BOUNDARIES as readonly string[]).includes(option),
 );
 
-const PRESENCE: { id: CompanionIntensity; labelKey: 'create.presence_soft' | 'create.presence_balanced' | 'create.presence_intense' }[] =
-  [
-    { id: 'soft', labelKey: 'create.presence_soft' },
-    { id: 'balanced', labelKey: 'create.presence_balanced' },
-    { id: 'intense', labelKey: 'create.presence_intense' },
-  ];
+const PRESENCE: {
+  id: CompanionIntensity;
+  labelKey: 'create.presence_soft' | 'create.presence_balanced' | 'create.presence_intense';
+  descKey: 'create.presence_desc_soft' | 'create.presence_desc_balanced' | 'create.presence_desc_intense';
+  icon: string;
+  recommended?: boolean;
+}[] = [
+  { id: 'soft', labelKey: 'create.presence_soft', descKey: 'create.presence_desc_soft', icon: 'leaf-outline' },
+  {
+    id: 'balanced',
+    labelKey: 'create.presence_balanced',
+    descKey: 'create.presence_desc_balanced',
+    icon: 'pulse-outline',
+    recommended: true,
+  },
+  { id: 'intense', labelKey: 'create.presence_intense', descKey: 'create.presence_desc_intense', icon: 'flash-outline' },
+];
 
 const GREETING_DEBOUNCE_MS = 400;
 
@@ -62,6 +74,7 @@ export default function CreateHowPage() {
     toggleBoundary,
     setCompanionName,
     patchData,
+    saveWithWebView,
   } = useCreationDraft({ webView: 'como', step: DEFAULT_COMO_STEP });
 
   const [adultConsent, setAdultConsent] = useState(false);
@@ -139,8 +152,14 @@ export default function CreateHowPage() {
     }
   };
 
+  const onConfirmLeave = async () => {
+    await saveWithWebView('como');
+    await logoutWeb();
+    void navigate('/acceso');
+  };
+
   useDesktopShortcuts({
-    escapeTo: '/crear/quien',
+    escapeEnabled: false,
     canContinue: canSubmit && !submitting,
     onEnterContinue: () => {
       const form = document.getElementById('create-how-form') as HTMLFormElement | null;
@@ -154,9 +173,9 @@ export default function CreateHowPage() {
       header={
         <CreationShellHeader
           step={3}
-          stepLabel={t('create.step3')}
           backLabel={t('create.back')}
           onBack={() => void navigate('/crear/quien')}
+          onConfirmLeave={onConfirmLeave}
         />
       }
       preview={
@@ -165,6 +184,7 @@ export default function CreateHowPage() {
           tagTimeline={tagTimeline}
           companionName={displayName}
           greeting={greeting}
+          showGreetingPreview
         />
       }
       footer={
@@ -218,32 +238,33 @@ export default function CreateHowPage() {
           </OptionGroup>
         </section>
 
-        <div className="create-how__row create-how__row--split">
-          <section className="create-who__section" aria-labelledby="create-how-presence">
-            <h2 id="create-how-presence" className="create-who__section-title">
-              Presencia
-            </h2>
-            <OptionGroup
-              mode="radio"
-              aria-labelledby="create-how-presence"
-              layout="inline"
-              className="seg"
-            >
-              {PRESENCE.map(({ id, labelKey }) => (
-                <button
-                  key={id}
-                  type="button"
-                  role="radio"
-                  aria-checked={data.intensity === id}
-                  className="seg__item"
-                  onClick={() => setIntensity(id)}
-                >
+        <section className="create-who__section" aria-labelledby="create-how-presence">
+          <h2 id="create-how-presence" className="create-who__section-title">
+            Presencia
+          </h2>
+          <OptionGroup mode="radio" aria-labelledby="create-how-presence" cols={3}>
+            {PRESENCE.map(({ id, labelKey, descKey, icon, recommended }) => (
+              <button
+                key={id}
+                type="button"
+                role="radio"
+                aria-checked={data.intensity === id}
+                className="opt opt--presence"
+                data-testid={`presence-${id}`}
+                onClick={() => setIntensity(id)}
+              >
+                <AppIcon name={icon} className="opt--presence__icon" />
+                <span className="opt--presence__title">
                   {t(labelKey)}
-                </button>
-              ))}
-            </OptionGroup>
-          </section>
+                  {recommended ? <span className="pill opt--presence__pill">{t('create.recommended')}</span> : null}
+                </span>
+                <span className="opt--presence__desc">{t(descKey)}</span>
+              </button>
+            ))}
+          </OptionGroup>
+        </section>
 
+        <div className="create-how__row">
           <section className="create-who__section" aria-labelledby="create-how-name">
             <div className="field">
               <span id="create-how-name" className="field__label">

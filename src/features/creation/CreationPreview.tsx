@@ -42,9 +42,16 @@ export type CreationPreviewProps = {
   tagTimeline: string[];
   companionName?: string;
   greeting?: string | null;
+  showGreetingPreview?: boolean;
 };
 
-export function CreationPreview({ data, tagTimeline, companionName, greeting }: CreationPreviewProps) {
+export function CreationPreview({
+  data,
+  tagTimeline,
+  companionName,
+  greeting,
+  showGreetingPreview = false,
+}: CreationPreviewProps) {
   const { t } = useTranslation('web');
   const portraitSrc = stylePortraitSrc(data.visualStyle, data.gender);
   const tags = buildComoPreviewTags(data, tagTimeline);
@@ -53,16 +60,6 @@ export function CreationPreview({ data, tagTimeline, companionName, greeting }: 
 
   return (
     <div className="creation-preview" aria-hidden="true">
-      <p className="label creation-preview__title">{t('create.preview_title')}</p>
-      <h2
-        className={
-          displayName
-            ? 'creation-preview__name'
-            : 'creation-preview__name creation-preview__name--placeholder'
-        }
-      >
-        {displayName || t('create.no_name')}
-      </h2>
       <div className="creation-preview__portrait-wrap">
         {portraitSrc ? (
           <img
@@ -80,6 +77,15 @@ export function CreationPreview({ data, tagTimeline, companionName, greeting }: 
           </div>
         )}
       </div>
+      <h2
+        className={
+          displayName
+            ? 'creation-preview__name'
+            : 'creation-preview__name creation-preview__name--placeholder'
+        }
+      >
+        {displayName || t('create.no_name')}
+      </h2>
       {tags.length > 0 ? (
         <ul className="creation-preview__tags">
           {tags.map((tag) => (
@@ -92,7 +98,12 @@ export function CreationPreview({ data, tagTimeline, companionName, greeting }: 
           ))}
         </ul>
       ) : null}
-      {greeting ? <p className="bubble--ai creation-preview__greeting">{greeting}</p> : null}
+      {showGreetingPreview ? (
+        <div className="creation-preview__card" data-testid="creation-preview-greeting">
+          <p className="label creation-preview__card-label">{t('create.preview_card')}</p>
+          {greeting ? <p className="bubble--ai creation-preview__greeting">{greeting}</p> : null}
+        </div>
+      ) : null}
     </div>
   );
 }
