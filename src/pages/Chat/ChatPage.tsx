@@ -1,12 +1,16 @@
+import { QueryClient, QueryClientProvider, useInfiniteQuery } from '@tanstack/react-query';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 
-import { sendChatMessage } from '@/features/chat/api/chat.api';
+import { getChatMessages, sendChatMessage } from '@/features/chat/api/chat.api';
+import { mergeAndSortChatMessages } from '@/features/chat/utils/mergeChatPages';
+import { queryKeys } from '@/shared/lib/queryKeys';
 import type { OnboardingData } from '@/features/onboarding/types';
 
 import { Composer } from '~/features/chat/Composer';
-import { MessageList, type ChatBubble } from '~/features/chat/MessageList';
+import { MessageList, type ChatBubble, firstMessageToBubble } from '~/features/chat/MessageList';
+import { ProfilePanel } from '~/features/chat/ProfilePanel';
 import {
   clearPending,
   dispatchPendingMessage,
@@ -16,8 +20,11 @@ import {
   sendMessageWithClientId,
 } from '~/features/chat/pendingMessage';
 import { QuickReplies } from '~/features/chat/QuickReplies';
+import { SideMenu } from '~/features/chat/SideMenu';
 import { useCreationStatus } from '~/features/chat/useCreationStatus';
 import { usePortraitGeneration } from '~/features/chat/usePortraitGeneration';
+import { useProfile } from '~/features/chat/useProfile';
+import { isQuotaExhausted, useQuota } from '~/features/chat/useQuota';
 import {
   buildCreateCompanionPayload,
 } from '~/features/creation/startCreation';
@@ -40,7 +47,19 @@ const CREATION_STEP_KEYS = [
   ['portrait', 'chat.step_portrait'],
 ] as const;
 
+const chatQueryClient = new QueryClient({
+  defaultOptions: { queries: { retry: false } },
+});
+
 export default function ChatPage() {
+  return (
+    <QueryClientProvider client={chatQueryClient}>
+      <ChatPageContent />
+    </QueryClientProvider>
+  );
+}
+
+function ChatPageContent() {
   const { t } = useTranslation('web');
   const navigate = useNavigate();
   const [retryKey, setRetryKey] = useState(0);
@@ -50,17 +69,55 @@ export default function ChatPage() {
   const [pendingFailed, setPendingFailed] = useState(false);
   const [dispatching, setDispatching] = useState(false);
 
-  const companionName =
-    profile?.name?.trim() || draftData?.companionName?.trim() || 'tu eJoi';
-  const companionId = profile?.id;
   const isReady = state === 'ready';
   const isError = state === 'error';
+  const profileQueryEnabled = isReady;
+
+  const {
+    data: profileData,
+    isLoading: profileLoading,
+    isError: profileLoadError,
+    refetch: refetchProfile,
+  } = useProfile(profileQueryEnabled);
+
+  const { data: subscription, isLoading: quotaLoading } = useQuota(isReady);
+  const quotaOut = isQuotaExhausted(subscription);
+
+  const companionName =
+    profileData?.name?.trim() ||
+    profile?.name?.trim() ||
+    draftData?.companionName?.trim() ||
+    'tu eJoi';
+  const companionId = profileData?.id ?? profile?.id;
 
   const portrait = usePortraitGeneration({
     steps,
     onboardingData: draftData,
     canPatchCompanion: isReady || Boolean(steps.personality),
-    profileAvatarUrl: profile?.avatarUrl,
+    profileAvatarUrl: profileData?.avatarUrl ?? profile?.avatarUrl,
+  });
+
+  const {
+    data: historyData,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+    refetch: refetchHistory,
+  } = useInfiniteQuery({
+    queryKey: queryKeys.chat.messages(companionId ?? 'pending'),
+    queryFn: ({ pageParam }: { pageParam: string | undefined }) =>
+      getChatMessages({
+        companionId,
+        limit: 50,
+        beforeMessageId: pageParam,
+      }),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage) => {
+      if (!lastPage.hasMore) return undefined;
+      const oldest = lastPage.messages.at(-1);
+      return oldest?.id;
+    },
+    enabled: isReady && Boolean(companionId),
   });
 
   useEffect(() => {
@@ -100,7 +157,7 @@ export default function ChatPage() {
   const handleSend = useCallback(
     async (text: string) => {
       const userId = resolveUserIdFromSession();
-      if (!userId) return;
+      if (!userId || quotaOut) return;
 
       if (!isReady) {
         const next = {
@@ -127,11 +184,12 @@ export default function ChatPage() {
           await sendChatMessage({ message: text, companionId });
         }
         setPendingFailed(false);
+        void refetchHistory();
       } catch {
         setPendingFailed(true);
       }
     },
-    [companionId, isReady, pending],
+    [companionId, isReady, pending, quotaOut, refetchHistory],
   );
 
   const retryCreation = useCallback(async () => {
@@ -156,17 +214,28 @@ export default function ChatPage() {
     return buildPreviewTags(draftData, timeline);
   }, [draftData]);
 
+  const historyMessages = useMemo(() => {
+    if (!historyData?.pages.length) return [];
+    return mergeAndSortChatMessages(historyData.pages);
+  }, [historyData?.pages]);
+
   const bubbles = useMemo((): ChatBubble[] => {
-    const list: ChatBubble[] = [];
+    const byId = new Map<string, ChatBubble>();
+
+    for (const msg of historyMessages) {
+      byId.set(msg.id, firstMessageToBubble(msg));
+    }
+
     if (firstMessage?.content) {
-      list.push({
+      byId.set(firstMessage.id, {
         id: firstMessage.id,
         role: 'assistant',
         text: firstMessage.content,
       });
     }
+
     if (pending) {
-      list.push({
+      byId.set(pending.clientMessageId, {
         id: pending.clientMessageId,
         role: 'user',
         text: pending.text,
@@ -175,10 +244,12 @@ export default function ChatPage() {
         onRetry: pendingFailed ? retryPending : undefined,
       });
     }
-    return list;
+
+    return [...byId.values()];
   }, [
     dispatching,
     firstMessage,
+    historyMessages,
     isReady,
     pending,
     pendingFailed,
@@ -188,34 +259,34 @@ export default function ChatPage() {
   const quickReplies = firstMessage?.meta?.quickReplies ?? [];
   const basedOn = firstMessage?.meta?.basedOnInterests ?? [];
   const samplePortrait = draftData ? stylePortraitSrc(draftData.visualStyle, draftData.gender) : null;
-  const showPortrait = portrait.avatarUrl || samplePortrait;
-  const blurPortrait = !steps.portrait && !portrait.avatarUrl;
+  const portraitUrl = portrait.avatarUrl ?? profileData?.avatarUrl ?? profile?.avatarUrl ?? samplePortrait;
+  const showPortrait = Boolean(portraitUrl);
+  const blurPortrait = !steps.portrait && !portrait.avatarUrl && !profileData?.avatarUrl;
 
-  const profilePanel = (
-    <div className="chat-profile-card" data-testid="chat-profile-card">
-      {showPortrait ? (
-        <div className="chat-profile-card__portrait-wrap">
-          <img
-            src={portrait.avatarUrl ?? samplePortrait ?? undefined}
-            alt=""
-            className={`chat-profile-card__portrait${blurPortrait ? ' chat-profile-card__portrait--blur' : ''}`}
-          />
-          {blurPortrait ? (
-            <span className="chat-profile-card__portrait-label">{t('chat.portrait_on_way')}</span>
-          ) : null}
-        </div>
-      ) : null}
-      {isReady ? <p className="chat-page__online">{t('chat.online')}</p> : null}
-      {portrait.state === 'error' ? (
-        <button type="button" className="chat-profile-card__retry" onClick={portrait.retry}>
-          {t('chat.portrait_retry')}
-        </button>
-      ) : null}
-    </div>
-  );
+  const composerDisabled = dispatching || (isReady && quotaOut);
+  const composerHint = quotaOut
+    ? t('chat.quota_out')
+    : isCreating
+      ? t('chat.can_write')
+      : undefined;
 
   return (
-    <ChatShell menu={<span>{t('menu.chat')}</span>} profile={profilePanel}>
+    <ChatShell menu={<SideMenu />} profile={
+      <ProfilePanel
+        profile={profileData ?? null}
+        draft={draftData}
+        subscription={subscription ?? null}
+        quotaLoading={quotaLoading}
+        profileLoading={profileQueryEnabled && profileLoading}
+        profileError={profileQueryEnabled && profileLoadError}
+        onRetryProfile={() => void refetchProfile()}
+        portraitUrl={showPortrait ? portraitUrl : null}
+        portraitBlur={blurPortrait}
+        portraitPendingLabel={blurPortrait ? t('chat.portrait_on_way') : null}
+        onRetryPortrait={portrait.state === 'error' ? portrait.retry : undefined}
+        showOnline={isReady}
+      />
+    }>
       <div className="chat-shell__read-inner">
         {isError ? (
           <div className="chat-page__banner" role="alert" data-testid="chat-error-banner">
@@ -261,15 +332,27 @@ export default function ChatPage() {
           <p className="chat-page__based-on">{t('chat.based_on')}</p>
         ) : null}
 
-        <MessageList messages={bubbles} loading={!isReady && !isCreating && !isError && state === 'none'} />
+        {hasNextPage ? (
+          <button
+            type="button"
+            className="chat-page__load-history"
+            disabled={isFetchingNextPage}
+            onClick={() => void fetchNextPage()}
+          >
+            {t('chat.load_older')}
+          </button>
+        ) : null}
 
-        {isReady ? <QuickReplies replies={quickReplies} onSelect={(text) => void handleSend(text)} /> : null}
-
-        <Composer
-          hint={isCreating ? t('chat.can_write') : undefined}
-          disabled={dispatching}
-          onSend={handleSend}
+        <MessageList
+          messages={bubbles}
+          loading={!isReady && !isCreating && !isError && state === 'none'}
         />
+
+        {isReady && !quotaOut ? (
+          <QuickReplies replies={quickReplies} onSelect={(text) => void handleSend(text)} />
+        ) : null}
+
+        <Composer hint={composerHint} disabled={composerDisabled} onSend={handleSend} />
       </div>
     </ChatShell>
   );

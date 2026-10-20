@@ -42,7 +42,17 @@
     "portrait_retry": "Reintentar retrato",
     "error_banner": "No pudimos terminar de crear a {{name}}. Tus elecciones y tu mensaje están guardados.",
     "retry": "Reintentar",
-    "back_to_step3": "Volver a ajustar"
+    "back_to_step3": "Volver a ajustar",
+    "quota_left": "Te quedan {{count}} mensajes",
+    "quota_out": "Usaste todos tus mensajes disponibles. Puedes seguir conversando desde la app de eJoi.",
+    "profile_personality": "Personalidad",
+    "profile_presence": "Presencia",
+    "profile_interests": "Intereses",
+    "profile_boundaries": "Temas evitados",
+    "profile_appearance": "Apariencia",
+    "profile_age": "{{count}} años",
+    "profile_load_error": "No pudimos cargar el perfil.",
+    "load_older": "Ver mensajes anteriores"
   },
   "menu": {
     "chat": "Conversación",
