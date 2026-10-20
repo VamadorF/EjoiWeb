@@ -14,10 +14,14 @@ const emptyDraft = {
 async function mockCreationApi(page: Page) {
   let draft: typeof emptyDraft | null = null;
 
+  await page.addInitScript(() => {
+    sessionStorage.setItem('ejoi-mock-demo-logged-in', '1');
+  });
+
   await page.route('**/api/**', async (route) => {
     const path = new URL(route.request().url()).pathname.replace(/^\/api/, '');
 
-    if (path.includes('/auth/refresh')) {
+    if (path.includes('/auth/refresh') || path.includes('/auth/session')) {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -51,10 +55,12 @@ async function mockCreationApi(page: Page) {
 }
 
 async function pickMinimalWho(page: Page) {
-  await page.getByRole('radio', { name: 'Femenino' }).click();
-  await page.getByRole('radio', { name: 'Realista' }).click();
+  await page.waitForSelector('.opt');
+  await page.getByRole('radio', { name: 'Femenino' }).click({ force: true });
+  await page.getByRole('radio', { name: 'Realista' }).click({ force: true });
+  const interests = page.locator('[aria-labelledby="create-who-interests"] button');
   for (const interest of ['Música', 'Cine', 'Viajes']) {
-    await page.getByRole('button', { name: interest }).click();
+    await interests.filter({ hasText: interest }).click({ force: true });
   }
 }
 
@@ -65,7 +71,7 @@ test.describe('Responsive creación', () => {
     await page.goto('/crear/quien');
     const preview = page.getByTestId('shell-preview');
     await expect(preview).toHaveCSS('width', '360px');
-    const thumb = page.locator('.create-option__thumb').first();
+    const thumb = page.locator('.opt__thumb').first();
     await expect(thumb).toHaveCSS('max-height', '140px');
   });
 
@@ -94,6 +100,7 @@ test.describe('Responsive creación', () => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await mockCreationApi(page);
     await page.goto('/crear/quien');
+    await expect(page.getByRole('heading', { level: 1, name: '¿Quién es tu eJoi?' })).toBeVisible();
     await pickMinimalWho(page);
     await page.waitForTimeout(400);
     await page.setViewportSize({ width: 800, height: 1000 });

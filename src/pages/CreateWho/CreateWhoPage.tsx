@@ -13,16 +13,16 @@ import { stylePortraitSrcForCard, visualStyleSelectorOptions } from '~/features/
 import { useCreationDraft } from '~/features/creation/useCreationDraft';
 import { canContinueWho, listWhoMissing } from '~/features/creation/whoValidation';
 import { ENABLE_AGE, ENABLE_ETHNICITY } from '~/platform/env';
-import { DesktopShell } from '~/layout/DesktopShell';
+import { CreationShellHeader, DesktopShell } from '~/layout/DesktopShell';
 import { OptionGroup } from '~/layout/OptionGroup';
 import { useDesktopShortcuts } from '~/layout/useDesktopShortcuts';
 
 import './CreateWhoPage.css';
 
-const GENDERS: { id: Gender; label: string }[] = [
-  { id: 'femenino', label: 'Femenino' },
-  { id: 'masculino', label: 'Masculino' },
-  { id: 'neutro', label: 'Neutro' },
+const GENDERS: { id: Gender; label: string; icon: string }[] = [
+  { id: 'femenino', label: 'Femenino', icon: 'female-outline' },
+  { id: 'masculino', label: 'Masculino', icon: 'male-outline' },
+  { id: 'neutro', label: 'Neutro', icon: 'male-female-outline' },
 ];
 
 const ETHNICITY_LABELS: Record<(typeof ETHNICITY_IDS)[number], string> = {
@@ -34,6 +34,8 @@ const ETHNICITY_LABELS: Record<(typeof ETHNICITY_IDS)[number], string> = {
   india: 'India',
   mixta: 'Mixta',
 };
+
+const DEFAULT_AGE = 28;
 
 export default function CreateWhoPage() {
   const { t } = useTranslation('web');
@@ -55,6 +57,8 @@ export default function CreateWhoPage() {
   const missing = useMemo(() => listWhoMissing(data), [data]);
   const canContinue = canContinueWho(data);
   const missingText = missing.length > 0 ? t('create.missing', { items: missing.join(', ') }) : '';
+  const ageValue = data.age ?? DEFAULT_AGE;
+  const showRowB = ENABLE_ETHNICITY || ENABLE_AGE;
 
   const onContinue = async () => {
     if (!canContinue) return;
@@ -70,22 +74,21 @@ export default function CreateWhoPage() {
 
   return (
     <DesktopShell
-      header={
-        <div className="create-who__header">
-          <span>{t('create.step2')}</span>
-        </div>
-      }
+      header={<CreationShellHeader step={2} stepLabel={t('create.step2')} />}
       preview={<CreationPreview data={data} tagTimeline={tagTimeline} />}
       footer={
-        <div className="create-who__footer">
+        <div className="creation-shell-footer">
           {!canContinue ? (
-            <p id={missingId} className="create-who__missing" role="status">
+            <p id={missingId} className="creation-shell-footer__hint" role="status">
+              <AppIcon name="information-circle-outline" />
               {missingText}
             </p>
-          ) : null}
+          ) : (
+            <span />
+          )}
           <button
             type="button"
-            className="create-who__continue"
+            className="btn btn--primary btn--l creation-shell-footer__primary"
             disabled={!canContinue || !loaded}
             aria-describedby={!canContinue ? missingId : undefined}
             onClick={() => void onContinue()}
@@ -96,118 +99,152 @@ export default function CreateWhoPage() {
       }
     >
       <div className="create-who">
-        <section className="create-who__section" aria-labelledby="create-who-gender">
-          <h3 id="create-who-gender" className="create-who__label">
-            Género
-          </h3>
-          <OptionGroup mode="radio" aria-labelledby="create-who-gender" cols={3}>
-            {GENDERS.map(({ id, label }) => (
-              <button
-                key={id}
-                type="button"
-                role="radio"
-                aria-checked={data.gender === id}
-                className={data.gender === id ? 'create-option create-option--selected' : 'create-option'}
-                onClick={() => setGender(id)}
-              >
-                {label}
-              </button>
-            ))}
-          </OptionGroup>
-        </section>
+        <header className="create-step__intro">
+          <h1>{t('create.title_who')}</h1>
+          <p>{t('create.subtitle_who')}</p>
+        </header>
 
-        <section className="create-who__section" aria-labelledby="create-who-style">
-          <h3 id="create-who-style" className="create-who__label">
-            Estilo visual
-          </h3>
-          <OptionGroup mode="radio" aria-labelledby="create-who-style" cols={3}>
-            {styleOptions.map(({ id, labelKey }) => (
-              <button
-                key={id}
-                type="button"
-                role="radio"
-                aria-checked={data.visualStyle === id}
-                className={
-                  data.visualStyle === id ? 'create-option create-option--selected' : 'create-option'
-                }
-                onClick={() => setVisualStyle(id)}
-              >
-                <img
-                  className="create-option__thumb"
-                  src={stylePortraitSrcForCard(id, 'femenino')}
-                  alt=""
-                />
-                <span>{t(labelKey)}</span>
-              </button>
-            ))}
-          </OptionGroup>
-        </section>
-
-        {ENABLE_ETHNICITY ? (
-          <section className="create-who__section" aria-labelledby="create-who-ethnicity">
-            <h3 id="create-who-ethnicity" className="create-who__label">
-              Etnia <span className="create-who__optional">(opcional)</span>
-            </h3>
-            <OptionGroup mode="radio" aria-labelledby="create-who-ethnicity" cols={4}>
-              <button
-                type="button"
-                role="radio"
-                aria-checked={!data.ethnicity}
-                className={
-                  !data.ethnicity ? 'create-option create-option--selected' : 'create-option'
-                }
-                onClick={() => setEthnicity(undefined)}
-              >
-                Sin preferencia
-              </button>
-              {ETHNICITY_IDS.map((id) => (
+        <div className="create-who__row create-who__row--split">
+          <section className="create-who__section" aria-labelledby="create-who-gender">
+            <h2 id="create-who-gender" className="create-who__section-title">
+              Género
+            </h2>
+            <OptionGroup mode="radio" aria-labelledby="create-who-gender" cols={3}>
+              {GENDERS.map(({ id, label, icon }) => (
                 <button
                   key={id}
                   type="button"
                   role="radio"
-                  aria-checked={data.ethnicity === ETHNICITY_LABELS[id]}
-                  className={
-                    data.ethnicity === ETHNICITY_LABELS[id]
-                      ? 'create-option create-option--selected'
-                      : 'create-option'
-                  }
-                  onClick={() => setEthnicity(ETHNICITY_LABELS[id])}
+                  aria-checked={data.gender === id}
+                  className="opt opt--gender"
+                  onClick={() => setGender(id)}
                 >
-                  {ETHNICITY_LABELS[id]}
+                  <AppIcon name={icon} />
+                  <span>{label}</span>
                 </button>
               ))}
             </OptionGroup>
           </section>
-        ) : null}
 
-        {ENABLE_AGE ? (
-          <section className="create-who__section" aria-labelledby="create-who-age">
-            <h3 id="create-who-age" className="create-who__label">
-              Edad aparente <span className="create-who__optional">(opcional)</span>
-            </h3>
-            <input
-              id="create-who-age-input"
-              className="create-who__age"
-              type="number"
-              min={COMPANION_MIN_AGE}
-              max={COMPANION_MAX_AGE}
-              value={data.age ?? ''}
-              onChange={(e) => setAge(Number(e.target.value))}
-              aria-labelledby="create-who-age"
-            />
+          <section className="create-who__section" aria-labelledby="create-who-style">
+            <h2 id="create-who-style" className="create-who__section-title">
+              Estilo visual
+            </h2>
+            <OptionGroup
+              mode="radio"
+              aria-labelledby="create-who-style"
+              layout="inline"
+              className="create-who__style-grid"
+            >
+              {styleOptions.map(({ id, labelKey }) => (
+                <button
+                  key={id}
+                  type="button"
+                  role="radio"
+                  aria-checked={data.visualStyle === id}
+                  className="opt opt--style"
+                  onClick={() => setVisualStyle(id)}
+                >
+                  <img
+                    className="opt__thumb"
+                    src={stylePortraitSrcForCard(id, 'femenino')}
+                    alt=""
+                  />
+                  <span>{t(labelKey)}</span>
+                </button>
+              ))}
+            </OptionGroup>
           </section>
+        </div>
+
+        {showRowB ? (
+          <div
+            className={
+              ENABLE_ETHNICITY && ENABLE_AGE
+                ? 'create-who__row create-who__row--split'
+                : 'create-who__row'
+            }
+          >
+            {ENABLE_ETHNICITY ? (
+              <section className="create-who__section" aria-labelledby="create-who-ethnicity">
+                <h2 id="create-who-ethnicity" className="create-who__section-title">
+                  Etnia <span className="create-who__optional">(opcional)</span>
+                </h2>
+                <OptionGroup
+                  mode="radio"
+                  aria-labelledby="create-who-ethnicity"
+                  layout="inline"
+                  className="create-who__chip-wrap"
+                >
+                  <button
+                    type="button"
+                    role="radio"
+                    aria-checked={!data.ethnicity}
+                    className="chip"
+                    onClick={() => setEthnicity(undefined)}
+                  >
+                    Sin preferencia
+                  </button>
+                  {ETHNICITY_IDS.map((id) => (
+                    <button
+                      key={id}
+                      type="button"
+                      role="radio"
+                      aria-checked={data.ethnicity === ETHNICITY_LABELS[id]}
+                      className="chip"
+                      onClick={() => setEthnicity(ETHNICITY_LABELS[id])}
+                    >
+                      {ETHNICITY_LABELS[id]}
+                    </button>
+                  ))}
+                </OptionGroup>
+              </section>
+            ) : null}
+
+            {ENABLE_AGE ? (
+              <section className="create-who__section" aria-labelledby="create-who-age">
+                <h2 id="create-who-age" className="create-who__section-title">
+                  Edad aparente <span className="create-who__optional">(opcional)</span>
+                </h2>
+                <div className="create-who__age-row">
+                  <div className="stepper" aria-labelledby="create-who-age">
+                    <button
+                      type="button"
+                      className="btn btn--icon btn--secondary"
+                      aria-label="Reducir edad"
+                      disabled={ageValue <= COMPANION_MIN_AGE}
+                      onClick={() => setAge(Math.max(COMPANION_MIN_AGE, ageValue - 1))}
+                    >
+                      <AppIcon name="remove-outline" />
+                    </button>
+                    <span className="stepper__value" aria-live="polite">
+                      {ageValue}
+                    </span>
+                    <button
+                      type="button"
+                      className="btn btn--icon btn--secondary"
+                      aria-label="Aumentar edad"
+                      disabled={ageValue >= COMPANION_MAX_AGE}
+                      onClick={() => setAge(Math.min(COMPANION_MAX_AGE, ageValue + 1))}
+                    >
+                      <AppIcon name="add-outline" />
+                    </button>
+                  </div>
+                  <span className="create-who__age-unit">{t('create.age_unit')}</span>
+                </div>
+              </section>
+            ) : null}
+          </div>
         ) : null}
 
         <section className="create-who__section" aria-labelledby="create-who-interests">
           <div className="create-who__interests-head">
-            <h3 id="create-who-interests" className="create-who__label">
+            <h2 id="create-who-interests" className="create-who__section-title">
               Intereses
-            </h3>
+            </h2>
             <span
               className={
-                data.interests.length >= 3
-                  ? 'create-who__counter create-who__counter--ok'
-                  : 'create-who__counter'
+                data.interests.length >= 3 ? 'pill create-who__counter--ok' : 'pill create-who__counter'
               }
             >
               {t('create.interests_counter', { count: data.interests.length })}
@@ -221,7 +258,7 @@ export default function CreateWhoPage() {
                   key={interest}
                   type="button"
                   aria-pressed={selected}
-                  className={selected ? 'create-option create-option--selected' : 'create-option'}
+                  className="chip"
                   onClick={() => toggleInterest(interest)}
                 >
                   <AppIcon name={INTEREST_OPTION_ICONS[interest]} />

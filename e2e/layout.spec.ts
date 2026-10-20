@@ -3,10 +3,47 @@ import { expect, test } from '@playwright/test';
 test.describe('Desktop shell 1440×900', () => {
   test.use({ viewport: { width: 1440, height: 900 } });
 
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => {
+      sessionStorage.setItem('ejoi-mock-demo-logged-in', '1');
+    });
+  });
+
   test('/crear/quien cabe sin scroll vertical', async ({ page }) => {
     await page.goto('/crear/quien');
     const scrollHeight = await page.evaluate(() => document.documentElement.scrollHeight);
     expect(scrollHeight).toBeLessThanOrEqual(900);
+    const main = page.locator('#main-content');
+    const mainScroll = await main.evaluate((el) => ({
+      scrollHeight: el.scrollHeight,
+      clientHeight: el.clientHeight,
+    }));
+    expect(mainScroll.scrollHeight).toBeLessThanOrEqual(mainScroll.clientHeight);
+  });
+
+  test('/crear/como cabe sin scroll en el main', async ({ page }) => {
+    await page.goto('/crear/como');
+    const main = page.locator('#main-content');
+    const mainScroll = await main.evaluate((el) => ({
+      scrollHeight: el.scrollHeight,
+      clientHeight: el.clientHeight,
+    }));
+    expect(mainScroll.scrollHeight).toBeLessThanOrEqual(mainScroll.clientHeight);
+  });
+
+  test('opción seleccionada en Vista 2 usa borde de selección', async ({ page }) => {
+    await page.goto('/crear/quien');
+    const femenino = page.getByRole('radio', { name: 'Femenino' });
+    await femenino.click();
+    const styles = await femenino.evaluate((el) => {
+      const cs = getComputedStyle(el);
+      return {
+        borderWidth: cs.borderTopWidth,
+        background: cs.backgroundColor,
+      };
+    });
+    expect(styles.borderWidth).toBe('2px');
+    expect(styles.background).not.toBe('rgba(0, 0, 0, 0)');
   });
 
   test('medidas del shell de creación', async ({ page }) => {

@@ -46,9 +46,9 @@ describe('CreationPreview', () => {
         tagTimeline={['gender', 'style', 'interest:Arte y cultura', 'interest:Música']}
       />,
     );
-    const tags = container.querySelectorAll('.creation-preview__tag');
+    const tags = container.querySelectorAll('.pill');
     const last = tags[tags.length - 1];
     expect(last?.textContent).toBe('Música');
-    expect(last?.classList.contains('creation-preview__tag--latest')).toBe(true);
+    expect(last?.classList.contains('pill--last')).toBe(true);
   });
 });

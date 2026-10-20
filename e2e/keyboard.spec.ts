@@ -168,7 +168,7 @@ test.describe('Teclado desktop (SCRUM-113)', () => {
   test('flujo principal solo con teclado hasta editar nombre', async ({ page }) => {
     await mockAuthedApi(page);
     await page.goto('/crear/quien');
-    await page.waitForSelector('.create-option');
+    await page.waitForSelector('.opt');
     await page.locator('[role="radio"]').first().focus();
     await page.keyboard.press(' ');
     await page.locator('[aria-labelledby="create-who-style"] [role="radio"]').first().focus();
@@ -180,7 +180,7 @@ test.describe('Teclado desktop (SCRUM-113)', () => {
     await page.keyboard.press(' ');
     await interests.nth(2).focus();
     await page.keyboard.press(' ');
-    await page.locator('.create-who__continue').focus();
+    await page.getByRole('button', { name: 'Continuar' }).focus();
     await page.keyboard.press('Enter');
     await page.waitForURL('**/crear/como');
 

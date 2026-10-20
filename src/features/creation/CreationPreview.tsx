@@ -53,18 +53,29 @@ export function CreationPreview({ data, tagTimeline, companionName, greeting }: 
 
   return (
     <div className="creation-preview" aria-hidden="true">
-      <h2 className="creation-preview__title">{t('create.preview_title')}</h2>
-      {displayName ? <p className="creation-preview__name">{displayName}</p> : null}
+      <p className="label creation-preview__title">{t('create.preview_title')}</p>
+      <h2
+        className={
+          displayName
+            ? 'creation-preview__name'
+            : 'creation-preview__name creation-preview__name--placeholder'
+        }
+      >
+        {displayName || t('create.no_name')}
+      </h2>
       <div className="creation-preview__portrait-wrap">
         {portraitSrc ? (
           <img
-            className="creation-preview__portrait"
+            className="avatar avatar--168 creation-preview__portrait"
             src={portraitSrc}
             alt=""
             data-testid="creation-portrait"
           />
         ) : (
-          <div className="creation-preview__portrait creation-preview__portrait--abstract" data-testid="creation-portrait">
+          <div
+            className="avatar avatar--168 creation-preview__portrait creation-preview__portrait--abstract"
+            data-testid="creation-portrait"
+          >
             e
           </div>
         )}
@@ -74,18 +85,14 @@ export function CreationPreview({ data, tagTimeline, companionName, greeting }: 
           {tags.map((tag) => (
             <li
               key={tag.id}
-              className={
-                tag.id === lastTagId
-                  ? 'creation-preview__tag creation-preview__tag--latest'
-                  : 'creation-preview__tag'
-              }
+              className={tag.id === lastTagId ? 'pill pill--last' : 'pill'}
             >
               {tag.label}
             </li>
           ))}
         </ul>
       ) : null}
-      {greeting ? <p className="creation-preview__greeting">{greeting}</p> : null}
+      {greeting ? <p className="bubble--ai creation-preview__greeting">{greeting}</p> : null}
     </div>
   );
 }

@@ -63,3 +63,44 @@
   font-size: 0.875rem;
   color: var(--c-ink2);
 }
+
+/* ponytail: CreateMobilePage.tsx aún usa create-option; desktop usa .opt de ui.css */
+.create-mobile .create-option {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-height: calc(var(--size-button-l) * 1px);
+  padding: 0.5rem;
+  border-radius: calc(var(--radius-control) * 1px);
+  border: calc(var(--border-card) * 1px) solid var(--c-line);
+  background: var(--c-surface);
+  color: var(--c-ink);
+  text-align: center;
+}
+
+.create-mobile .create-option--selected {
+  border: 2px solid var(--c-sel-border);
+  background: var(--c-sel-fill);
+  color: var(--c-sel-ink);
+  box-shadow: var(--elev-sel);
+}
+
+.create-mobile .create-option__thumb {
+  width: 100%;
+  max-height: var(--create-style-thumb-max-h, 72px);
+  object-fit: cover;
+  border-radius: calc(var(--radius-control) * 0.5px);
+}
+
+.create-mobile .create-who__age {
+  width: 5rem;
+  min-height: calc(var(--size-button-l) * 1px);
+  padding: 0 0.75rem;
+  border-radius: calc(var(--radius-control) * 1px);
+  border: calc(var(--border-card) * 1px) solid var(--c-line);
+  background: var(--c-surface);
+  color: var(--c-ink);
+}

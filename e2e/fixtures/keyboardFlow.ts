@@ -1,7 +1,7 @@
 import { expect, type Page } from '@playwright/test';
 
 export async function pickWhoWithKeyboard(page: Page) {
-  await page.waitForSelector('.create-option');
+  await page.waitForSelector('.opt');
   await page.locator('[role="radio"]').first().focus();
   await page.keyboard.press(' ');
   await page.locator('[aria-labelledby="create-who-style"] [role="radio"]').first().focus();
@@ -11,7 +11,7 @@ export async function pickWhoWithKeyboard(page: Page) {
     await interests.nth(i).focus();
     await page.keyboard.press(' ');
   }
-  await page.locator('.create-who__continue').focus();
+  await page.getByRole('button', { name: 'Continuar' }).focus();
   await page.keyboard.press('Enter');
   await page.waitForURL('**/crear/como');
 }
@@ -24,15 +24,15 @@ export async function pickHowWithKeyboard(page: Page) {
   const intensity = page.getByRole('radio', { name: 'Equilibrada' });
   await intensity.focus();
   await page.keyboard.press(' ');
-  const nameInput = page.locator('.create-how__name-input');
+  const nameInput = page.locator('#create-how-form .field__control').first();
   await nameInput.focus();
   await page.keyboard.type('Luna');
-  const consents = page.locator('.create-how__consent input[type="checkbox"]');
+  const consents = page.locator('.check__input');
   await consents.nth(0).focus();
   await page.keyboard.press(' ');
   await consents.nth(1).focus();
   await page.keyboard.press(' ');
-  await page.locator('.create-who__continue').focus();
+  await page.getByRole('button', { name: /Crear a .+ y conversar/ }).focus();
   await page.keyboard.press('Enter');
 }
 

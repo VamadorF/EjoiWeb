@@ -24,7 +24,7 @@ import {
   startCreation,
 } from '~/features/creation/startCreation';
 import { DEFAULT_COMO_STEP, useCreationDraft } from '~/features/creation/useCreationDraft';
-import { DesktopShell } from '~/layout/DesktopShell';
+import { CreationShellHeader, DesktopShell } from '~/layout/DesktopShell';
 import { OptionGroup } from '~/layout/OptionGroup';
 import { useDesktopShortcuts } from '~/layout/useDesktopShortcuts';
 
@@ -67,6 +67,7 @@ export default function CreateHowPage() {
   const [adultConsent, setAdultConsent] = useState(false);
   const [legalConsent, setLegalConsent] = useState(false);
   const [otherBoundary, setOtherBoundary] = useState('');
+  const [showOtherBoundary, setShowOtherBoundary] = useState(false);
   const [greeting, setGreeting] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const defaultsApplied = useRef(false);
@@ -106,6 +107,12 @@ export default function CreateHowPage() {
     [t],
   );
 
+  const missingText = useMemo(() => {
+    if (!displayName) return t('create.missing', { items: 'nombre y consentimiento' });
+    if (!adultConsent || !legalConsent) return t('create.missing', { items: 'consentimiento' });
+    return t('create.missing', { items: 'nombre' });
+  }, [adultConsent, displayName, legalConsent, t]);
+
   const onSuggestName = () => {
     const suggested = getRandomCompanionName(data.ethnicity, data.gender, data.companionName);
     if (suggested) setCompanionName(suggested);
@@ -116,6 +123,7 @@ export default function CreateHowPage() {
     if (!trimmed || trimmed.length > 60) return;
     if (!data.boundaries.includes(trimmed)) toggleBoundary(trimmed);
     setOtherBoundary('');
+    setShowOtherBoundary(false);
   };
 
   const onSubmit = async (event: FormEvent) => {
@@ -143,9 +151,12 @@ export default function CreateHowPage() {
   return (
     <DesktopShell
       header={
-        <div className="create-who__header">
-          <span>{t('create.step3')}</span>
-        </div>
+        <CreationShellHeader
+          step={3}
+          stepLabel={t('create.step3')}
+          backLabel={t('create.back')}
+          onBack={() => void navigate('/crear/quien')}
+        />
       }
       preview={
         <CreationPreview
@@ -156,22 +167,26 @@ export default function CreateHowPage() {
         />
       }
       footer={
-        <div className="create-who__footer">
+        <div className="creation-shell-footer creation-shell-footer--how">
+          <button
+            type="button"
+            className="btn btn--secondary btn--m"
+            onClick={() => void navigate('/crear/quien')}
+          >
+            {t('create.back')}
+          </button>
           {!canSubmit ? (
-            <p id={missingId} className="create-who__missing" role="status">
-              {t('create.missing', {
-                items: !displayName
-                  ? 'nombre y consentimiento'
-                  : !adultConsent || !legalConsent
-                    ? 'consentimiento'
-                    : 'nombre',
-              })}
+            <p id={missingId} className="creation-shell-footer__hint" role="status">
+              <AppIcon name="information-circle-outline" />
+              {missingText}
             </p>
-          ) : null}
+          ) : (
+            <span />
+          )}
           <button
             type="submit"
             form="create-how-form"
-            className="create-who__continue"
+            className="btn btn--primary btn--l creation-shell-footer__primary"
             disabled={!canSubmit || !loaded || submitting}
             aria-describedby={!canSubmit ? missingId : undefined}
           >
@@ -181,10 +196,15 @@ export default function CreateHowPage() {
       }
     >
       <form id="create-how-form" className="create-how create-who" onSubmit={(e) => void onSubmit(e)}>
+        <header className="create-step__intro">
+          <h1>{t('create.title_how')}</h1>
+          <p>{t('create.subtitle_how')}</p>
+        </header>
+
         <section className="create-who__section" aria-labelledby="create-how-personality">
-          <h3 id="create-how-personality" className="create-who__label">
+          <h2 id="create-how-personality" className="create-who__section-title">
             Personalidad
-          </h3>
+          </h2>
           <OptionGroup mode="radio" aria-labelledby="create-how-personality" cols={4}>
             {PERSONALITY_OPTIONS.map((option) => (
               <button
@@ -192,142 +212,160 @@ export default function CreateHowPage() {
                 type="button"
                 role="radio"
                 aria-checked={data.persona === option}
-                className={
-                  data.persona === option ? 'create-option create-option--selected' : 'create-option'
-                }
+                className="opt opt--personality"
                 onClick={() => setPersona(option)}
               >
-                <AppIcon name={PERSONALITY_OPTION_ICONS[option]} />
+                <span className="opt__icon-wrap">
+                  <AppIcon name={PERSONALITY_OPTION_ICONS[option]} />
+                </span>
                 <span>{option}</span>
               </button>
             ))}
           </OptionGroup>
         </section>
 
-        <section className="create-who__section" aria-labelledby="create-how-presence">
-          <h3 id="create-how-presence" className="create-who__label">
-            Presencia
-          </h3>
-          <OptionGroup
-            mode="radio"
-            aria-labelledby="create-how-presence"
-            layout="inline"
-            className="create-how__presence"
-          >
-            {PRESENCE.map(({ id, labelKey }) => (
-              <button
-                key={id}
-                type="button"
-                role="radio"
-                aria-checked={data.intensity === id}
-                className={
-                  data.intensity === id
-                    ? 'create-how__presence-btn create-how__presence-btn--selected'
-                    : 'create-how__presence-btn'
-                }
-                onClick={() => setIntensity(id)}
-              >
-                {t(labelKey)}
-              </button>
-            ))}
-          </OptionGroup>
-        </section>
+        <div className="create-how__row create-how__row--split">
+          <section className="create-who__section" aria-labelledby="create-how-presence">
+            <h2 id="create-how-presence" className="create-who__section-title">
+              Presencia
+            </h2>
+            <OptionGroup
+              mode="radio"
+              aria-labelledby="create-how-presence"
+              layout="inline"
+              className="seg"
+            >
+              {PRESENCE.map(({ id, labelKey }) => (
+                <button
+                  key={id}
+                  type="button"
+                  role="radio"
+                  aria-checked={data.intensity === id}
+                  className="seg__item"
+                  onClick={() => setIntensity(id)}
+                >
+                  {t(labelKey)}
+                </button>
+              ))}
+            </OptionGroup>
+          </section>
+
+          <section className="create-who__section" aria-labelledby="create-how-name">
+            <div className="field">
+              <span id="create-how-name" className="field__label">
+                Nombre
+              </span>
+              <div className="create-how__name-row">
+                <input
+                  className="field__control"
+                  type="text"
+                  maxLength={20}
+                  value={data.companionName ?? ''}
+                  onChange={(e) => setCompanionName(e.target.value)}
+                  aria-labelledby="create-how-name"
+                  aria-describedby="create-how-name-hint"
+                />
+                <button type="button" className="btn btn--tonal btn--s" onClick={onSuggestName}>
+                  {t('create.suggest_name')}
+                </button>
+              </div>
+              <p id="create-how-name-hint" className="field__help">
+                {tApp('onboarding.name.helper')}
+              </p>
+            </div>
+          </section>
+        </div>
 
         <section className="create-who__section" aria-labelledby="create-how-boundaries">
-          <h3 id="create-how-boundaries" className="create-who__label">
+          <h2 id="create-how-boundaries" className="create-who__section-title">
             Temas a evitar <span className="create-who__optional">(opcional)</span>
-          </h3>
-          <p className="create-how__basic-limits" role="note">
-            {basicLimitsText}
-          </p>
-          <OptionGroup mode="toggle" aria-labelledby="create-how-boundaries" cols={3}>
-            {OPTIONAL_BOUNDARIES.map((option) => {
-              const selected = data.boundaries.includes(option);
-              return (
+          </h2>
+          <div className="create-how__chip-row">
+            <OptionGroup mode="toggle" aria-labelledby="create-how-boundaries" layout="inline">
+              {OPTIONAL_BOUNDARIES.map((option) => {
+                const selected = data.boundaries.includes(option);
+                return (
+                  <button
+                    key={option}
+                    type="button"
+                    aria-pressed={selected}
+                    className="chip"
+                    onClick={() => toggleBoundary(option)}
+                  >
+                    {option}
+                  </button>
+                );
+              })}
+              {!showOtherBoundary ? (
                 <button
-                  key={option}
                   type="button"
-                  aria-pressed={selected}
-                  className={selected ? 'create-option create-option--selected' : 'create-option'}
-                  onClick={() => toggleBoundary(option)}
+                  className="chip chip--add"
+                  onClick={() => setShowOtherBoundary(true)}
                 >
-                  {option}
+                  {t('create.avoid_other')}
                 </button>
-              );
-            })}
-          </OptionGroup>
-          <div className="create-how__other-boundary">
-            <label htmlFor={otherBoundaryId}>{t('create.avoid_other')}</label>
-            <div className="create-how__other-row">
-              <input
-                id={otherBoundaryId}
-                className="create-how__other-input"
-                type="text"
-                maxLength={60}
-                value={otherBoundary}
-                onChange={(e) => setOtherBoundary(e.target.value)}
-              />
-              <button
-                type="button"
-                className="create-how__other-add"
-                onClick={onAddOtherBoundary}
-                aria-label={`Añadir ${t('create.avoid_other').toLowerCase()}`}
-              >
-                +
-              </button>
-            </div>
+              ) : null}
+            </OptionGroup>
+            {showOtherBoundary ? (
+              <div className="create-how__other-inline field">
+                <label className="field__label" htmlFor={otherBoundaryId}>
+                  {t('create.avoid_other')}
+                </label>
+                <div className="create-how__other-row">
+                  <input
+                    id={otherBoundaryId}
+                    className="field__control"
+                    type="text"
+                    maxLength={60}
+                    value={otherBoundary}
+                    onChange={(e) => setOtherBoundary(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    className="btn btn--secondary btn--m"
+                    onClick={onAddOtherBoundary}
+                    aria-label={`Añadir ${t('create.avoid_other').toLowerCase()}`}
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+            ) : null}
           </div>
-        </section>
-
-        <section className="create-who__section" aria-labelledby="create-how-name">
-          <h3 id="create-how-name" className="create-who__label">
-            Nombre
-          </h3>
-          <div className="create-how__name-row">
-            <input
-              className="create-how__name-input"
-              type="text"
-              maxLength={20}
-              value={data.companionName ?? ''}
-              onChange={(e) => setCompanionName(e.target.value)}
-              aria-labelledby="create-how-name"
-              aria-describedby="create-how-name-hint"
-            />
-            <button type="button" className="create-how__suggest" onClick={onSuggestName}>
-              {t('create.suggest_name')}
-            </button>
-          </div>
-          <p id="create-how-name-hint" className="create-how__name-hint">
-            {tApp('onboarding.name.helper')}
+          <p className="banner--info" role="note">
+            <AppIcon name="shield-checkmark-outline" />
+            {basicLimitsText}
           </p>
         </section>
 
         <section className="create-who__section" aria-labelledby="create-how-consent">
-          <h3 id="create-how-consent" className="create-who__label">
+          <h2 id="create-how-consent" className="create-who__section-title">
             {tApp('companion.create.consent_title')}
-          </h3>
+          </h2>
           <p className="create-how__consent-hint">{tApp('companion.create.consent_cta_hint')}</p>
-          <label className="create-how__consent">
+          <label className="check">
             <input
+              className="check__input"
               type="checkbox"
               checked={adultConsent}
               onChange={(e) => setAdultConsent(e.target.checked)}
             />
             <span>{tApp('auth.login.age_gate')}</span>
           </label>
-          <label className="create-how__consent">
+          <label className="check">
             <input
+              className="check__input"
               type="checkbox"
               checked={legalConsent}
               onChange={(e) => setLegalConsent(e.target.checked)}
             />
             <span>
               {tApp('auth.login.legal_gate_prefix')}{' '}
-              <a href={LEGAL_TERMS_URL} target="_blank" rel="noreferrer">
+              <a className="create-how__legal-link" href={LEGAL_TERMS_URL} target="_blank" rel="noreferrer">
                 {tApp('auth.login.terms_link')}
               </a>
               {tApp('auth.login.and_privacy')}
-              <a href={LEGAL_PRIVACY_URL} target="_blank" rel="noreferrer">
+              <a className="create-how__legal-link" href={LEGAL_PRIVACY_URL} target="_blank" rel="noreferrer">
                 {tApp('auth.login.privacy_link')}
               </a>
               {tApp('auth.login.legal_gate_suffix')}
