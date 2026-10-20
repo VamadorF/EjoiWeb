@@ -77,9 +77,15 @@
 
 .create-option__thumb {
   width: 100%;
-  max-height: 72px;
+  max-height: var(--create-style-thumb-max-h, 72px);
   object-fit: cover;
   border-radius: calc(var(--radius-control) * 0.5px);
+}
+
+@media (max-width: 1279px) {
+  .create-who .option-grid[data-cols='6'] {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
 }
 
 .create-who__footer {

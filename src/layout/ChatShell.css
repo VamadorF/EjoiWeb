@@ -54,3 +54,46 @@
 .chat-shell__profile {
   padding: calc(var(--radius-control) * 1px);
 }
+
+.chat-shell__mobile-bar {
+  display: none;
+}
+
+.chat-shell__scrim {
+  display: none;
+}
+
+@media (max-width: 1023px) {
+  .chat-shell {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .chat-shell__mobile-bar {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0;
+  }
+
+  .chat-shell__mobile-toggle {
+    flex: 1;
+    min-height: calc(var(--size-control, 56) * 1px);
+    border-radius: calc(var(--radius-control) * 1px);
+    border: calc(var(--border-card) * 1px) solid var(--c-line);
+    background: var(--c-surface);
+    color: var(--c-ink);
+    font-weight: 600;
+  }
+
+  .chat-shell__scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 30;
+    border: none;
+    padding: 0;
+    background: color-mix(in srgb, var(--c-ink) 35%, transparent);
+    cursor: pointer;
+  }
+}

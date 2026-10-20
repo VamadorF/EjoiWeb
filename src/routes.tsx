@@ -4,8 +4,8 @@ import { createBrowserRouter, Navigate, Outlet, type RouteObject } from 'react-r
 import { SessionRouting } from '~/features/auth/useWebSession';
 
 const AccessPage = lazy(() => import('~/pages/Access/AccessPage'));
-const CreateWhoPage = lazy(() => import('~/pages/CreateWho/CreateWhoPage'));
-const CreateHowPage = lazy(() => import('~/pages/CreateHow/CreateHowPage'));
+const CreateWhoPage = lazy(() => import('~/pages/CreateMobile/CreateWhoEntry'));
+const CreateHowPage = lazy(() => import('~/pages/CreateMobile/CreateHowEntry'));
 const ChatPage = lazy(() => import('~/pages/ChatPage'));
 const ChatEditPage = lazy(() => import('~/pages/ChatEditPage'));
 
