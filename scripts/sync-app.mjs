@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
-import { checkImport, parseImports, resolveSpecifier } from './sync-lib.mjs';
+import { checkImport, parseImports, portraitPipeline, resolveSpecifier } from './sync-lib.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.join(__dirname, '..');
@@ -119,20 +119,26 @@ function collectClosure(ref) {
 
 async function processAsset(ref, sha, asset) {
   const raw = gitBuffer(ref, asset.from);
-  if (!asset.resize) {
+  const pipeline = portraitPipeline(asset);
+  if (!pipeline) {
     return raw;
   }
+
+  const render = (quality) => {
+    let img = sharp(raw);
+    if (pipeline.kind === 'crop') {
+      img = img.extract(pipeline.extract).resize(pipeline.outputSize, pipeline.outputSize);
+    } else {
+      img = img.resize(pipeline.resize, pipeline.resize, { fit: 'cover', position: 'attention' });
+    }
+    return img.webp({ quality }).toBuffer();
+  };
+
   let quality = 80;
-  let out = await sharp(raw)
-    .resize(asset.resize, asset.resize, { fit: 'cover', position: 'attention' })
-    .webp({ quality })
-    .toBuffer();
+  let out = await render(quality);
   while (out.length > 120 * 1024 && quality > 60) {
     quality -= 5;
-    out = await sharp(raw)
-      .resize(asset.resize, asset.resize, { fit: 'cover', position: 'attention' })
-      .webp({ quality })
-      .toBuffer();
+    out = await render(quality);
   }
   if (out.length > 120 * 1024) {
     throw new Error(`${asset.to} supera 120 KB (${out.length} bytes)`);

@@ -8,6 +8,7 @@ import { CAMPAIGN_LANDING_URL, isOAuthConfigured, MOCK_API } from '~/platform/en
 import { httpClient } from '~/platform/http';
 import * as session from '~/platform/session';
 import { AppIcon } from '~/components/AppIcon';
+import { Logo } from '~/components/Logo';
 import { DesktopShell } from '~/layout/DesktopShell';
 import {
   finishLoginAfterProvider,
@@ -58,10 +59,6 @@ export default function AccessPage() {
   const [founderCount, setFounderCount] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const isDark =
-    typeof document !== 'undefined' && document.documentElement.dataset.theme === 'dark';
-  const logoSrc = isDark ? '/logos/invertido.png' : '/logos/principal.png';
 
   useEffect(() => {
     document.documentElement.classList.add('access-route');
@@ -194,14 +191,11 @@ export default function AccessPage() {
   return (
     <div className="access-page" data-testid="page-acceso">
       <DesktopShell
-        header={
-          <img src={logoSrc} alt="eJoi" className="access-brand__logo" width={120} height={40} />
-        }
+        header={<Logo height={28} className="access-brand__logo" />}
         footer={<span>{legalDocuments.termsAndConditions.title}</span>}
       >
         <div className="access-layout">
           <section className="access-brand" aria-labelledby="access-brand-heading">
-            <img src={logoSrc} alt="" className="access-brand__logo" width={160} height={48} />
             <h1 id="access-brand-heading" className="access-brand__tagline">
               {t('auth.login.value_tagline')}
             </h1>

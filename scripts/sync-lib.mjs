@@ -112,3 +112,22 @@ export function checkImport(spec, isTypeOnly, config) {
   }
   return { status: 'prohibido', motivo: `paquete no permitido: ${spec}` };
 }
+
+/** @param {{ crop?: { left: number, top: number, size: number }, resize?: number }} asset */
+export function portraitPipeline(asset) {
+  if (asset.crop) {
+    const { left, top, size } = asset.crop;
+    return {
+      kind: 'crop',
+      extract: { left, top, width: size, height: size },
+      outputSize: 512,
+    };
+  }
+  if (asset.resize) {
+    return {
+      kind: 'attention',
+      resize: asset.resize,
+    };
+  }
+  return null;
+}

@@ -1,6 +1,6 @@
 {
   "repo": "ejoiFE",
-  "ref": "origin/develop",
+  "ref": "b20f6d62a97a0266796ebfb82e772f0961ed9136",
   "sha": "b20f6d62a97a0266796ebfb82e772f0961ed9136",
   "syncedAt": "2026-10-20T11:26:40-03:00",
   "files": [
@@ -220,19 +220,19 @@
     },
     {
       "path": "public/portraits/ilustrado-femenino.webp",
-      "sha256": "414eeef634fc79fd929f21e1ef0b5e63f58c8ec389d967280f94638dff1d7ab2"
+      "sha256": "2d2d383de36394a023b8f2717b33f10882e5b1aa3866537898c4a74f78c8aae7"
     },
     {
       "path": "public/portraits/ilustrado-masculino.webp",
-      "sha256": "d68f00abc10eabc75433b6a07cf4aaee979edcb955ca1825b0b605a5dd0743a1"
+      "sha256": "bfc3de21561473a40b6bdf1cd871a2691725ec1f22230dfa9fc78977e0f37029"
     },
     {
       "path": "public/portraits/realista-femenino.webp",
-      "sha256": "babd2e7a0367b3d345859e1c192dd56e81fecb94bff12535a49f1bb8214711fb"
+      "sha256": "266d4390335d8011ac2bea7a35dc3b1304a1e76224eed03e84189e5d18f929eb"
     },
     {
       "path": "public/portraits/realista-masculino.webp",
-      "sha256": "ca621b3fe7ce19e6630a79c0b63c9907759b66dfc9679b346e62c07610f29e80"
+      "sha256": "1b7930b29a9530c336fc5a80c15045f13688fc284760cf2e4d2a1e71e20ff55d"
     }
   ]
 }

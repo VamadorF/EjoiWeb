@@ -1,6 +1,6 @@
 {
   "appDir": "../ejoiFE/ejoi",
-  "ref": "origin/develop",
+  "ref": "b20f6d62a97a0266796ebfb82e772f0961ed9136",
   "entries": [
     "src/shared/theme/tokens.ts",
     "src/shared/i18n/index.ts",
@@ -42,9 +42,25 @@
     { "from": "public/logos/cropped/eJoi_logo-mono@2x.png", "to": "public/logos/mono@2x.png" },
     { "from": "public/logos/cropped/eJoi_logo-invertido.png", "to": "public/logos/invertido.png" },
     { "from": "public/logos/cropped/eJoi_logo-invertido@2x.png", "to": "public/logos/invertido@2x.png" },
-    { "from": "public/IMG/arquetipos/Anfitriona.jpg", "to": "public/portraits/realista-femenino.webp", "resize": 640 },
-    { "from": "public/IMG/arquetipos/Protector.png", "to": "public/portraits/realista-masculino.webp", "resize": 640 },
-    { "from": "public/IMG/anime/Anime_anfitriona.png", "to": "public/portraits/ilustrado-femenino.webp", "resize": 640 },
-    { "from": "public/IMG/anime/Anime_Protector.jpg", "to": "public/portraits/ilustrado-masculino.webp", "resize": 640 }
+    {
+      "from": "public/IMG/arquetipos/Anfitriona.jpg",
+      "to": "public/portraits/realista-femenino.webp",
+      "crop": { "left": 257, "top": 0, "size": 560 }
+    },
+    {
+      "from": "public/IMG/arquetipos/Protector.png",
+      "to": "public/portraits/realista-masculino.webp",
+      "crop": { "left": 230, "top": 0, "size": 560 }
+    },
+    {
+      "from": "public/IMG/anime/Anime_anfitriona.png",
+      "to": "public/portraits/ilustrado-femenino.webp",
+      "crop": { "left": 384, "top": 0, "size": 928 }
+    },
+    {
+      "from": "public/IMG/anime/Anime_Protector.jpg",
+      "to": "public/portraits/ilustrado-masculino.webp",
+      "crop": { "left": 42, "top": 0, "size": 700 }
+    }
   ]
 }

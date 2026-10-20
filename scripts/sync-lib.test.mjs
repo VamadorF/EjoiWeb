@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { checkImport, parseImports, resolveSpecifier } from './sync-lib.mjs';
+import { checkImport, parseImports, portraitPipeline, resolveSpecifier } from './sync-lib.mjs';
 
 const config = {
   shims: { '@/shared/services/http/client': 'src/platform/http.ts' },
@@ -27,5 +27,17 @@ describe('sync-lib', () => {
     expect(resolveSpecifier('@/shared/utils/uuid', 'src/features/auth/api/auth.api.ts')).toBe(
       'src/shared/utils/uuid.ts',
     );
+  });
+
+  it('portraitPipeline prioriza crop explícito sobre resize', () => {
+    expect(
+      portraitPipeline({ crop: { left: 257, top: 0, size: 560 }, resize: 640 }),
+    ).toEqual({
+      kind: 'crop',
+      extract: { left: 257, top: 0, width: 560, height: 560 },
+      outputSize: 512,
+    });
+    expect(portraitPipeline({ resize: 640 })).toEqual({ kind: 'attention', resize: 640 });
+    expect(portraitPipeline({})).toBeNull();
   });
 });
