@@ -1,6 +1,7 @@
 import { UxV2, type UxV2ColorMode } from '@/shared/theme/tokens';
 
 import { BREAKPOINTS } from './breakpoints';
+import { initTheme } from './theme';
 
 const STYLE_ID = 'ejoi-css-vars';
 
@@ -75,6 +76,10 @@ export function buildCssVarsText(): string {
     '  --chat-read-min: 680px;',
     '  --chat-read-max: 720px;',
     '  --chat-profile-w: 320px;',
+    '  --motion-theme: 150ms;',
+    '  --state-hover-bg: color-mix(in srgb, var(--c-ink) 6%, var(--c-surface));',
+    '  --state-hover-border: var(--c-line-strong);',
+    '  --state-hover-shadow: 0 2px 8px color-mix(in srgb, var(--c-ink) 10%, transparent);',
   ].join('\n');
 
   return [
@@ -93,11 +98,5 @@ export function applyCssVars(): void {
     document.head.appendChild(el);
   }
   el.textContent = buildCssVarsText();
-}
-
-export function getInitialTheme(): 'light' | 'dark' {
-  if (typeof window === 'undefined') return 'light';
-  const stored = document.documentElement.dataset.theme;
-  if (stored === 'light' || stored === 'dark') return stored;
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  initTheme();
 }

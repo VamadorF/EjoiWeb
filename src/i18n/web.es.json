@@ -59,6 +59,12 @@
     "edit": "Editar eJoi",
     "logout": "Cerrar sesión"
   },
+  "theme": {
+    "label": "Tema",
+    "system": "Automático",
+    "light": "Claro",
+    "dark": "Oscuro"
+  },
   "edit": {
     "title": "Editar eJoi",
     "back_chat": "Volver al chat",
