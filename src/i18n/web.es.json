@@ -58,5 +58,30 @@
     "chat": "Conversación",
     "edit": "Editar eJoi",
     "logout": "Cerrar sesión"
+  },
+  "edit": {
+    "title": "Editar eJoi",
+    "back_chat": "Volver al chat",
+    "section_appearance": "Apariencia",
+    "section_conversational": "Personalidad y conversación",
+    "appearance_hint": "Los cambios de apariencia requieren un nuevo retrato.",
+    "regen_needed": "Hay cambios de apariencia sin aplicar. Genera un retrato nuevo para comparar.",
+    "regen_cta": "Generar retrato nuevo",
+    "regen_generating": "Generando retrato…",
+    "regen_error": "No pudimos generar el retrato. Tu eJoi sigue igual.",
+    "regen_use": "Usar este retrato",
+    "regen_current": "Actual",
+    "regen_new": "Nuevo",
+    "save": "Guardar cambios",
+    "save_error": "No pudimos guardar. Inténtalo de nuevo.",
+    "style": "Estilo visual",
+    "gender": "Género",
+    "ethnicity": "Etnia",
+    "age": "Edad aparente",
+    "presence": "Presencia",
+    "interests": "Intereses",
+    "boundaries": "Temas a evitar",
+    "voice": "Voz",
+    "name": "Nombre"
   }
 }
