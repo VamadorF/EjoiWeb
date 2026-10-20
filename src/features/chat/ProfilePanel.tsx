@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import type { OnboardingData } from '@/features/onboarding/types';
 
+import { hairColorLabelKey } from '~/theme/hairSwatches';
 import { ENABLE_AGE, ENABLE_ETHNICITY } from '~/platform/env';
 
 import type { CompanionProfile } from './useProfile';
@@ -29,7 +30,7 @@ const INTENSITY_KEYS: Record<string, 'create.presence_soft' | 'create.presence_b
 export type ProfilePanelDraft = Pick<
   OnboardingData,
   'companionName' | 'persona' | 'intensity' | 'interests' | 'boundaries' | 'visualStyle' | 'gender' | 'ethnicity' | 'age'
->;
+> & { hairColor?: string };
 
 export type ProfilePanelProps = {
   profile?: CompanionProfile | null;
@@ -57,6 +58,7 @@ function mergeProfileView(
   visualStyle?: string;
   gender?: string;
   ethnicity?: string;
+  hairColor?: string;
   age?: number;
 } {
   return {
@@ -68,6 +70,7 @@ function mergeProfileView(
     visualStyle: profile?.visualStyle ?? draft?.visualStyle,
     gender: profile?.gender ?? draft?.gender,
     ethnicity: profile?.ethnicity?.trim() || draft?.ethnicity?.trim(),
+    hairColor: profile?.hairColor?.trim() || draft?.hairColor?.trim(),
     age: profile?.age ?? draft?.age,
   };
 }
@@ -104,6 +107,10 @@ export function ProfilePanel({
   }
   if (ENABLE_ETHNICITY && view.ethnicity) {
     appearanceParts.push(view.ethnicity);
+  }
+  if (view.hairColor) {
+    const hairKey = hairColorLabelKey(view.hairColor);
+    appearanceParts.push(hairKey ? t(hairKey) : view.hairColor);
   }
 
   return (

@@ -199,6 +199,8 @@ test.describe('Estilo ilustrado end-to-end (SCRUM-115)', () => {
 
     await page.goto('/chat/editar');
     await page.getByTestId('edit-companion-page').waitFor();
+    await page.getByTestId('edit-row-style').click();
+    await page.getByTestId('edit-section-dialog').waitFor();
     const illustrated = page.getByRole('radio', { name: /Ilustrado/i });
     await expect(illustrated).toBeVisible();
     await expect(illustrated.locator('img')).toHaveAttribute('src', /ilustrado-femenino\.webp/);

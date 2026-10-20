@@ -113,6 +113,8 @@ test.describe('QA cross-browser SCRUM-116', () => {
     await sendChatWithKeyboard(page, 'Hola teclado QA');
     await page.goto('/chat/editar');
     await page.waitForSelector('[data-testid="edit-companion-page"]');
+    await page.getByTestId('edit-row-personality').click();
+    await page.getByTestId('edit-section-dialog').waitFor();
     const nameInput = page.locator('[aria-labelledby="edit-name"]').last();
     await nameInput.focus();
     await page.keyboard.press('End');
