@@ -25,7 +25,7 @@
 
 .create-who__optional {
   font-weight: 400;
-  color: var(--c-ink-muted, var(--c-ink));
+  color: var(--c-ink2);
 }
 
 .create-who__interests-head {
@@ -37,7 +37,7 @@
 
 .create-who__counter {
   font-size: 0.875rem;
-  color: var(--c-ink-muted, var(--c-ink));
+  color: var(--c-ink2);
 }
 
 .create-who__counter--ok {
@@ -47,7 +47,7 @@
 
 .create-who__age {
   width: 5rem;
-  min-height: calc(var(--size-control, 56) * 1px);
+  min-height: calc(var(--size-button-l) * 1px);
   padding: 0 0.75rem;
   border-radius: calc(var(--radius-control) * 1px);
   border: calc(var(--border-card) * 1px) solid var(--c-line);
@@ -61,7 +61,7 @@
   align-items: center;
   justify-content: center;
   gap: 0.35rem;
-  min-height: calc(var(--size-control, 56) * 1px);
+  min-height: calc(var(--size-button-l) * 1px);
   padding: 0.5rem;
   border-radius: calc(var(--radius-control) * 1px);
   border: calc(var(--border-card) * 1px) solid var(--c-line);
@@ -71,8 +71,8 @@
 }
 
 .create-option--selected {
-  border-color: var(--c-accent, var(--c-ink));
-  box-shadow: 0 0 0 1px var(--c-accent, var(--c-ink));
+  border-color: var(--c-sel-border);
+  box-shadow: 0 0 0 1px var(--c-sel-border);
 }
 
 .create-option__thumb {
@@ -100,16 +100,16 @@
   margin: 0;
   flex: 1;
   font-size: 0.875rem;
-  color: var(--c-ink-muted, var(--c-ink));
+  color: var(--c-ink2);
 }
 
 .create-who__continue {
-  min-height: calc(var(--size-control, 56) * 1px);
+  min-height: calc(var(--size-button-l) * 1px);
   padding: 0 1.5rem;
   border: none;
   border-radius: calc(var(--radius-control) * 1px);
-  background: var(--c-accent, var(--c-ink));
-  color: var(--c-on-accent, var(--c-bg));
+  background: var(--c-brand);
+  color: var(--c-on-brand);
   font-weight: 700;
 }
 

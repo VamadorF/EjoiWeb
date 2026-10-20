@@ -5,6 +5,8 @@ import { logoutWeb } from '~/features/auth/api/auth.api';
 import { OptionGroup } from '~/layout/OptionGroup';
 import { type ThemePreference, useThemePreference } from '~/theme/theme';
 
+import './SideMenu.css';
+
 const THEME_OPTIONS: readonly { id: ThemePreference; labelKey: string }[] = [
   { id: 'system', labelKey: 'theme.system' },
   { id: 'light', labelKey: 'theme.light' },

@@ -21,15 +21,15 @@
   display: grid;
   grid-template-columns:
     var(--chat-menu-w)
-    minmax(var(--chat-read-min), var(--chat-read-max))
+    minmax(var(--chat-read-min), 1fr)
     var(--chat-profile-w);
-  justify-content: center;
-  gap: calc(var(--radius-control) * 1px);
+  gap: 0;
+  width: 100%;
   height: 100%;
   min-height: 0;
-  max-width: var(--bp-reference);
-  margin: 0 auto;
-  padding: calc(var(--radius-card) * 1px);
+  max-width: none;
+  margin: 0;
+  padding: 0;
   background: var(--c-bg);
 }
 
@@ -38,21 +38,25 @@
 .chat-shell__profile {
   min-height: 0;
   overflow: hidden;
-  background: var(--c-surface);
-  border-radius: calc(var(--radius-card) * 1px);
-  border: calc(var(--border-card) * 1px) solid var(--c-line);
+  border-radius: 0;
 }
 
 .chat-shell__menu {
-  padding: calc(var(--radius-control) * 1px);
+  background: var(--c-surface);
+  border-right: calc(var(--border-card) * 1px) solid var(--c-line);
+  padding: var(--space-6);
 }
 
 .chat-shell__read {
-  padding: calc(var(--radius-card) * 1px);
+  background: var(--c-bg);
+  border: none;
+  padding: 0;
 }
 
 .chat-shell__profile {
-  padding: calc(var(--radius-control) * 1px);
+  background: var(--c-surface);
+  border-left: calc(var(--border-card) * 1px) solid var(--c-line);
+  padding: var(--space-6);
 }
 
 .chat-shell__mobile-bar {
@@ -78,7 +82,7 @@
 
   .chat-shell__mobile-toggle {
     flex: 1;
-    min-height: calc(var(--size-control, 56) * 1px);
+    min-height: calc(var(--size-button-l) * 1px);
     border-radius: calc(var(--radius-control) * 1px);
     border: calc(var(--border-card) * 1px) solid var(--c-line);
     background: var(--c-surface);

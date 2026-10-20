@@ -8,6 +8,8 @@ import { ENABLE_AGE, ENABLE_ETHNICITY } from '~/platform/env';
 import type { CompanionProfile } from './useProfile';
 import type { SubscriptionMe } from './useQuota';
 
+import './ProfilePanel.css';
+
 const GENDER_LABELS: Record<string, string> = {
   femenino: 'Femenino',
   masculino: 'Masculino',

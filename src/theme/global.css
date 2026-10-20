@@ -79,15 +79,13 @@ button {
 
 .create-who__continue:not(:disabled) {
   background: var(--c-brand);
-  color: var(--c-surface);
+  color: var(--c-on-brand);
 }
 
 @media (hover: hover) {
   button:not(:disabled):hover,
   .create-option:hover,
   .create-how__presence-btn:hover,
-  .chat-side-menu__link:hover,
-  .chat-side-menu__logout:hover,
   .access-auth__link:not(:disabled):hover,
   .access-auth__apple:not(:disabled):hover {
     border-color: var(--state-hover-border);
@@ -97,56 +95,9 @@ button {
 
   .create-who__continue:not(:disabled):hover {
     background: var(--c-brand-pressed);
-    color: var(--c-surface);
+    color: var(--c-on-brand);
     box-shadow: var(--state-hover-shadow);
   }
-}
-
-.chat-side-menu__theme {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-top: 0.5rem;
-}
-
-.chat-side-menu__theme-label {
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--c-ink-2);
-}
-
-.chat-side-menu__theme-options {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.chat-side-menu__link,
-.chat-side-menu__logout,
-.chat-side-menu__theme-btn {
-  min-height: 44px;
-}
-
-.chat-side-menu__theme-btn {
-  min-width: 44px;
-  display: block;
-  width: 100%;
-  padding: 8px 12px;
-  border-radius: calc(var(--radius-control) * 1px);
-  border: calc(var(--border-card) * 1px) solid transparent;
-  background: transparent;
-  color: var(--c-ink-2);
-  text-align: left;
-  font: inherit;
-  cursor: pointer;
-}
-
-.chat-side-menu__theme-btn--active {
-  border-color: var(--c-line);
-  background: var(--c-surface-2);
-  color: var(--c-ink);
 }
 
 .app-icon {

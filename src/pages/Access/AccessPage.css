@@ -22,7 +22,7 @@ html.access-route .desktop-shell__preview {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: calc(var(--space-md, 16) * 1px);
+  gap: var(--space-4);
   padding: calc(var(--radius-card) * 1px);
   background: var(--c-surface2);
   border-radius: calc(var(--radius-card) * 1px);
@@ -55,13 +55,13 @@ html.access-route .desktop-shell__preview {
   display: flex;
   align-items: flex-start;
   gap: 0.5rem;
-  color: var(--c-ink-muted, var(--c-ink));
+  color: var(--c-ink2);
 }
 
 .access-brand__social {
   margin: 0;
   font-weight: 600;
-  color: var(--c-accent, var(--c-ink));
+  color: var(--c-brand-text);
 }
 
 .access-auth {
@@ -76,7 +76,7 @@ html.access-route .desktop-shell__preview {
 .access-auth__step {
   margin: 0;
   font-size: 0.875rem;
-  color: var(--c-ink-muted, var(--c-ink));
+  color: var(--c-ink2);
 }
 
 .access-auth__title {
@@ -96,7 +96,7 @@ html.access-route .desktop-shell__preview {
   padding: 0 1rem;
   border: none;
   background: transparent;
-  color: var(--c-accent, var(--c-ink));
+  color: var(--c-brand-text);
   font-weight: 600;
   text-align: left;
 }
@@ -118,18 +118,18 @@ html.access-route .desktop-shell__preview {
   padding: 0.5rem 0.75rem;
   border-radius: 0.5rem;
   font-size: 0.8125rem;
-  background: color-mix(in srgb, var(--color-accent) 18%, transparent);
-  color: var(--color-text-secondary);
+  background: color-mix(in srgb, var(--c-brand) 18%, transparent);
+  color: var(--c-ink2);
 }
 
 .access-auth__mock-login {
   width: 100%;
   margin-top: 0.5rem;
   padding: 0.75rem 1rem;
-  border: 1px dashed var(--color-border);
+  border: 1px dashed var(--c-line);
   border-radius: 999px;
   background: transparent;
-  color: var(--color-text);
+  color: var(--c-ink);
   font-weight: 600;
   cursor: pointer;
 }
@@ -181,29 +181,29 @@ html.access-route .desktop-shell__preview {
 }
 
 .access-auth__invite-msg--ok {
-  color: var(--c-ok, #2e7d32);
+  color: var(--c-ok);
 }
 
 .access-auth__invite-msg--err {
-  color: var(--c-danger, #c62828);
+  color: var(--c-err);
 }
 
 .access-auth__error {
   margin: 0;
   padding: 0.75rem 1rem;
   border-radius: calc(var(--radius-card) * 1px);
-  background: color-mix(in srgb, var(--c-danger, #c62828) 12%, transparent);
-  color: var(--c-danger, #c62828);
+  background: color-mix(in srgb, var(--c-err) 12%, transparent);
+  color: var(--c-err);
 }
 
 .access-auth__legal {
   margin: 0;
   font-size: 0.875rem;
-  color: var(--c-ink-muted, var(--c-ink));
+  color: var(--c-ink2);
 }
 
 .access-auth__legal a {
-  color: var(--c-accent, var(--c-ink));
+  color: var(--c-brand-text);
   font-weight: 600;
 }
 

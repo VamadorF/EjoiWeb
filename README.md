@@ -12,7 +12,9 @@ Cliente web de escritorio de eJoi. Usa el mismo backend que la app móvil (`eJoi
 | --- | --- |
 | `npm run dev` | Servidor de desarrollo (Vite) |
 | `npm run build` | Typecheck + build de producción |
+| `npm run build:demo` | Build modo demo (`VITE_MOCK_API=true`) en `dist-demo/` |
 | `npm run preview` | Vista previa del build |
+| `npm run shots` | Capturas Playwright 1440/1280/1024 × claro/oscuro (requiere `build:demo`) |
 | `npm run typecheck` | Solo TypeScript |
 | `npm run lint` | ESLint |
 | `npm run test` | Vitest (una pasada) |
@@ -47,6 +49,16 @@ Copia `.env.example` a `.env.local` y ajusta según el entorno. En desarrollo, l
 ### Modo mock (sin backend)
 
 Con `VITE_MOCK_API=true` la SPA responde en el cliente con datos de demo (misma idea que el mock de Playwright). En `/acceso` aparece **Entrar en modo demo**. Desactiva la variable (`false` u omítela) y reinicia Vite/preview para usar eJoi-BE real.
+
+Para capturas locales sin backend:
+
+```powershell
+npm run build:demo
+npm run shots -- vista-2 chat-listo
+# salida: docs/screens/<pantalla>-<claro|oscuro>-<ancho>.png
+```
+
+La hoja de componentes base vive en `src/theme/ui.css` (tokens en `src/theme/cssVars.ts`). `npm test` incluye `cssGuard.test.ts`, que falla si hay variables CSS inventadas o colores literales fuera de `src/theme/`.
 
 ```powershell
 # .env.local

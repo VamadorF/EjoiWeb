@@ -135,12 +135,62 @@ function layoutMediaQueries(): string {
 }`;
 }
 
+/** Nombres de variables definidas en buildCssVarsText (para cssGuard.test.ts). */
+export function definedCssVarNames(): Set<string> {
+  const names = new Set<string>();
+  for (const m of buildCssVarsText().matchAll(/--([a-z0-9-]+)\s*:/g)) {
+    names.add(`--${m[1]}`);
+  }
+  return names;
+}
+
+function webTypographyAndLayoutTokens(): string {
+  // ponytail: tipografía, espaciado y elevación definidos en la web; moverlos a tokens.ts de ejoiFE cuando la app los necesite
+  const fontStack = 'Apis, system-ui, sans-serif';
+  return [
+    `  --font-title1: 800 28px/34px ${fontStack};`,
+    '  --ls-title1: -0.2px;',
+    `  --font-title2: 700 22px/28px ${fontStack};`,
+    `  --font-option: 700 17px/24px ${fontStack};`,
+    `  --font-button: 700 17px/24px ${fontStack};`,
+    `  --font-body: 400 16px/24px ${fontStack};`,
+    `  --font-secondary: 400 15px/22px ${fontStack};`,
+    `  --font-caption: 400 13px/18px ${fontStack};`,
+    `  --font-label: 700 12px/16px ${fontStack};`,
+    '  --ls-label: 1.2px;',
+    '  --space-1: 4px;',
+    '  --space-2: 8px;',
+    '  --space-3: 12px;',
+    '  --space-4: 16px;',
+    '  --space-5: 20px;',
+    '  --space-6: 24px;',
+    '  --space-7: 32px;',
+    '  --space-8: 48px;',
+    '  --gutter: 32px;',
+    '  --elev-1: 0 1px 4px color-mix(in srgb, var(--c-ink) 8%, transparent);',
+    '  --elev-2: 0 12px 30px color-mix(in srgb, var(--c-ink) 8%, transparent);',
+    '  --elev-3: 0 24px 60px color-mix(in srgb, var(--c-ink) 22%, transparent);',
+    '  --elev-cta: 0 6px 16px color-mix(in srgb, var(--c-brand) 25%, transparent);',
+    '  --elev-sel: 0 6px 18px color-mix(in srgb, var(--c-brand) 14%, transparent);',
+    '  --c-on-brand: #FFFFFF;',
+  ].join('\n');
+}
+
+const darkElevNone = `:root[data-theme="dark"] {
+  --elev-1: none;
+  --elev-2: none;
+  --elev-3: none;
+  --elev-cta: none;
+  --elev-sel: none;
+}`;
+
 export function buildCssVarsText(): string {
   const rootScalars = [
     scalarBlock('radius', UxV2.radius, 'px'),
     scalarBlock('size', UxV2.size, 'px'),
     scalarBlock('border', UxV2.border, 'px'),
     scalarBlock('motion', UxV2.motion, 'ms'),
+    webTypographyAndLayoutTokens(),
     `  --bp-reference: ${BREAKPOINTS.REFERENCE}px;`,
     `  --bp-large: ${BREAKPOINTS.LARGE}px;`,
     `  --bp-medium: ${BREAKPOINTS.MEDIUM}px;`,
@@ -162,6 +212,7 @@ export function buildCssVarsText(): string {
     `:root {\n${rootScalars}\n}`,
     colorBlock('light', UxV2.light),
     colorBlock('dark', UxV2.dark),
+    darkElevNone,
     layoutMediaQueries(),
   ].join('\n\n');
 }

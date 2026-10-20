@@ -24,7 +24,7 @@
   margin: 0;
   font-size: 0.9375rem;
   line-height: 1.45;
-  color: var(--c-ink-muted, var(--c-ink));
+  color: var(--c-ink2);
   font-style: italic;
 }
 
@@ -49,7 +49,7 @@
   align-items: center;
   justify-content: center;
   background: var(--c-surface2);
-  color: var(--c-ink-muted, var(--c-ink));
+  color: var(--c-ink2);
   font-size: 3rem;
   font-weight: 800;
 }
@@ -72,6 +72,6 @@
 }
 
 .creation-preview__tag--latest {
-  border-color: var(--c-accent, var(--c-ink));
+  border-color: var(--c-sel-border);
   font-weight: 700;
 }

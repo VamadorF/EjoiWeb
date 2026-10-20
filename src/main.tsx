@@ -8,6 +8,7 @@ import { MOCK_API } from '~/platform/env';
 import { installMockFetch } from '~/platform/mockApi';
 import { applyCssVars } from '~/theme/cssVars';
 import '~/theme/global.css';
+import '~/theme/ui.css';
 
 if (MOCK_API) {
   installMockFetch();
