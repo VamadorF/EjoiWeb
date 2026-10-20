@@ -19,6 +19,7 @@ Cliente web de escritorio de eJoi. Usa el mismo backend que la app móvil (`eJoi
 | `npm run sync:app` | Copia módulos y assets desde `ejoiFE` (requiere `C:\ejoi\ejoiFE\ejoi` al lado) |
 | `npm run sync:check` | Verifica manifiesto `SYNC.json` (CI, sin red) |
 | `npm run verify` | sync:check + typecheck + lint + test + build |
+| `npm run e2e` | Playwright (Chromium, Firefox, WebKit y Edge si está instalado) |
 
 ## Estructura (prevista)
 
@@ -42,6 +43,37 @@ Los imports de plataforma (`HTTP`, almacenamiento, env) se resuelven a `src/plat
 ## Variables de entorno
 
 Copia `.env.example` a `.env.local` y ajusta según el entorno. En desarrollo, las peticiones a `/api` se proxyean al backend local (`VITE_DEV_API_PROXY_TARGET`).
+
+## QA e2e (SCRUM-116)
+
+Por defecto las pruebas usan el build de preview en `127.0.0.1:4173` con API simulada (`page.route`) y login C4 (`POST /auth/test-session` mockeado).
+
+### Entorno integrado 3.5 (opcional)
+
+Requiere Docker y `eJoi-BE` local (plan Épica 11, §3.5): Postgres en `55432`, Redis en `56379`, `AUTH_TEST_SESSION_SECRET` en el backend, web en dev con proxy:
+
+```powershell
+# Backend (terminal 1) — ver SCRUM-104 plan §3.5 para .env.e2e
+cd C:\ejoi\eJoi-BE
+npm run start:dev
+
+# Web (terminal 2)
+cd C:\ejoi\EjoiWeb
+# .env.local: VITE_DEV_API_PROXY_TARGET=http://localhost:4000, VITE_API_URL=/api
+npm run dev
+```
+
+Con el dev server levantado:
+
+```powershell
+$env:PLAYWRIGHT_BASE_URL = 'http://127.0.0.1:5173'
+$env:AUTH_TEST_SESSION_SECRET = '<mismo valor que el backend>'
+npm run e2e
+```
+
+`eJoi-BE-Image` no es necesario: Playwright intercepta `**/image/**`.
+
+Instalar navegadores (una vez): `npx playwright install chromium firefox webkit`. En Windows, Edge suele estar disponible; si no: `$env:PLAYWRIGHT_SKIP_EDGE = '1'`.
 
 ## Publicación
 

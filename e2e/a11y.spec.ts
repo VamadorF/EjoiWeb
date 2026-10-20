@@ -1,6 +1,8 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 
+import { QA_VIEWPORTS } from './fixtures/viewports';
+
 async function mockAuthedApi(page: Page) {
   await page.route('**/api/**', async (route) => {
     const path = new URL(route.request().url()).pathname.replace(/^\/api/, '');
@@ -84,21 +86,22 @@ const screens = [
   { name: 'editar', path: '/chat/editar' },
 ];
 
-test.describe('Accesibilidad axe (SCRUM-113)', () => {
-  test.use({ viewport: { width: 1440, height: 900 } });
-
-  for (const screen of screens) {
-    test(`${screen.name} sin violaciones serious/critical`, async ({ page }) => {
-      await mockAuthedApi(page);
-      await page.goto(screen.path);
-      await page.waitForLoadState('networkidle');
-      const results = await new AxeBuilder({ page })
-        .withTags(['wcag2a', 'wcag2aa'])
-        .analyze();
-      const blocking = results.violations.filter(
-        (v) => v.impact === 'serious' || v.impact === 'critical',
-      );
-      expect(blocking, JSON.stringify(blocking, null, 2)).toEqual([]);
-    });
+test.describe('Accesibilidad axe (SCRUM-113 / 116)', () => {
+  for (const vp of QA_VIEWPORTS) {
+    for (const screen of screens) {
+      test(`${screen.name} @ ${vp.label} sin violaciones serious/critical`, async ({ page }) => {
+        await page.setViewportSize({ width: vp.width, height: vp.height });
+        await mockAuthedApi(page);
+        await page.goto(screen.path);
+        await page.waitForLoadState('networkidle');
+        const results = await new AxeBuilder({ page })
+          .withTags(['wcag2a', 'wcag2aa'])
+          .analyze();
+        const blocking = results.violations.filter(
+          (v) => v.impact === 'serious' || v.impact === 'critical',
+        );
+        expect(blocking, JSON.stringify(blocking, null, 2)).toEqual([]);
+      });
+    }
   }
 });

@@ -13,6 +13,7 @@
     "sync:app": "node scripts/sync-app.mjs",
     "sync:check": "node scripts/sync-app.mjs --check",
     "test:e2e": "playwright test",
+    "e2e": "playwright test",
     "verify": "npm run sync:check && npm run typecheck && npm run lint && npm test && npm run build"
   },
   "dependencies": {
