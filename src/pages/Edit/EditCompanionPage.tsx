@@ -25,7 +25,8 @@ import { useRegeneration } from '~/features/edit/useRegeneration';
 import { EDIT_VOICE_OPTIONS } from '~/features/edit/voiceOptions';
 import { stylePortraitSrcForCard } from '~/features/creation/portraits';
 import { ChatShell } from '~/layout/ChatShell';
-import { OptionGrid } from '~/layout/OptionGrid';
+import { OptionGroup } from '~/layout/OptionGroup';
+import { useDesktopShortcuts } from '~/layout/useDesktopShortcuts';
 import { ENABLE_AGE, ENABLE_ETHNICITY } from '~/platform/env';
 
 import '../CreateWho/CreateWhoPage.css';
@@ -143,6 +144,12 @@ function EditCompanionContent() {
       ? regen.pendingPortrait.fileUrl
       : profile?.avatarUrl ?? null;
 
+  useDesktopShortcuts({
+    escapeTo: '/chat',
+    canContinue: conversationalDirty && !saving,
+    onEnterContinue: () => void saveConversational(),
+  });
+
   return (
     <ChatShell
       menu={<SideMenu />}
@@ -175,8 +182,10 @@ function EditCompanionContent() {
                 {regen.appearanceDirty ? t('edit.regen_needed') : t('edit.appearance_hint')}
               </p>
 
-              <h3 className="create-who__label">{t('edit.style')}</h3>
-              <OptionGrid cols={3}>
+              <h3 id="edit-style" className="create-who__label">
+                {t('edit.style')}
+              </h3>
+              <OptionGroup mode="radio" aria-labelledby="edit-style" cols={3}>
                 {STYLES.map(({ id, labelKey }) => (
                   <button
                     key={id}
@@ -196,10 +205,12 @@ function EditCompanionContent() {
                     <span>{t(labelKey)}</span>
                   </button>
                 ))}
-              </OptionGrid>
+              </OptionGroup>
 
-              <h3 className="create-who__label">{t('edit.gender')}</h3>
-              <OptionGrid cols={3}>
+              <h3 id="edit-gender" className="create-who__label">
+                {t('edit.gender')}
+              </h3>
+              <OptionGroup mode="radio" aria-labelledby="edit-gender" cols={3}>
                 {GENDERS.map(({ id, label }) => (
                   <button
                     key={id}
@@ -212,14 +223,18 @@ function EditCompanionContent() {
                     {label}
                   </button>
                 ))}
-              </OptionGrid>
+              </OptionGroup>
 
               {ENABLE_ETHNICITY ? (
                 <>
-                  <h3 className="create-who__label">{t('edit.ethnicity')}</h3>
-                  <OptionGrid cols={4}>
+                  <h3 id="edit-ethnicity" className="create-who__label">
+                    {t('edit.ethnicity')}
+                  </h3>
+                  <OptionGroup mode="radio" aria-labelledby="edit-ethnicity" cols={4}>
                     <button
                       type="button"
+                      role="radio"
+                      aria-checked={!values.ethnicity}
                       className={!values.ethnicity ? 'create-option create-option--selected' : 'create-option'}
                       onClick={() => patchValues({ ethnicity: undefined })}
                     >
@@ -229,6 +244,8 @@ function EditCompanionContent() {
                       <button
                         key={id}
                         type="button"
+                        role="radio"
+                        aria-checked={values.ethnicity === ETHNICITY_LABELS[id]}
                         className={
                           values.ethnicity === ETHNICITY_LABELS[id]
                             ? 'create-option create-option--selected'
@@ -239,13 +256,15 @@ function EditCompanionContent() {
                         {ETHNICITY_LABELS[id]}
                       </button>
                     ))}
-                  </OptionGrid>
+                  </OptionGroup>
                 </>
               ) : null}
 
               {ENABLE_AGE ? (
                 <>
-                  <h3 className="create-who__label">{t('edit.age')}</h3>
+                  <h3 id="edit-age" className="create-who__label">
+                    {t('edit.age')}
+                  </h3>
                   <input
                     className="create-who__age"
                     type="number"
@@ -253,6 +272,7 @@ function EditCompanionContent() {
                     max={COMPANION_MAX_AGE}
                     value={values.age}
                     onChange={(e) => patchValues({ age: Number(e.target.value) })}
+                    aria-labelledby="edit-age"
                   />
                 </>
               ) : null}
@@ -305,7 +325,7 @@ function EditCompanionContent() {
               <h2 id="edit-personality" className="create-who__label">
                 {t('edit.section_conversational')}
               </h2>
-              <OptionGrid cols={4}>
+              <OptionGroup mode="radio" aria-labelledby="edit-personality" cols={4}>
                 {PERSONALITY_OPTIONS.map((option) => (
                   <button
                     key={option}
@@ -321,10 +341,17 @@ function EditCompanionContent() {
                     <span>{option}</span>
                   </button>
                 ))}
-              </OptionGrid>
+              </OptionGroup>
 
-              <h3 className="create-who__label">{t('edit.presence')}</h3>
-              <div className="create-how__presence" role="radiogroup">
+              <h3 id="edit-presence" className="create-who__label">
+                {t('edit.presence')}
+              </h3>
+              <OptionGroup
+                mode="radio"
+                aria-labelledby="edit-presence"
+                layout="inline"
+                className="create-how__presence"
+              >
                 {PRESENCE.map(({ id, labelKey }) => (
                   <button
                     key={id}
@@ -341,10 +368,12 @@ function EditCompanionContent() {
                     {t(labelKey)}
                   </button>
                 ))}
-              </div>
+              </OptionGroup>
 
-              <h3 className="create-who__label">{t('edit.interests')}</h3>
-              <OptionGrid cols={6}>
+              <h3 id="edit-interests" className="create-who__label">
+                {t('edit.interests')}
+              </h3>
+              <OptionGroup mode="toggle" aria-labelledby="edit-interests" cols={6}>
                 {INTEREST_OPTIONS.map((interest) => {
                   const selected = values.interests.includes(interest);
                   return (
@@ -360,13 +389,15 @@ function EditCompanionContent() {
                     </button>
                   );
                 })}
-              </OptionGrid>
+              </OptionGroup>
 
-              <h3 className="create-who__label">{t('edit.boundaries')}</h3>
+              <h3 id="edit-boundaries" className="create-who__label">
+                {t('edit.boundaries')}
+              </h3>
               <p className="create-how__basic-limits" role="note">
                 {t('create.basic_limits', { limits: BASIC_BOUNDARIES.join(', ') })}
               </p>
-              <OptionGrid cols={3}>
+              <OptionGroup mode="toggle" aria-labelledby="edit-boundaries" cols={3}>
                 {OPTIONAL_BOUNDARIES.map((option) => {
                   const selected = values.boundaries.includes(option);
                   return (
@@ -381,7 +412,7 @@ function EditCompanionContent() {
                     </button>
                   );
                 })}
-              </OptionGrid>
+              </OptionGroup>
               <div className="create-how__other-boundary">
                 <label htmlFor={otherBoundaryId}>{t('create.avoid_other')}</label>
                 <div className="create-how__other-row">
@@ -399,11 +430,14 @@ function EditCompanionContent() {
                 </div>
               </div>
 
-              <h3 className="create-who__label">{t('edit.voice')}</h3>
+              <h3 id="edit-voice" className="create-who__label">
+                {t('edit.voice')}
+              </h3>
               <select
                 className="create-how__name-input"
                 value={values.voiceKey}
                 onChange={(e) => patchValues({ voiceKey: e.target.value })}
+                aria-labelledby="edit-voice"
               >
                 {EDIT_VOICE_OPTIONS.map(({ key, label }) => (
                   <option key={key} value={key}>
@@ -412,13 +446,16 @@ function EditCompanionContent() {
                 ))}
               </select>
 
-              <h3 className="create-who__label">{t('edit.name')}</h3>
+              <h3 id="edit-name" className="create-who__label">
+                {t('edit.name')}
+              </h3>
               <input
                 className="create-how__name-input"
                 type="text"
                 maxLength={20}
                 value={values.companionName}
                 onChange={(e) => patchValues({ companionName: e.target.value })}
+                aria-labelledby="edit-name"
               />
 
               {saveError ? (

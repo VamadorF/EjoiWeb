@@ -123,7 +123,14 @@ button {
   gap: 4px;
 }
 
+.chat-side-menu__link,
+.chat-side-menu__logout,
 .chat-side-menu__theme-btn {
+  min-height: 44px;
+}
+
+.chat-side-menu__theme-btn {
+  min-width: 44px;
   display: block;
   width: 100%;
   padding: 8px 12px;

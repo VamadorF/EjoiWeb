@@ -14,7 +14,8 @@ import { useCreationDraft } from '~/features/creation/useCreationDraft';
 import { canContinueWho, listWhoMissing } from '~/features/creation/whoValidation';
 import { ENABLE_AGE, ENABLE_ETHNICITY } from '~/platform/env';
 import { DesktopShell } from '~/layout/DesktopShell';
-import { OptionGrid } from '~/layout/OptionGrid';
+import { OptionGroup } from '~/layout/OptionGroup';
+import { useDesktopShortcuts } from '~/layout/useDesktopShortcuts';
 
 import './CreateWhoPage.css';
 
@@ -65,6 +66,12 @@ export default function CreateWhoPage() {
     void navigate('/crear/como');
   };
 
+  useDesktopShortcuts({
+    escapeTo: '/acceso',
+    canContinue,
+    onEnterContinue: () => void onContinue(),
+  });
+
   return (
     <DesktopShell
       header={
@@ -97,7 +104,7 @@ export default function CreateWhoPage() {
           <h3 id="create-who-gender" className="create-who__label">
             Género
           </h3>
-          <OptionGrid cols={3}>
+          <OptionGroup mode="radio" aria-labelledby="create-who-gender" cols={3}>
             {GENDERS.map(({ id, label }) => (
               <button
                 key={id}
@@ -110,14 +117,14 @@ export default function CreateWhoPage() {
                 {label}
               </button>
             ))}
-          </OptionGrid>
+          </OptionGroup>
         </section>
 
         <section className="create-who__section" aria-labelledby="create-who-style">
           <h3 id="create-who-style" className="create-who__label">
             Estilo visual
           </h3>
-          <OptionGrid cols={3}>
+          <OptionGroup mode="radio" aria-labelledby="create-who-style" cols={3}>
             {STYLES.map(({ id, labelKey }) => (
               <button
                 key={id}
@@ -137,7 +144,7 @@ export default function CreateWhoPage() {
                 <span>{t(labelKey)}</span>
               </button>
             ))}
-          </OptionGrid>
+          </OptionGroup>
         </section>
 
         {ENABLE_ETHNICITY ? (
@@ -145,9 +152,11 @@ export default function CreateWhoPage() {
             <h3 id="create-who-ethnicity" className="create-who__label">
               Etnia <span className="create-who__optional">(opcional)</span>
             </h3>
-            <OptionGrid cols={4}>
+            <OptionGroup mode="radio" aria-labelledby="create-who-ethnicity" cols={4}>
               <button
                 type="button"
+                role="radio"
+                aria-checked={!data.ethnicity}
                 className={
                   !data.ethnicity ? 'create-option create-option--selected' : 'create-option'
                 }
@@ -159,6 +168,8 @@ export default function CreateWhoPage() {
                 <button
                   key={id}
                   type="button"
+                  role="radio"
+                  aria-checked={data.ethnicity === ETHNICITY_LABELS[id]}
                   className={
                     data.ethnicity === ETHNICITY_LABELS[id]
                       ? 'create-option create-option--selected'
@@ -169,7 +180,7 @@ export default function CreateWhoPage() {
                   {ETHNICITY_LABELS[id]}
                 </button>
               ))}
-            </OptionGrid>
+            </OptionGroup>
           </section>
         ) : null}
 
@@ -186,6 +197,7 @@ export default function CreateWhoPage() {
               max={COMPANION_MAX_AGE}
               value={data.age ?? ''}
               onChange={(e) => setAge(Number(e.target.value))}
+              aria-labelledby="create-who-age"
             />
           </section>
         ) : null}
@@ -205,7 +217,7 @@ export default function CreateWhoPage() {
               {t('create.interests_counter', { count: data.interests.length })}
             </span>
           </div>
-          <OptionGrid cols={6}>
+          <OptionGroup mode="toggle" aria-labelledby="create-who-interests" cols={6}>
             {INTEREST_OPTIONS.map((interest) => {
               const selected = data.interests.includes(interest);
               return (
@@ -221,7 +233,7 @@ export default function CreateWhoPage() {
                 </button>
               );
             })}
-          </OptionGrid>
+          </OptionGroup>
         </section>
       </div>
     </DesktopShell>

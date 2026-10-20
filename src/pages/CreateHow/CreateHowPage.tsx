@@ -25,7 +25,8 @@ import {
 } from '~/features/creation/startCreation';
 import { DEFAULT_COMO_STEP, useCreationDraft } from '~/features/creation/useCreationDraft';
 import { DesktopShell } from '~/layout/DesktopShell';
-import { OptionGrid } from '~/layout/OptionGrid';
+import { OptionGroup } from '~/layout/OptionGroup';
+import { useDesktopShortcuts } from '~/layout/useDesktopShortcuts';
 
 import '../CreateWho/CreateWhoPage.css';
 import './CreateHowPage.css';
@@ -130,6 +131,15 @@ export default function CreateHowPage() {
     }
   };
 
+  useDesktopShortcuts({
+    escapeTo: '/crear/quien',
+    canContinue: canSubmit && !submitting,
+    onEnterContinue: () => {
+      const form = document.getElementById('create-how-form') as HTMLFormElement | null;
+      form?.requestSubmit();
+    },
+  });
+
   return (
     <DesktopShell
       header={
@@ -175,7 +185,7 @@ export default function CreateHowPage() {
           <h3 id="create-how-personality" className="create-who__label">
             Personalidad
           </h3>
-          <OptionGrid cols={4}>
+          <OptionGroup mode="radio" aria-labelledby="create-how-personality" cols={4}>
             {PERSONALITY_OPTIONS.map((option) => (
               <button
                 key={option}
@@ -191,14 +201,19 @@ export default function CreateHowPage() {
                 <span>{option}</span>
               </button>
             ))}
-          </OptionGrid>
+          </OptionGroup>
         </section>
 
         <section className="create-who__section" aria-labelledby="create-how-presence">
           <h3 id="create-how-presence" className="create-who__label">
             Presencia
           </h3>
-          <div className="create-how__presence" role="radiogroup" aria-labelledby="create-how-presence">
+          <OptionGroup
+            mode="radio"
+            aria-labelledby="create-how-presence"
+            layout="inline"
+            className="create-how__presence"
+          >
             {PRESENCE.map(({ id, labelKey }) => (
               <button
                 key={id}
@@ -215,7 +230,7 @@ export default function CreateHowPage() {
                 {t(labelKey)}
               </button>
             ))}
-          </div>
+          </OptionGroup>
         </section>
 
         <section className="create-who__section" aria-labelledby="create-how-boundaries">
@@ -225,7 +240,7 @@ export default function CreateHowPage() {
           <p className="create-how__basic-limits" role="note">
             {basicLimitsText}
           </p>
-          <OptionGrid cols={3}>
+          <OptionGroup mode="toggle" aria-labelledby="create-how-boundaries" cols={3}>
             {OPTIONAL_BOUNDARIES.map((option) => {
               const selected = data.boundaries.includes(option);
               return (
@@ -240,7 +255,7 @@ export default function CreateHowPage() {
                 </button>
               );
             })}
-          </OptionGrid>
+          </OptionGroup>
           <div className="create-how__other-boundary">
             <label htmlFor={otherBoundaryId}>{t('create.avoid_other')}</label>
             <div className="create-how__other-row">
@@ -275,6 +290,7 @@ export default function CreateHowPage() {
               maxLength={20}
               value={data.companionName ?? ''}
               onChange={(e) => setCompanionName(e.target.value)}
+              aria-labelledby="create-how-name"
               aria-describedby="create-how-name-hint"
             />
             <button type="button" className="create-how__suggest" onClick={onSuggestName}>
@@ -317,7 +333,14 @@ export default function CreateHowPage() {
               {tApp('auth.login.legal_gate_suffix')}
             </span>
           </label>
-          <input type="hidden" name="documentsVersion" value={LEGAL_DOCUMENTS_VERSION} readOnly />
+          <input
+            type="hidden"
+            name="documentsVersion"
+            value={LEGAL_DOCUMENTS_VERSION}
+            readOnly
+            aria-hidden
+            tabIndex={-1}
+          />
         </section>
       </form>
     </DesktopShell>
