@@ -8,6 +8,8 @@
 
 .chat-side-menu__logo {
   display: block;
+  width: auto;
+  height: 28px;
   margin-bottom: var(--space-4);
 }
 

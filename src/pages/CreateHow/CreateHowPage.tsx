@@ -168,14 +168,7 @@ export default function CreateHowPage() {
         />
       }
       footer={
-        <div className="creation-shell-footer creation-shell-footer--how">
-          <button
-            type="button"
-            className="btn btn--secondary btn--m"
-            onClick={() => void navigate('/crear/quien')}
-          >
-            {t('create.back')}
-          </button>
+        <div className="creation-shell-footer">
           {!canSubmit ? (
             <p id={missingId} className="creation-shell-footer__hint" role="status">
               <AppIcon name="information-circle-outline" />

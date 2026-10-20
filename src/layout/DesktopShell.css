@@ -44,7 +44,7 @@
 .desktop-shell__main {
   grid-area: main;
   min-height: 0;
-  overflow: hidden;
+  overflow-y: auto;
   padding: var(--space-7) var(--gutter);
 }
 
