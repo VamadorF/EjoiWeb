@@ -1,0 +1,37 @@
+.chat-shell {
+  display: grid;
+  grid-template-columns:
+    var(--chat-menu-w)
+    minmax(var(--chat-read-min), var(--chat-read-max))
+    var(--chat-profile-w);
+  justify-content: center;
+  gap: calc(var(--radius-control) * 1px);
+  height: 100%;
+  min-height: 0;
+  max-width: var(--bp-reference);
+  margin: 0 auto;
+  padding: calc(var(--radius-card) * 1px);
+  background: var(--c-bg);
+}
+
+.chat-shell__menu,
+.chat-shell__read,
+.chat-shell__profile {
+  min-height: 0;
+  overflow: hidden;
+  background: var(--c-surface);
+  border-radius: calc(var(--radius-card) * 1px);
+  border: calc(var(--border-card) * 1px) solid var(--c-line);
+}
+
+.chat-shell__menu {
+  padding: calc(var(--radius-control) * 1px);
+}
+
+.chat-shell__read {
+  padding: calc(var(--radius-card) * 1px);
+}
+
+.chat-shell__profile {
+  padding: calc(var(--radius-control) * 1px);
+}

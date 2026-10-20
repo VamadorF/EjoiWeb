@@ -1,0 +1,78 @@
+@font-face {
+  font-family: Apis;
+  src: url('/fonts/ApisRegular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: Apis;
+  src: url('/fonts/ApisMedium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: Apis;
+  src: url('/fonts/ApisBold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: Apis;
+  src: url('/fonts/ApisExtraBold.ttf') format('truetype');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ponytail: ttf; convertir a woff2 si el peso inicial molesta */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  overflow: hidden;
+  font-family: Apis, system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.4;
+  background: var(--c-bg);
+  color: var(--c-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: calc(var(--border-focus-ring) * 1px) solid var(--c-focus);
+  outline-offset: 2px;
+}
+
+.app-icon {
+  display: inline-flex;
+  color: currentColor;
+  line-height: 0;
+}
+
+.app-icon svg {
+  width: 1.25em;
+  height: 1.25em;
+  display: block;
+}
