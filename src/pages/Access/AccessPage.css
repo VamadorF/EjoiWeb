@@ -113,6 +113,32 @@ html.access-route .desktop-shell__preview {
   min-height: 56px;
 }
 
+.access-auth__mock-banner {
+  margin: 0 0 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.8125rem;
+  background: color-mix(in srgb, var(--color-accent) 18%, transparent);
+  color: var(--color-text-secondary);
+}
+
+.access-auth__mock-login {
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 0.75rem 1rem;
+  border: 1px dashed var(--color-border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--color-text);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.access-auth__mock-login:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .access-auth__apple {
   display: flex;
   align-items: center;

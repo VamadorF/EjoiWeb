@@ -14,7 +14,9 @@
     "sync:check": "node scripts/sync-app.mjs --check",
     "test:e2e": "playwright test",
     "e2e": "playwright test",
-    "verify": "npm run sync:check && npm run typecheck && npm run lint && npm test && npm run build"
+    "verify": "npm run sync:check && npm run typecheck && npm run lint && npm test && npm run build",
+    "ponytail:install": "node ../ejoiFE/ejoi/ponytail/scripts/cursor-hooks.js install --project",
+    "ponytail:skills": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/link-ponytail-skills.ps1"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.91.0",

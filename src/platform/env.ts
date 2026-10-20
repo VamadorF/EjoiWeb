@@ -11,7 +11,8 @@ export const REFERRAL_INVITE_BASE_URL = String(env.VITE_REFERRAL_INVITE_BASE_URL
 export const SOCKET_URL = String(env.VITE_SOCKET_URL ?? '');
 export const IMAGE_API_URL = String(env.VITE_IMAGE_API_URL ?? '');
 export const ENABLE_WEBSOCKET = false;
-export const MOCK_API = false;
+/** true cuando VITE_MOCK_API=true: respuestas locales sin eJoi-BE */
+export const MOCK_API = (env.VITE_MOCK_API ?? 'false') === 'true';
 
 export const IS_DEVELOPMENT = import.meta.env.DEV;
 export const ENABLE_SUBSCRIPTION_MOCK = IS_DEVELOPMENT;

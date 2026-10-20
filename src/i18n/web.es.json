@@ -9,7 +9,9 @@
     "invite_invalid": "Ese código no existe. Revísalo o continúa sin código.",
     "error_generic": "No pudimos iniciar sesión. Inténtalo de nuevo.",
     "apple_continue": "Continuar con Apple",
-    "have_code": "Tengo un código"
+    "have_code": "Tengo un código",
+    "mock_banner": "Modo demo: API simulada, sin backend.",
+    "mock_login": "Entrar en modo demo"
   },
   "create": {
     "step2": "Paso 2 de 3",

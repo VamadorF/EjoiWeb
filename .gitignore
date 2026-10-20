@@ -7,3 +7,5 @@ coverage/
 test-results/
 playwright-report/
 .vite/
+.cursor/hooks.json
+.cursor/skills/

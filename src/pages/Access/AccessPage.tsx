@@ -3,7 +3,10 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 
 import { legalDocuments } from '@/features/auth/assets/legalDocuments';
-import { CAMPAIGN_LANDING_URL, isOAuthConfigured } from '~/platform/env';
+import { fromWebAuthResponse, type RawAuthResponse } from '~/features/auth/authWeb.adapter';
+import { CAMPAIGN_LANDING_URL, isOAuthConfigured, MOCK_API } from '~/platform/env';
+import { httpClient } from '~/platform/http';
+import * as session from '~/platform/session';
 import { AppIcon } from '~/components/AppIcon';
 import { DesktopShell } from '~/layout/DesktopShell';
 import {
@@ -39,7 +42,7 @@ function profileFromIdToken(idToken: string) {
 }
 
 export default function AccessPage() {
-  const { t } = useTranslation(['web', 'translation']);
+  const { t } = useTranslation(['translation', 'web']);
   const navigate = useNavigate();
   const { markAuthenticated } = useWebSession();
   const providersRef = useRef<HTMLDivElement>(null);
@@ -116,6 +119,19 @@ export default function AccessPage() {
       void handleGoogleCredential(token);
     });
   }, [handleGoogleCredential]);
+
+  const handleMockLogin = async () => {
+    setBusy(true);
+    setError(null);
+    try {
+      const response = await httpClient.post<RawAuthResponse>('/auth/mock-login', {});
+      const { accessToken, user } = fromWebAuthResponse(response.data);
+      session.setSession(accessToken, JSON.stringify(user));
+      await runAfterLogin();
+    } catch {
+      handleProviderError();
+    }
+  };
 
   const handleApple = async () => {
     setBusy(true);
@@ -215,6 +231,11 @@ export default function AccessPage() {
             aria-labelledby="access-auth-title"
             aria-busy={busy || undefined}
           >
+            {MOCK_API ? (
+              <p className="access-auth__mock-banner" role="status">
+                {t('web:access.mock_banner')}
+              </p>
+            ) : null}
             <p className="access-auth__step">{t('web:access.step')}</p>
             <h2 id="access-auth-title" className="access-auth__title">
               {authTitle}
@@ -259,6 +280,16 @@ export default function AccessPage() {
                   disabled={busy}
                 >
                   {t('web:access.apple_continue')}
+                </button>
+              ) : null}
+              {MOCK_API ? (
+                <button
+                  type="button"
+                  className="access-auth__mock-login"
+                  onClick={() => void handleMockLogin()}
+                  disabled={busy}
+                >
+                  {t('web:access.mock_login')}
                 </button>
               ) : null}
             </div>

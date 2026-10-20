@@ -1,4 +1,5 @@
-import { API_URL } from './env';
+import { API_URL, MOCK_API } from './env';
+import { handleMockApiRequest } from './mockApi';
 import * as session from './session';
 
 export interface RequestConfig {
@@ -75,6 +76,13 @@ async function requestOnce<T>(endpoint: string, config: RequestConfig): Promise<
     } else {
       headers['Content-Type'] = headers['Content-Type'] ?? 'application/json';
       body = JSON.stringify(config.body);
+    }
+  }
+
+  if (MOCK_API) {
+    const mocked = handleMockApiRequest<T>(url, config);
+    if (mocked) {
+      return mocked;
     }
   }
 
