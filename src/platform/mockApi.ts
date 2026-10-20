@@ -36,10 +36,89 @@ type OnboardingDraftBody = {
   data: Record<string, unknown>;
 };
 
+type MockCompanionProfile = {
+  id: string;
+  name: string;
+  visualStyle: string;
+  gender: string;
+  persona: string;
+  intensity: string;
+  interests: string[];
+  boundaries: string[];
+  age?: number;
+  ethnicity?: string;
+};
+
 type CreationRow = {
   state: 'none' | 'creating' | 'ready' | 'error';
   creatingSince: number;
+  companion?: MockCompanionProfile;
 };
+
+function defaultMockCompanion(): MockCompanionProfile {
+  return {
+    id: 'c1',
+    name: 'Luna',
+    visualStyle: 'realista',
+    gender: 'femenino',
+    persona: 'Amigable y empática',
+    intensity: 'balanced',
+    interests: ['Música', 'Cine', 'Viajes'],
+    boundaries: [],
+  };
+}
+
+function portraitPathFor(style: string, gender: string): string {
+  const illustrated = style === 'anime';
+  const masculine = gender === 'masculino';
+  if (illustrated) {
+    return masculine ? '/portraits/ilustrado-masculino.webp' : '/portraits/ilustrado-femenino.webp';
+  }
+  return masculine ? '/portraits/realista-masculino.webp' : '/portraits/realista-femenino.webp';
+}
+
+function portraitUrlForCompanion(companion: MockCompanionProfile): string {
+  const path = portraitPathFor(companion.visualStyle, companion.gender);
+  if (typeof window !== 'undefined') {
+    return new URL(path, window.location.origin).href;
+  }
+  return path;
+}
+
+function companionFromPost(body: Record<string, unknown>): MockCompanionProfile {
+  const base = defaultMockCompanion();
+  const name = typeof body.name === 'string' ? body.name.trim() : '';
+  const visualStyle = typeof body.visualStyle === 'string' ? body.visualStyle : base.visualStyle;
+  const gender = typeof body.gender === 'string' ? body.gender : base.gender;
+  const persona = typeof body.persona === 'string' ? body.persona : base.persona;
+  const intensity = typeof body.intensity === 'string' ? body.intensity : base.intensity;
+  const interests = Array.isArray(body.interests)
+    ? body.interests.filter((item): item is string => typeof item === 'string')
+    : base.interests;
+  const boundaries = Array.isArray(body.boundaries)
+    ? body.boundaries.filter((item): item is string => typeof item === 'string')
+    : base.boundaries;
+  const age = typeof body.age === 'number' ? body.age : undefined;
+  const ethnicity = typeof body.ethnicity === 'string' ? body.ethnicity.trim() : undefined;
+
+  return {
+    ...base,
+    name: name || base.name,
+    visualStyle,
+    gender,
+    persona,
+    intensity,
+    interests,
+    boundaries,
+    ...(age != null ? { age } : {}),
+    ...(ethnicity ? { ethnicity } : {}),
+  };
+}
+
+function getMockCompanion(userId: string): MockCompanionProfile {
+  const row = creationStore.get(userId);
+  return row?.companion ?? defaultMockCompanion();
+}
 
 const draftStore = new Map<string, OnboardingDraftBody | null>();
 const creationStore = new Map<string, CreationRow>();
@@ -158,51 +237,63 @@ export function handleMockApiRequest<T>(
   }
 
   if (path.includes('/companion/me/creation') && method === 'GET') {
+    const companion = getMockCompanion(userId);
+    const profileSummary = {
+      id: companion.id,
+      name: companion.name,
+      visualStyle: companion.visualStyle,
+      avatarUrl: portraitUrlForCompanion(companion),
+    };
     const body =
       creation.state === 'ready'
         ? {
             state: 'ready',
             steps: { personality: true, interests: true, greeting: true, portrait: true },
-            profile: { id: 'c1', name: 'Luna', visualStyle: 'realista', avatarUrl: portraitUrl() },
-            firstMessage: { id: 'm1', content: 'Hola, soy Luna', meta: { quickReplies: ['Cuéntame más'] } },
+            profile: profileSummary,
+            firstMessage: {
+              id: 'm1',
+              content: `Hola, soy ${companion.name}`,
+              meta: {
+                quickReplies: ['Cuéntame más'],
+                basedOnInterests: companion.interests.slice(0, 3),
+              },
+            },
           }
         : creation.state === 'error'
           ? {
               state: 'error',
               error: { code: 'MOCK_FAIL' },
-              profile: { name: 'Luna', visualStyle: 'realista' },
+              profile: { name: companion.name, visualStyle: companion.visualStyle },
             }
           : creation.state === 'creating'
             ? {
                 state: 'creating',
                 steps: { personality: true, interests: true, greeting: false, portrait: false },
-                profile: { name: 'Luna', visualStyle: 'realista' },
+                profile: profileSummary,
               }
             : { state: 'none' };
     return ok(body as T);
   }
 
   if (path.endsWith('/companion/me') && method === 'POST') {
+    creation.companion = companionFromPost((config.body ?? {}) as Record<string, unknown>);
     creation.state = 'ready';
     creation.creatingSince = Date.now();
-    return ok({ id: 'c1', name: 'Luna' } as T);
+    const created = getMockCompanion(userId);
+    return ok({ id: created.id, name: created.name } as T);
   }
 
   if (path.includes('/companion/me/profile') || (path.endsWith('/companion/me') && method === 'GET')) {
+    const companion = getMockCompanion(userId);
     return ok({
-      id: 'c1',
-      name: 'Luna',
-      visualStyle: 'realista',
-      persona: 'Amigable y empática',
-      intensity: 'balanced',
-      interests: ['Música', 'Cine', 'Viajes'],
-      boundaries: [],
-      avatarUrl: portraitUrl(),
+      ...companion,
+      avatarUrl: portraitUrlForCompanion(companion),
     } as T);
   }
 
   if (path.endsWith('/companion/me') && method === 'PATCH') {
-    return ok({ id: 'c1', ...(config.body as object) } as T);
+    const companion = getMockCompanion(userId);
+    return ok({ ...companion, ...(config.body as object) } as T);
   }
 
   if (path.includes('/chat/message') && method === 'POST') {
@@ -222,7 +313,7 @@ export function handleMockApiRequest<T>(
   }
 
   if (path.includes('/subscription/me')) {
-    return ok({ remainingMessages: 12, planLabel: 'basic' } as T);
+    return ok({ messagesRemaining: 54, planLabel: 'basic' } as T);
   }
 
   if (path.includes('/campaign/founder-count')) {

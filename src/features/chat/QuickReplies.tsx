@@ -20,15 +20,15 @@ export function QuickReplies({ replies, onSelect }: QuickRepliesProps) {
           Respuestas rápidas
         </span>
         {replies.map((reply) => (
-        <button
-          key={reply}
-          type="button"
-          className="chat-quick-replies__chip"
-          aria-pressed={false}
-          onClick={() => onSelect(reply)}
-        >
-          {reply}
-        </button>
+          <button
+            key={reply}
+            type="button"
+            className="chip chat-quick-replies__chip"
+            aria-pressed={false}
+            onClick={() => onSelect(reply)}
+          >
+            {reply}
+          </button>
         ))}
       </OptionGroup>
     </div>

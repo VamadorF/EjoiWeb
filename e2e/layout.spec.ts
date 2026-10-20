@@ -106,7 +106,7 @@ test.describe('Desktop shell 1440×900', () => {
         await route.fulfill({
           status: 200,
           contentType: 'application/json',
-          body: JSON.stringify({ remainingMessages: 12 }),
+          body: JSON.stringify({ messagesRemaining: 12 }),
         });
         return;
       }
@@ -126,6 +126,74 @@ test.describe('Desktop shell 1440×900', () => {
     expect(readBox?.width).toBeGreaterThanOrEqual(680);
     expect(readBox?.width).toBeLessThanOrEqual(720);
     expect(profileBox?.width).toBe(320);
+  });
+
+  test('chat: encabezado, cupo y burbujas del manual', async ({ page }) => {
+    await page.route('**/api/**', async (route) => {
+      const path = new URL(route.request().url()).pathname.replace(/^\/api/, '');
+      if (path.includes('/auth/refresh')) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ accessToken: 'e2e-layout-chat-ui' }),
+        });
+        return;
+      }
+      if (path.includes('/companion/me/creation')) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            state: 'ready',
+            profile: { id: 'c1', name: 'Luna', visualStyle: 'realista' },
+            firstMessage: { id: 'm1', content: 'Hola', meta: {} },
+          }),
+        });
+        return;
+      }
+      if (path.includes('/companion/me')) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ id: 'c1', name: 'Luna', visualStyle: 'realista', interests: [], boundaries: [] }),
+        });
+        return;
+      }
+      if (path.includes('/chat/')) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            messages: [{ id: 'u1', role: 'user', message: 'Hola Luna' }],
+            hasMore: false,
+          }),
+        });
+        return;
+      }
+      if (path.includes('/subscription/me')) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ messagesRemaining: 12 }),
+        });
+        return;
+      }
+      await route.fulfill({ status: 200, contentType: 'application/json', body: '{}' });
+    });
+
+    await page.goto('/chat');
+    await page.waitForSelector('[data-testid="chat-conv-header"]');
+    await expect(page.getByTestId('chat-quota')).toContainText('12 mensajes restantes');
+
+    const aiBubble = page.locator('.bubble--ai').first();
+    const userBubble = page.locator('.bubble--user').first();
+    await expect(aiBubble).toBeVisible();
+    await expect(userBubble).toBeVisible();
+
+    const aiBg = await aiBubble.evaluate((el) => getComputedStyle(el).backgroundColor);
+    const userBg = await userBubble.evaluate((el) => getComputedStyle(el).backgroundColor);
+    expect(aiBg).not.toBe('rgba(0, 0, 0, 0)');
+    expect(userBg).not.toBe(aiBg);
   });
 });
 

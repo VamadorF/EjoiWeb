@@ -6,8 +6,6 @@ import type { OnboardingData } from '@/features/onboarding/types';
 import { ENABLE_AGE, ENABLE_ETHNICITY } from '~/platform/env';
 
 import type { CompanionProfile } from './useProfile';
-import type { SubscriptionMe } from './useQuota';
-
 import './ProfilePanel.css';
 
 const GENDER_LABELS: Record<string, string> = {
@@ -36,8 +34,6 @@ export type ProfilePanelDraft = Pick<
 export type ProfilePanelProps = {
   profile?: CompanionProfile | null;
   draft?: ProfilePanelDraft | null;
-  subscription?: SubscriptionMe | null;
-  quotaLoading?: boolean;
   profileLoading?: boolean;
   profileError?: boolean;
   onRetryProfile?: () => void;
@@ -78,8 +74,6 @@ function mergeProfileView(
 export function ProfilePanel({
   profile,
   draft,
-  subscription,
-  quotaLoading,
   profileLoading,
   profileError,
   onRetryProfile,
@@ -105,10 +99,6 @@ export function ProfilePanel({
   if (ENABLE_ETHNICITY && view.ethnicity) {
     appearanceParts.push(view.ethnicity);
   }
-
-  const quotaExhausted =
-    subscription != null &&
-    (subscription.isFreeTierExhausted || subscription.messagesRemaining <= 0);
 
   return (
     <div className="chat-profile-panel" data-testid="chat-profile-card">
@@ -138,7 +128,9 @@ export function ProfilePanel({
               <img
                 src={portraitUrl}
                 alt=""
-                className={`chat-profile-card__portrait${portraitBlur ? ' chat-profile-card__portrait--blur' : ''}`}
+                className={`avatar avatar--132 chat-profile-card__portrait${
+                  portraitBlur ? ' avatar--blur' : ''
+                }`}
               />
               {portraitBlur && portraitPendingLabel ? (
                 <span className="chat-profile-card__portrait-label">{portraitPendingLabel}</span>
@@ -147,7 +139,7 @@ export function ProfilePanel({
           ) : null}
 
           <h2 className="chat-profile-panel__name">{view.name}</h2>
-          {showOnline ? <p className="chat-page__online">{t('chat.online')}</p> : null}
+          {showOnline ? <p className="chat-profile-panel__online">{t('chat.online')}</p> : null}
 
           {view.persona ? (
             <section className="chat-profile-panel__section">
@@ -165,11 +157,11 @@ export function ProfilePanel({
 
           {view.interests.length > 0 ? (
             <section className="chat-profile-panel__section">
-              <h3 className="chat-profile-panel__label">{t('chat.profile_interests')}</h3>
-              <ul className="chat-page__choices">
+              <h3 className="label chat-profile-panel__label">{t('chat.profile_interests')}</h3>
+              <ul className="chat-profile-panel__pills">
                 {view.interests.map((interest) => (
-                  <li key={interest} className="chat-page__choice">
-                    {interest}
+                  <li key={interest}>
+                    <span className="pill">{interest}</span>
                   </li>
                 ))}
               </ul>
@@ -178,11 +170,11 @@ export function ProfilePanel({
 
           {view.boundaries.length > 0 ? (
             <section className="chat-profile-panel__section">
-              <h3 className="chat-profile-panel__label">{t('chat.profile_boundaries')}</h3>
-              <ul className="chat-page__choices">
+              <h3 className="label chat-profile-panel__label">{t('chat.profile_boundaries')}</h3>
+              <ul className="chat-profile-panel__pills">
                 {view.boundaries.map((boundary) => (
-                  <li key={boundary} className="chat-page__choice">
-                    {boundary}
+                  <li key={boundary}>
+                    <span className="pill">{boundary}</span>
                   </li>
                 ))}
               </ul>
@@ -202,22 +194,9 @@ export function ProfilePanel({
             </button>
           ) : null}
 
-          <Link to="/chat/editar" className="chat-profile-panel__edit">
+          <Link to="/chat/editar" className="btn btn--secondary btn--m chat-profile-panel__edit">
             {t('menu.edit')}
           </Link>
-
-          {!quotaLoading && subscription != null ? (
-            <p
-              className={
-                quotaExhausted ? 'chat-profile-panel__quota chat-profile-panel__quota--out' : 'chat-profile-panel__quota'
-              }
-              data-testid="chat-quota"
-            >
-              {quotaExhausted
-                ? t('chat.quota_out')
-                : t('chat.quota_left', { count: subscription.messagesRemaining })}
-            </p>
-          ) : null}
         </>
       ) : null}
     </div>
