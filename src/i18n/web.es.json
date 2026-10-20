@@ -1,1 +1,14 @@
-{}
+{
+  "access": {
+    "step": "Paso 1 de 3",
+    "sign_in": "Iniciar sesión",
+    "returning_title": "Qué bueno verte de nuevo",
+    "social_proof": "Ya somos {{count}} fundadores",
+    "invite_placeholder": "Escribe tu código",
+    "invite_valid": "Código válido. Te invitó {{name}}.",
+    "invite_invalid": "Ese código no existe. Revísalo o continúa sin código.",
+    "error_generic": "No pudimos iniciar sesión. Inténtalo de nuevo.",
+    "apple_continue": "Continuar con Apple",
+    "have_code": "Tengo un código"
+  }
+}

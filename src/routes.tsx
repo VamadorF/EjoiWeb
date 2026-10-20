@@ -1,7 +1,9 @@
 import { lazy } from 'react';
-import { createBrowserRouter, Navigate, type RouteObject } from 'react-router';
+import { createBrowserRouter, Navigate, Outlet, type RouteObject } from 'react-router';
 
-const AccessPage = lazy(() => import('~/pages/AccessPage'));
+import { SessionRouting } from '~/features/auth/useWebSession';
+
+const AccessPage = lazy(() => import('~/pages/Access/AccessPage'));
 const CreateQuienPage = lazy(() => import('~/pages/CreateQuienPage'));
 const CreateComoPage = lazy(() => import('~/pages/CreateComoPage'));
 const ChatPage = lazy(() => import('~/pages/ChatPage'));
@@ -16,4 +18,18 @@ export const routeConfig: RouteObject[] = [
   { path: '/chat/editar', element: <ChatEditPage /> },
 ];
 
-export const router = createBrowserRouter(routeConfig);
+function RootLayout() {
+  return (
+    <>
+      <SessionRouting />
+      <Outlet />
+    </>
+  );
+}
+
+export const router = createBrowserRouter([
+  {
+    element: <RootLayout />,
+    children: routeConfig,
+  },
+]);
