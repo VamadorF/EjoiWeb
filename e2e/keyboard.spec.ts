@@ -152,6 +152,36 @@ test.describe('Teclado desktop (SCRUM-113)', () => {
     await expect(page.locator('#main-content')).toBeFocused();
   });
 
+  test('línea de cuenta accesible por teclado', async ({ page }) => {
+    await page.route('**/api/**', async (route) => {
+      const path = new URL(route.request().url()).pathname.replace(/^\/api/, '');
+      if (path.includes('/campaign/founder-count')) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ claimed: 0, max: 100 }),
+        });
+        return;
+      }
+      await route.abort();
+    });
+    await page.goto('/acceso');
+    await expect(page.getByTestId('page-acceso')).toBeVisible();
+
+    const signIn = page.getByRole('button', { name: 'Iniciar sesión' });
+    await signIn.focus();
+    await expect(signIn).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(page.getByRole('heading', { name: 'Qué bueno verte de nuevo' })).toBeVisible();
+
+    await page.goto('/acceso');
+    const codeBtn = page.getByRole('button', { name: 'Tengo un código' });
+    await codeBtn.focus();
+    await expect(codeBtn).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(page.locator('#access-invite-code')).toBeFocused();
+  });
+
   test('Enter envía y Shift+Enter no envía en el chat', async ({ page }) => {
     await mockAuthedApi(page);
     await page.goto('/chat');

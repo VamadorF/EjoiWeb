@@ -2,6 +2,7 @@
   "access": {
     "step": "Paso 1 de 3",
     "sign_in": "Iniciar sesión",
+    "account_prompt": "¿Ya tienes cuenta?",
     "returning_title": "Qué bueno verte de nuevo",
     "social_proof": "Ya somos {{count}} fundadores",
     "invite_placeholder": "Escribe tu código",

@@ -32,6 +32,18 @@ import './AccessPage.css';
 const LEGAL_TERMS_URL = `${CAMPAIGN_LANDING_URL}/terminos`;
 const LEGAL_PRIVACY_URL = `${CAMPAIGN_LANDING_URL}/privacidad`;
 
+const ACCESS_PORTRAITS = {
+  left: '/portraits/ilustrado-femenino.webp',
+  center: '/portraits/realista-femenino.webp',
+  right: '/portraits/realista-masculino.webp',
+} as const;
+
+const VALUE_PILLS = [
+  { key: 'pill_safe', icon: 'shield-checkmark-outline', tone: 'brand' },
+  { key: 'pill_support', icon: 'heart-outline', tone: 'lav' },
+  { key: 'pill_habits', icon: 'trending-up-outline', tone: 'ok' },
+] as const;
+
 function profileFromIdToken(idToken: string) {
   const payload = decodeJwtPayload(idToken);
   return {
@@ -195,28 +207,44 @@ export default function AccessPage() {
       <DesktopShell header={<Logo height={28} />}>
         <div className="access-layout">
           <section className="access-brand" aria-labelledby="access-brand-heading">
+            <div className="access-brand__portraits" aria-hidden>
+              <img
+                className="avatar access-brand__portrait access-brand__portrait--side"
+                src={ACCESS_PORTRAITS.left}
+                alt=""
+                width={96}
+                height={96}
+                decoding="async"
+              />
+              <img
+                className="avatar avatar--132 access-brand__portrait access-brand__portrait--center"
+                src={ACCESS_PORTRAITS.center}
+                alt=""
+                width={132}
+                height={132}
+                decoding="async"
+              />
+              <img
+                className="avatar access-brand__portrait access-brand__portrait--side"
+                src={ACCESS_PORTRAITS.right}
+                alt=""
+                width={96}
+                height={96}
+                decoding="async"
+              />
+            </div>
             <h1 id="access-brand-heading" className="access-brand__tagline">
               {t('auth.login.value_tagline')}
             </h1>
-            <ul className="access-brand__seals">
-              <li>
-                <span className="access-brand__seal-icon access-brand__seal-icon--lav" aria-hidden>
-                  <AppIcon name="chatbubbles-outline" />
-                </span>
-                {t('auth.login.value_seal_1')}
-              </li>
-              <li>
-                <span className="access-brand__seal-icon access-brand__seal-icon--brand" aria-hidden>
-                  <AppIcon name="shield-checkmark-outline" />
-                </span>
-                {t('auth.login.value_seal_2')}
-              </li>
-              <li>
-                <span className="access-brand__seal-icon access-brand__seal-icon--ok" aria-hidden>
-                  <AppIcon name="time-outline" />
-                </span>
-                {t('auth.login.value_seal_3')}
-              </li>
+            <ul className="access-brand__pills">
+              {VALUE_PILLS.map(({ key, icon, tone }) => (
+                <li key={key}>
+                  <span className={`pill access-brand__pill access-brand__pill--${tone}`}>
+                    <AppIcon name={icon} className="access-brand__pill-icon" />
+                    {t(`auth.login.${key}`)}
+                  </span>
+                </li>
+              ))}
             </ul>
             {founderCount !== null ? (
               <p className="access-brand__social">
@@ -304,26 +332,28 @@ export default function AccessPage() {
                 ) : null}
               </div>
 
-              <hr className="access-auth__sep" />
-
-              <div className="access-auth__text-actions">
+              <p className="access-auth__account-line">
+                {t('web:access.account_prompt')}{' '}
                 <button
                   type="button"
-                  className="btn btn--text btn--l access-auth__text-btn"
-                  onClick={toggleInvite}
-                  disabled={busy}
-                >
-                  {t('web:access.have_code')}
-                </button>
-                <button
-                  type="button"
-                  className="btn btn--text btn--l access-auth__text-btn"
+                  className="btn btn--text access-auth__account-btn"
                   onClick={focusProviders}
                   disabled={busy}
                 >
                   {t('web:access.sign_in')}
                 </button>
-              </div>
+                <span className="access-auth__account-sep" aria-hidden>
+                  {' · '}
+                </span>
+                <button
+                  type="button"
+                  className="btn btn--text access-auth__account-btn"
+                  onClick={toggleInvite}
+                  disabled={busy}
+                >
+                  {t('web:access.have_code')}
+                </button>
+              </p>
 
               {showInvite ? (
                 <div className="field">
