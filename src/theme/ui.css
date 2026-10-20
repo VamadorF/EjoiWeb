@@ -460,6 +460,11 @@
   color: var(--c-ink);
 }
 
+.bubble__hl {
+  font-weight: 700;
+  color: var(--c-brand-text);
+}
+
 .bubble--user {
   align-self: flex-end;
   border-radius: 16px 16px 4px 16px;

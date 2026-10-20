@@ -95,7 +95,7 @@ test.describe('QA cross-browser SCRUM-116', () => {
     await expect(page.getByText('Mensaje pendiente e2e')).toBeVisible();
 
     await expect(page.getByTestId('chat-error-banner')).toBeVisible({ timeout: 15_000 });
-    await page.getByRole('button', { name: 'Reintentar' }).click();
+    await page.getByRole('button', { name: 'Intentar de nuevo' }).click();
 
     await expect(page.getByText('Hola, soy Luna')).toBeVisible({ timeout: 15_000 });
     await page.waitForTimeout(800);

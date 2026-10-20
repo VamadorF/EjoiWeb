@@ -59,8 +59,14 @@
     "portrait_on_way": "Retrato en camino",
     "portrait_retry": "Reintentar retrato",
     "error_banner": "No pudimos terminar de crear a {{name}}. Tus elecciones y tu mensaje están guardados.",
+    "error_retry": "Intentar de nuevo",
+    "error_review": "Revisar mis elecciones",
     "retry": "Reintentar",
     "back_to_step3": "Volver a ajustar",
+    "ready_moment": "{{name}} ya puede conversar contigo",
+    "placeholder": "Escribe un mensaje…",
+    "summary": "{{name}} es {{persona}}, con presencia {{presence}}, y le interesan {{interests}}.",
+    "summary_edit": "Editar",
     "quota_left": "Te quedan {{count}} mensajes",
     "quota_remaining": "{{count}} mensajes restantes",
     "quota_low": "Te quedan {{count}} mensajes",
@@ -74,6 +80,9 @@
     "profile_age": "{{count}} años",
     "profile_load_error": "No pudimos cargar el perfil.",
     "load_older": "Ver mensajes anteriores"
+  },
+  "profile": {
+    "avoids": "Evita hablar de"
   },
   "menu": {
     "chat": "Conversación",

@@ -184,7 +184,7 @@ for (const theme of ['light', 'dark'] as const) {
       });
       await page.goto('/chat');
       await setTheme(page, theme);
-      const primary = page.getByTestId('chat-error-banner').getByRole('button', { name: 'Reintentar' });
+      const primary = page.getByTestId('chat-error-banner').getByRole('button', { name: 'Intentar de nuevo' });
       await expectUsesToken(page, primary, 'backgroundColor', '--c-brand');
       await expectUsesToken(page, primary, 'color', '--c-on-brand');
     });

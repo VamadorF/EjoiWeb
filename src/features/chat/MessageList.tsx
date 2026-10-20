@@ -4,10 +4,13 @@ import { AppIcon } from '~/components/AppIcon';
 
 import type { Message } from '@/features/chat/types';
 
+import { splitInterestHighlights } from './highlightInterests';
+
 export type ChatBubble = {
   id: string;
   role: 'user' | 'assistant';
   text: string;
+  basedOnInterests?: string[];
   pending?: boolean;
   failed?: boolean;
   onRetry?: () => void;
@@ -41,6 +44,11 @@ export function MessageList({ messages, loading, showFirstMessageNote }: Message
 
         const bubbleClass = isAssistant ? 'bubble--ai' : 'bubble--user';
 
+        const body =
+          showNote && msg.basedOnInterests?.length
+            ? splitInterestHighlights(msg.text, msg.basedOnInterests)
+            : [{ text: msg.text }];
+
         return (
           <li key={msg.id} className="chat-messages__item">
             <div
@@ -48,7 +56,17 @@ export function MessageList({ messages, loading, showFirstMessageNote }: Message
                 msg.failed ? ' chat-messages__bubble--failed' : ''
               }`}
             >
-              <p>{msg.text}</p>
+              <p>
+                {body.map((part, index) =>
+                  part.highlight ? (
+                    <strong key={index} className="bubble__hl">
+                      {part.text}
+                    </strong>
+                  ) : (
+                    <span key={index}>{part.text}</span>
+                  ),
+                )}
+              </p>
               {msg.pending ? (
                 <span className="chat-messages__pending-label">
                   <AppIcon name="time-outline" className="chat-messages__pending-icon" />
@@ -79,5 +97,6 @@ export function firstMessageToBubble(message: Message): ChatBubble {
     id: message.id,
     role: message.role === 'assistant' ? 'assistant' : 'user',
     text: message.message,
+    basedOnInterests: message.meta?.basedOnInterests,
   };
 }

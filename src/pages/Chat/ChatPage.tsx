@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider, useInfiniteQuery } from '@tanstack/react-query';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 
 import { getChatMessages, sendChatMessage } from '@/features/chat/api/chat.api';
 import { mergeAndSortChatMessages } from '@/features/chat/utils/mergeChatPages';
@@ -50,6 +50,17 @@ const CREATION_STEP_KEYS = [
   ['portrait', 'chat.step_portrait'],
 ] as const;
 
+const READY_MOMENT_MS = 2000;
+
+const INTENSITY_LABEL_KEYS: Record<
+  string,
+  'create.presence_soft' | 'create.presence_balanced' | 'create.presence_intense'
+> = {
+  soft: 'create.presence_soft',
+  balanced: 'create.presence_balanced',
+  intense: 'create.presence_intense',
+};
+
 const chatQueryClient = new QueryClient({
   defaultOptions: { queries: { retry: false } },
 });
@@ -66,6 +77,8 @@ function ChatPageContent() {
   const { t } = useTranslation('web');
   const navigate = useNavigate();
   const [retryKey, setRetryKey] = useState(0);
+  const [readyMoment, setReadyMoment] = useState(false);
+  const prevCreationStateRef = useRef<string>('none');
   const { state, steps, profile, firstMessage, isCreating } = useCreationStatus(retryKey);
   const [draftData, setDraftData] = useState<OnboardingData | null>(null);
   const [pending, setPending] = useState<Awaited<ReturnType<typeof loadPending>>>(null);
@@ -74,6 +87,20 @@ function ChatPageContent() {
 
   const isReady = state === 'ready';
   const isError = state === 'error';
+  const showConversation = isReady && !readyMoment;
+
+  useEffect(() => {
+    const prev = prevCreationStateRef.current;
+    prevCreationStateRef.current = state;
+    if (prev === 'creating' && state === 'ready') {
+      setReadyMoment(true);
+      const timer = window.setTimeout(() => setReadyMoment(false), READY_MOMENT_MS);
+      return () => window.clearTimeout(timer);
+    }
+    if (state !== 'ready') {
+      setReadyMoment(false);
+    }
+  }, [state]);
   const profileQueryEnabled = isReady;
 
   const {
@@ -234,6 +261,7 @@ function ChatPageContent() {
         id: firstMessage.id,
         role: 'assistant',
         text: firstMessage.content,
+        basedOnInterests: firstMessage.meta?.basedOnInterests,
       });
     }
 
@@ -280,6 +308,14 @@ function ChatPageContent() {
       ? t('chat.can_write')
       : undefined;
 
+  const summaryPersona = profileData?.persona?.trim() || draftData?.persona?.trim() || '';
+  const summaryIntensity = profileData?.intensity ?? draftData?.intensity;
+  const summaryPresenceKey = summaryIntensity ? INTENSITY_LABEL_KEYS[summaryIntensity] : undefined;
+  const summaryPresence = summaryPresenceKey ? t(summaryPresenceKey) : '';
+  const summaryInterests = (profileData?.interests?.length ? profileData.interests : draftData?.interests ?? [])
+    .slice(0, 3)
+    .join(', ');
+
   return (
     <ChatShell menu={<SideMenu />} profile={
       <ProfilePanel
@@ -292,11 +328,11 @@ function ChatPageContent() {
         portraitBlur={blurPortrait}
         portraitPendingLabel={blurPortrait ? t('chat.portrait_on_way') : null}
         onRetryPortrait={portrait.state === 'error' ? portrait.retry : undefined}
-        showOnline={isReady}
+        showOnline={showConversation}
       />
     }>
       <div className="chat-shell__read-inner">
-        {isReady ? (
+        {showConversation ? (
           <header className="chat-conv-header" data-testid="chat-conv-header">
             <div className="chat-conv-header__peer">
               {headerPortrait ? (
@@ -318,13 +354,29 @@ function ChatPageContent() {
           </header>
         ) : null}
 
-        {isReady && showQuotaLow ? (
+        {showConversation && summaryInterests ? (
+          <div className="banner--info chat-page__summary" data-testid="chat-summary-banner">
+            <p className="chat-page__summary-text">
+              {t('chat.summary', {
+                name: companionName,
+                persona: summaryPersona,
+                presence: summaryPresence,
+                interests: summaryInterests,
+              })}
+            </p>
+            <Link to="/chat/editar" className="btn btn--text chat-page__summary-edit">
+              {t('chat.summary_edit')}
+            </Link>
+          </div>
+        ) : null}
+
+        {showConversation && showQuotaLow ? (
           <p className="banner--warn chat-conv-banner" role="status" data-testid="chat-quota-low">
             {t('chat.quota_low', { count: messagesRemaining })}
           </p>
         ) : null}
 
-        {isReady && quotaOut ? (
+        {showConversation && quotaOut ? (
           <p className="banner--warn chat-conv-banner" role="status">
             {t('chat.quota_out')}
           </p>
@@ -334,11 +386,11 @@ function ChatPageContent() {
           <div className="banner--error chat-page__banner" role="alert" data-testid="chat-error-banner">
             <p>{t('chat.error_banner', { name: companionName })}</p>
             <div className="chat-page__banner-actions">
-              <button type="button" className="btn btn--secondary btn--m" onClick={() => navigate('/crear/como')}>
-                {t('chat.back_to_step3')}
-              </button>
               <button type="button" className="btn btn--primary btn--m" onClick={() => void retryCreation()}>
-                {t('chat.retry')}
+                {t('chat.error_retry')}
+              </button>
+              <button type="button" className="btn btn--text btn--m" onClick={() => navigate('/crear/como')}>
+                {t('chat.error_review')}
               </button>
             </div>
           </div>
@@ -380,6 +432,20 @@ function ChatPageContent() {
           </section>
         ) : null}
 
+        {readyMoment ? (
+          <section className="card chat-page__ready-moment" data-testid="chat-ready-moment">
+            {headerPortrait ? (
+              <img
+                src={headerPortrait}
+                alt=""
+                className="avatar avatar--168 chat-page__ready-portrait"
+              />
+            ) : null}
+            <AppIcon name="checkmark-circle" className="chat-page__ready-check" aria-hidden="true" />
+            <p className="chat-page__ready-text">{t('chat.ready_moment', { name: companionName })}</p>
+          </section>
+        ) : null}
+
         <div className="chat-thread">
           {hasNextPage ? (
             <button
@@ -393,13 +459,13 @@ function ChatPageContent() {
           ) : null}
 
           <MessageList
-            messages={bubbles}
+            messages={readyMoment ? [] : bubbles}
             loading={!isReady && !isCreating && !isError && state === 'none'}
-            showFirstMessageNote={isReady && basedOn.length > 0}
+            showFirstMessageNote={showConversation && basedOn.length > 0}
           />
         </div>
 
-        {isReady && !quotaOut ? (
+        {showConversation && !quotaOut ? (
           <QuickReplies replies={quickReplies} onSelect={(text) => void handleSend(text)} />
         ) : null}
 

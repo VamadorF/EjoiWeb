@@ -52,7 +52,8 @@ export function Composer({ disabled, onSend, hint }: ComposerProps) {
           maxLength={MESSAGE_MAX_LENGTH}
           disabled={disabled}
           rows={1}
-          aria-label={t('chat.can_write')}
+          placeholder={t('chat.placeholder')}
+          aria-label={t('chat.placeholder')}
           onChange={(e) => {
             setText(e.target.value);
             resizeInput(e.target);
@@ -66,7 +67,9 @@ export function Composer({ disabled, onSend, hint }: ComposerProps) {
         ) : null}
         <button
           type="submit"
-          className="btn btn--primary btn--icon chat-composer__send"
+          className={`btn btn--icon chat-composer__send${
+            text.trim() ? ' chat-composer__send--ready' : ' chat-composer__send--empty'
+          }`}
           disabled={disabled || !text.trim()}
           aria-label={t('chat.send_label')}
         >

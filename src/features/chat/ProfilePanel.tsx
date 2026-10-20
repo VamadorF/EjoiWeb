@@ -88,6 +88,10 @@ export function ProfilePanel({
   const { t } = useTranslation('web');
   const view = mergeProfileView(profile, draft);
   const intensityKey = view.intensity ? INTENSITY_KEYS[view.intensity] : undefined;
+  const traitPills: string[] = [];
+  if (view.persona?.trim()) traitPills.push(view.persona.trim());
+  if (intensityKey) traitPills.push(t(intensityKey));
+
   const appearanceParts: string[] = [];
   if (view.visualStyle) {
     appearanceParts.push(STYLE_LABELS[view.visualStyle] ?? view.visualStyle);
@@ -148,18 +152,14 @@ export function ProfilePanel({
           ) : null}
           {showOnline ? <p className="chat-profile-panel__online">{t('chat.online')}</p> : null}
 
-          {view.persona ? (
-            <section className="chat-profile-panel__section">
-              <h3 className="chat-profile-panel__label">{t('chat.profile_personality')}</h3>
-              <p className="chat-profile-panel__text">{view.persona}</p>
-            </section>
-          ) : null}
-
-          {intensityKey ? (
-            <section className="chat-profile-panel__section">
-              <h3 className="chat-profile-panel__label">{t('chat.profile_presence')}</h3>
-              <p className="chat-profile-panel__text">{t(intensityKey)}</p>
-            </section>
+          {traitPills.length > 0 ? (
+            <ul className="chat-profile-panel__pills chat-profile-panel__traits">
+              {traitPills.map((label) => (
+                <li key={label}>
+                  <span className="pill">{label}</span>
+                </li>
+              ))}
+            </ul>
           ) : null}
 
           {view.interests.length > 0 ? (
@@ -177,7 +177,7 @@ export function ProfilePanel({
 
           {view.boundaries.length > 0 ? (
             <section className="chat-profile-panel__section">
-              <h3 className="label chat-profile-panel__label">{t('chat.profile_boundaries')}</h3>
+              <h3 className="label chat-profile-panel__label">{t('profile.avoids')}</h3>
               <ul className="chat-profile-panel__pills">
                 {view.boundaries.map((boundary) => (
                   <li key={boundary}>
@@ -190,7 +190,7 @@ export function ProfilePanel({
 
           {appearanceParts.length > 0 ? (
             <section className="chat-profile-panel__section">
-              <h3 className="chat-profile-panel__label">{t('chat.profile_appearance')}</h3>
+              <h3 className="label chat-profile-panel__label">{t('chat.profile_appearance')}</h3>
               <p className="chat-profile-panel__text">{appearanceParts.join(' · ')}</p>
             </section>
           ) : null}
