@@ -1,10 +1,24 @@
 import { describe, expect, it } from 'vitest';
 
-import { handleMockApiRequest, normalizeApiPath } from './mockApi';
+import {
+  handleMockApiRequest,
+  MOCK_DEMO_SESSION_KEY,
+  normalizeApiPath,
+  setMockDemoLoggedIn,
+} from './mockApi';
 
 describe('mockApi', () => {
   it('normaliza rutas con prefijo /api', () => {
     expect(normalizeApiPath('http://localhost:5173/api/auth/refresh')).toBe('/auth/refresh');
+  });
+
+  it('refresh devuelve 401 hasta login demo', () => {
+    sessionStorage.removeItem(MOCK_DEMO_SESSION_KEY);
+    const denied = handleMockApiRequest('/api/auth/refresh', { method: 'POST' });
+    expect(denied?.status).toBe(401);
+    setMockDemoLoggedIn();
+    const allowed = handleMockApiRequest('/api/auth/refresh', { method: 'POST' });
+    expect(allowed?.status).toBe(200);
   });
 
   it('responde login mock', () => {

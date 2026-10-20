@@ -16,6 +16,17 @@ type MockApiResponse<T> = {
 };
 
 export const MOCK_USER_ID = 'mock-dev-user';
+export const MOCK_DEMO_SESSION_KEY = 'ejoi-mock-demo-logged-in';
+
+export function isMockDemoLoggedIn(): boolean {
+  if (typeof sessionStorage === 'undefined') return false;
+  return sessionStorage.getItem(MOCK_DEMO_SESSION_KEY) === '1';
+}
+
+export function setMockDemoLoggedIn(): void {
+  if (typeof sessionStorage === 'undefined') return;
+  sessionStorage.setItem(MOCK_DEMO_SESSION_KEY, '1');
+}
 
 const MOCK_PORTRAIT_PATH = '/portraits/realista-femenino.webp';
 
@@ -97,6 +108,10 @@ function ok<T>(data: T, status = 200): MockApiResponse<T> {
   return { data, status, statusText: 'OK' };
 }
 
+function unauthorized<T>(): MockApiResponse<T> {
+  return { data: {} as T, status: 401, statusText: 'Unauthorized' };
+}
+
 export function handleMockApiRequest<T>(
   absoluteOrRelativeUrl: string,
   config: MockRequestConfig,
@@ -116,6 +131,7 @@ export function handleMockApiRequest<T>(
   const creation = creationStore.get(userId)!;
 
   if (path.endsWith('/auth/refresh') && method === 'POST') {
+    if (!isMockDemoLoggedIn()) return unauthorized<T>();
     return ok(authBody(userId) as T);
   }
 
@@ -123,6 +139,7 @@ export function handleMockApiRequest<T>(
     (path.endsWith('/auth/google') || path.endsWith('/auth/apple') || path.endsWith('/auth/mock-login')) &&
     method === 'POST'
   ) {
+    setMockDemoLoggedIn();
     return ok(authBody(userId) as T);
   }
 

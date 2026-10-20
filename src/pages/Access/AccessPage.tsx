@@ -2,11 +2,11 @@ import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 
-import { legalDocuments } from '@/features/auth/assets/legalDocuments';
 import { fromWebAuthResponse, type RawAuthResponse } from '~/features/auth/authWeb.adapter';
 import { CAMPAIGN_LANDING_URL, isOAuthConfigured, MOCK_API } from '~/platform/env';
 import { httpClient } from '~/platform/http';
 import * as session from '~/platform/session';
+import { setMockDemoLoggedIn } from '~/platform/mockApi';
 import { AppIcon } from '~/components/AppIcon';
 import { Logo } from '~/components/Logo';
 import { DesktopShell } from '~/layout/DesktopShell';
@@ -60,6 +60,11 @@ export default function AccessPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const showDevOAuthBanner =
+    import.meta.env.DEV &&
+    !isOAuthConfigured.google &&
+    !isAppleSignInConfigured();
+
   useEffect(() => {
     document.documentElement.classList.add('access-route');
     return () => document.documentElement.classList.remove('access-route');
@@ -76,6 +81,7 @@ export default function AccessPage() {
   }, []);
 
   const runAfterLogin = useCallback(async () => {
+    if (MOCK_API) setMockDemoLoggedIn();
     markAuthenticated();
     const path = await finishLoginAfterProvider();
     navigate(path, { replace: true });
@@ -184,16 +190,9 @@ export default function AccessPage() {
     }
   };
 
-  const authTitle = returning
-    ? t('web:access.returning_title')
-    : `${t('auth.login.headline_prefix')}${t('auth.login.headline_highlight')}${t('auth.login.headline_suffix')}`;
-
   return (
     <div className="access-page" data-testid="page-acceso">
-      <DesktopShell
-        header={<Logo height={28} className="access-brand__logo" />}
-        footer={<span>{legalDocuments.termsAndConditions.title}</span>}
-      >
+      <DesktopShell header={<Logo height={28} />}>
         <div className="access-layout">
           <section className="access-brand" aria-labelledby="access-brand-heading">
             <h1 id="access-brand-heading" className="access-brand__tagline">
@@ -201,15 +200,21 @@ export default function AccessPage() {
             </h1>
             <ul className="access-brand__seals">
               <li>
-                <AppIcon name="checkmark-circle-outline" />
+                <span className="access-brand__seal-icon access-brand__seal-icon--lav" aria-hidden>
+                  <AppIcon name="chatbubbles-outline" />
+                </span>
                 {t('auth.login.value_seal_1')}
               </li>
               <li>
-                <AppIcon name="shield-checkmark-outline" />
+                <span className="access-brand__seal-icon access-brand__seal-icon--brand" aria-hidden>
+                  <AppIcon name="shield-checkmark-outline" />
+                </span>
                 {t('auth.login.value_seal_2')}
               </li>
               <li>
-                <AppIcon name="time-outline" />
+                <span className="access-brand__seal-icon access-brand__seal-icon--ok" aria-hidden>
+                  <AppIcon name="time-outline" />
+                </span>
                 {t('auth.login.value_seal_3')}
               </li>
             </ul>
@@ -220,118 +225,155 @@ export default function AccessPage() {
             ) : null}
           </section>
 
-          <section
-            className="access-auth"
-            aria-labelledby="access-auth-title"
-            aria-busy={busy || undefined}
-          >
-            {MOCK_API ? (
-              <p className="access-auth__mock-banner" role="status">
-                {t('web:access.mock_banner')}
-              </p>
-            ) : null}
-            <p className="access-auth__step">{t('web:access.step')}</p>
-            <h2 id="access-auth-title" className="access-auth__title">
-              {authTitle}
-            </h2>
-
-            <div className="access-auth__actions">
-              <button
-                type="button"
-                className="access-auth__link"
-                onClick={focusProviders}
-                disabled={busy}
-              >
-                {t('web:access.sign_in')}
-              </button>
-              <button
-                type="button"
-                className="access-auth__link"
-                onClick={toggleInvite}
-                disabled={busy}
-              >
-                {t('web:access.have_code')}
-              </button>
-            </div>
-
-            <div
-              id={providersGroupId}
-              ref={providersRef}
-              className="access-auth__providers"
-              tabIndex={-1}
-              aria-label={t('web:access.sign_in')}
-            >
-              {isOAuthConfigured.google ? (
-                <div className="access-auth__google-row">
-                  <div ref={googleHostRef} />
-                </div>
-              ) : null}
-              {isAppleSignInConfigured() ? (
-                <button
-                  type="button"
-                  className="access-auth__apple"
-                  onClick={() => void handleApple()}
-                  disabled={busy}
-                >
-                  {t('web:access.apple_continue')}
-                </button>
-              ) : null}
+          <section className="access-auth" aria-labelledby="access-auth-title">
+            <div className="access-auth__card card" aria-busy={busy || undefined}>
               {MOCK_API ? (
-                <button
-                  type="button"
-                  className="access-auth__mock-login"
-                  onClick={() => void handleMockLogin()}
-                  disabled={busy}
-                >
-                  {t('web:access.mock_login')}
-                </button>
+                <p className="banner--info" role="status">
+                  <AppIcon name="sparkles-outline" />
+                  {t('web:access.mock_banner')}
+                </p>
               ) : null}
-            </div>
+              {showDevOAuthBanner ? (
+                <p className="banner--warn" role="status">
+                  <AppIcon name="alert-circle-outline" />
+                  {t('web:access.dev_no_provider')}
+                </p>
+              ) : null}
 
-            {showInvite ? (
-              <div className="access-auth__invite">
-                <label htmlFor="access-invite-code">{t('auth.login.invite_code')}</label>
-                <input
-                  id="access-invite-code"
-                  ref={inviteInputRef}
-                  type="text"
-                  autoComplete="off"
-                  placeholder={t('web:access.invite_placeholder')}
-                  value={inviteCode}
-                  disabled={busy}
-                  onChange={(e) => setInviteCode(e.target.value)}
-                  onBlur={() => void onInviteBlur()}
-                />
-                {inviteMessage === 'ok' && inviterName ? (
-                  <p className="access-auth__invite-msg access-auth__invite-msg--ok" role="status">
-                    {t('web:access.invite_valid', { name: inviterName })}
-                  </p>
+              <p className="label">{t('web:access.step')}</p>
+              <div
+                className="access-auth__progress"
+                role="progressbar"
+                aria-valuemin={1}
+                aria-valuemax={3}
+                aria-valuenow={1}
+                aria-label={t('web:access.step')}
+              >
+                <span className="access-auth__progress-seg access-auth__progress-seg--done" />
+                <span className="access-auth__progress-seg" />
+                <span className="access-auth__progress-seg" />
+              </div>
+
+              <h2 id="access-auth-title" className="access-auth__title">
+                {returning ? (
+                  t('web:access.returning_title')
+                ) : (
+                  <>
+                    {t('auth.login.headline_prefix')}
+                    <span className="access-auth__highlight">{t('auth.login.headline_highlight')}</span>
+                    {t('auth.login.headline_suffix')}
+                  </>
+                )}
+              </h2>
+              {!returning ? (
+                <p className="access-auth__subtitle">{t('auth.login.subtitle')}</p>
+              ) : null}
+
+              <div
+                id={providersGroupId}
+                ref={providersRef}
+                className="access-auth__providers"
+                tabIndex={-1}
+                aria-label={t('web:access.sign_in')}
+              >
+                {isOAuthConfigured.google ? (
+                  <div className="access-auth__google-row">
+                    <div ref={googleHostRef} />
+                  </div>
                 ) : null}
-                {inviteMessage === 'invalid' ? (
-                  <p className="access-auth__invite-msg access-auth__invite-msg--err" role="status">
-                    {t('web:access.invite_invalid')}
-                  </p>
+                {isAppleSignInConfigured() ? (
+                  <button
+                    type="button"
+                    className="btn btn--secondary btn--l access-auth__provider-btn"
+                    onClick={() => void handleApple()}
+                    disabled={busy}
+                  >
+                    <AppIcon name="logo-apple" />
+                    {t('web:access.apple_continue')}
+                  </button>
+                ) : null}
+                {MOCK_API ? (
+                  <button
+                    type="button"
+                    className="btn btn--secondary btn--l access-auth__provider-btn"
+                    onClick={() => void handleMockLogin()}
+                    disabled={busy}
+                  >
+                    {t('web:access.mock_login')}
+                  </button>
                 ) : null}
               </div>
-            ) : null}
 
-            {error ? (
-              <p className="access-auth__error" role="alert">
-                {error}
+              <hr className="access-auth__sep" />
+
+              <div className="access-auth__text-actions">
+                <button
+                  type="button"
+                  className="btn btn--text btn--l access-auth__text-btn"
+                  onClick={toggleInvite}
+                  disabled={busy}
+                >
+                  {t('web:access.have_code')}
+                </button>
+                <button
+                  type="button"
+                  className="btn btn--text btn--l access-auth__text-btn"
+                  onClick={focusProviders}
+                  disabled={busy}
+                >
+                  {t('web:access.sign_in')}
+                </button>
+              </div>
+
+              {showInvite ? (
+                <div className="field">
+                  <label className="field__label" htmlFor="access-invite-code">
+                    {t('auth.login.invite_code')}
+                  </label>
+                  <input
+                    id="access-invite-code"
+                    ref={inviteInputRef}
+                    className="field__control"
+                    type="text"
+                    autoComplete="off"
+                    placeholder={t('web:access.invite_placeholder')}
+                    value={inviteCode}
+                    disabled={busy}
+                    onChange={(e) => setInviteCode(e.target.value)}
+                    onBlur={() => void onInviteBlur()}
+                  />
+                  {inviteMessage === 'ok' && inviterName ? (
+                    <p className="field__help" role="status">
+                      {t('web:access.invite_valid', { name: inviterName })}
+                    </p>
+                  ) : null}
+                  {inviteMessage === 'invalid' ? (
+                    <p className="field__help field__help--err" role="status">
+                      {t('web:access.invite_invalid')}
+                    </p>
+                  ) : null}
+                </div>
+              ) : null}
+
+              {error ? (
+                <p className="banner--error" role="alert">
+                  <AppIcon name="alert-circle-outline" />
+                  {error}
+                </p>
+              ) : null}
+
+              <p className="access-auth__legal">
+                {t('auth.login.terms_prefix')}{' '}
+                <a href={LEGAL_TERMS_URL} target="_blank" rel="noreferrer">
+                  {t('auth.login.terms_link')}
+                </a>
+                {t('auth.login.and_privacy')}
+                <a href={LEGAL_PRIVACY_URL} target="_blank" rel="noreferrer">
+                  {t('auth.login.privacy_link')}
+                </a>
+                {t('auth.login.terms_suffix')}
               </p>
-            ) : null}
-
-            <p className="access-auth__legal">
-              {t('auth.login.terms_prefix')}{' '}
-              <a href={LEGAL_TERMS_URL} target="_blank" rel="noreferrer">
-                {t('auth.login.terms_link')}
-              </a>
-              {t('auth.login.and_privacy')}
-              <a href={LEGAL_PRIVACY_URL} target="_blank" rel="noreferrer">
-                {t('auth.login.privacy_link')}
-              </a>
-              {t('auth.login.terms_suffix')}
-            </p>
+            </div>
           </section>
         </div>
       </DesktopShell>

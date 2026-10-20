@@ -11,7 +11,8 @@
     "apple_continue": "Continuar con Apple",
     "have_code": "Tengo un código",
     "mock_banner": "Modo demo: API simulada, sin backend.",
-    "mock_login": "Entrar en modo demo"
+    "mock_login": "Entrar en modo demo",
+    "dev_no_provider": "Falta configurar VITE_GOOGLE_CLIENT_ID en .env.local para ver el acceso con Google."
   },
   "create": {
     "step2": "Paso 2 de 3",
