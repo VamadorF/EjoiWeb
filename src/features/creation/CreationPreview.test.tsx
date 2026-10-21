@@ -6,6 +6,28 @@ import { applyCssVars } from '~/theme/cssVars';
 import { CreationPreview } from './CreationPreview';
 
 describe('CreationPreview', () => {
+  it('muestra retratos atenuados y texto cuando no hay estilo', () => {
+    applyCssVars();
+    render(
+      <CreationPreview
+        data={{
+          gender: '',
+          visualStyle: '',
+          persona: '',
+          tone: '',
+          interactionStyle: '',
+          conversationDepth: '',
+          interests: [],
+          boundaries: [],
+        }}
+        tagTimeline={[]}
+      />,
+    );
+    expect(screen.getByTestId('creation-preview-empty')).toBeTruthy();
+    expect(document.querySelectorAll('.creation-preview__empty-portrait').length).toBe(2);
+    expect(screen.queryByText('e')).toBeNull();
+  });
+
   it('cambia el retrato al cambiar estilo en el mismo render', () => {
     applyCssVars();
     const base = {

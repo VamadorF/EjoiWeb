@@ -73,10 +73,19 @@ function layoutMediaQueries(): string {
     height: 100%;
     width: 100%;
   }
+  .creation-preview-shell__title,
   .creation-preview__title,
   .creation-preview__name,
+  .creation-preview__empty-text,
   .creation-preview__greeting {
     display: none;
+  }
+  .creation-preview-shell.card {
+    width: 100%;
+    box-shadow: none;
+    border: none;
+    background: transparent;
+    padding: 0;
   }
   .creation-preview__portrait-wrap {
     flex: 0 0 auto;
@@ -196,7 +205,7 @@ export function buildCssVarsText(): string {
     `  --bp-medium: ${BREAKPOINTS.MEDIUM}px;`,
     '  --shell-header-h: 72px;',
     '  --shell-footer-h: 88px;',
-    '  --shell-preview-w: 420px;',
+    '  --shell-preview-w: 360px;',
     '  --shell-preview-strip-h: 72px;',
     '  --chat-menu-w: 264px;',
     '  --chat-read-min: 680px;',

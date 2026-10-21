@@ -29,6 +29,7 @@
   min-height: 0;
   max-width: var(--bp-reference);
   margin: 0 auto;
+  overflow: hidden;
   background: var(--c-bg);
 }
 
@@ -50,6 +51,9 @@
 
 .desktop-shell__preview {
   grid-area: preview;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   min-height: 0;
   overflow: hidden;
   border-left: calc(var(--border-card) * 1px) solid var(--c-line);
@@ -181,11 +185,21 @@
 }
 
 .creation-shell-footer {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: var(--space-4);
   width: 100%;
+}
+
+.creation-shell-footer__start {
+  flex: 0 0 auto;
+  min-width: 7rem;
+}
+
+.creation-shell-footer__center {
+  flex: 1;
+  min-width: 0;
 }
 
 .creation-shell-footer--how {
@@ -211,7 +225,7 @@
   align-items: center;
   justify-content: flex-end;
   gap: var(--space-4);
-  justify-self: end;
+  flex: 0 0 auto;
 }
 
 .creation-shell-footer__counter {

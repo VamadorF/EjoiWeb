@@ -41,7 +41,9 @@
     "s3_title": "Elige sus intereses",
     "s3_sub": "De esto hablará contigo. Elige al menos 3.",
     "s4_title": "Dale un nombre",
-    "s4_sub": "Así se presentará en la conversación."
+    "s4_sub": "Así se presentará en la conversación.",
+    "preview_empty": "Aquí verás a tu eJoi a medida que elijas",
+    "avoid_toggle": "Agregar temas a evitar (opcional)"
   },
   "create": {
     "step2": "Paso 2 de 3",

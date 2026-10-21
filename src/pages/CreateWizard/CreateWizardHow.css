@@ -86,7 +86,7 @@
 
 .opt--presence {
   align-items: flex-start;
-  min-height: 120px;
+  min-height: 88px;
   text-align: left;
 }
 
@@ -113,6 +113,10 @@
 }
 
 .opt--presence__desc {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
   font: var(--font-secondary);
   color: var(--c-ink2);
   width: 100%;

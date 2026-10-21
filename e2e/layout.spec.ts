@@ -101,7 +101,7 @@ test.describe('Desktop shell 1440×900', () => {
     const footer = page.getByTestId('shell-footer');
 
     await expect(header).toHaveCSS('height', '72px');
-    await expect(preview).toHaveCSS('width', '420px');
+    await expect(preview).toHaveCSS('width', '360px');
     await expect(footer).toHaveCSS('height', '88px');
   });
 

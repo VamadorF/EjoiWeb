@@ -34,6 +34,8 @@ export default defineConfig({
         env: {
           ...process.env,
           VITE_MOCK_API: 'false',
+          VITE_ENABLE_ETHNICITY: 'false',
+          VITE_ENABLE_AGE: 'false',
         },
       },
 });

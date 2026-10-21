@@ -47,6 +47,7 @@ import { useIsMobileLayout } from './useIsMobileLayout';
 import './CreateWizardWho.css';
 import './CreateWizardHow.css';
 import './CreateWizardMobile.css';
+import './CreateWizardLayout.css';
 
 const GENDERS: { id: Gender; label: string; icon: string }[] = [
   { id: 'femenino', label: 'Femenino', icon: 'female-outline' },
@@ -257,7 +258,7 @@ function CreateWizardStep({ stepIndex }: { stepIndex: number }) {
   const step1Body = (desktop: boolean) => (
     <>
       {stepIntro}
-      <section className="create-who__section" aria-labelledby="wizard-gender">
+      <section className="create-who__section" aria-labelledby="wizard-gender" data-testid="wizard-step-group">
         <h2 id="wizard-gender" className={desktop ? 'create-who__section-title' : 'create-who__label'}>
           Género
         </h2>
@@ -278,7 +279,7 @@ function CreateWizardStep({ stepIndex }: { stepIndex: number }) {
         </OptionGroup>
       </section>
 
-      <section className="create-who__section" aria-labelledby="wizard-persona">
+      <section className="create-who__section" aria-labelledby="wizard-persona" data-testid="wizard-step-group">
         <h2 id="wizard-persona" className={desktop ? 'create-who__section-title' : 'create-who__label'}>
           Personalidad
         </h2>
@@ -311,7 +312,7 @@ function CreateWizardStep({ stepIndex }: { stepIndex: number }) {
         </OptionGroup>
       </section>
 
-      <section className="create-who__section" aria-labelledby="wizard-style">
+      <section className="create-who__section" aria-labelledby="wizard-style" data-testid="wizard-step-group">
         <h2 id="wizard-style" className={desktop ? 'create-who__section-title' : 'create-who__label'}>
           Estilo visual
         </h2>
@@ -405,7 +406,7 @@ function CreateWizardStep({ stepIndex }: { stepIndex: number }) {
   const step2Body = (desktop: boolean) => (
     <>
       {stepIntro}
-      <section className="create-who__section" aria-labelledby="wizard-presence">
+      <section className="create-who__section" aria-labelledby="wizard-presence" data-testid="wizard-step-group">
         <h2 id="wizard-presence" className={desktop ? 'create-who__section-title' : 'create-who__label'}>
           Presencia
         </h2>
@@ -431,43 +432,55 @@ function CreateWizardStep({ stepIndex }: { stepIndex: number }) {
         </OptionGroup>
       </section>
 
-      <section className="create-who__section" aria-labelledby="wizard-boundaries">
-        <h2 id="wizard-boundaries" className={desktop ? 'create-who__section-title' : 'create-who__label'}>
-          Temas a evitar <span className="create-who__optional">(opcional)</span>
-        </h2>
-        <p className={desktop ? 'banner--info' : 'create-how__basic-limits'} role="note">
-          {desktop ? <AppIcon name="shield-checkmark-outline" /> : null}
-          {basicLimitsText}
-        </p>
-        <OptionGroup mode="toggle" aria-labelledby="wizard-boundaries" cols={desktop ? undefined : 3} layout={desktop ? 'inline' : undefined} className={desktop ? 'create-how__chip-row' : undefined}>
-          {OPTIONAL_BOUNDARIES.map((option) => {
-            const selected = data.boundaries.includes(option);
-            return (
-              <button key={option} type="button" aria-pressed={selected} className={desktop ? 'chip' : selected ? 'create-option create-option--selected' : 'create-option'} onClick={() => toggleBoundary(option)}>
-                {option}
-              </button>
-            );
-          })}
-          {desktop && !showOtherBoundary ? (
-            <button type="button" className="chip chip--add" onClick={() => setShowOtherBoundary(true)}>
-              {t('create.avoid_other')}
-            </button>
-          ) : null}
-        </OptionGroup>
-        {desktop && showOtherBoundary ? (
-          <div className="create-how__other-inline field">
-            <label className="field__label" htmlFor={otherBoundaryId}>
-              {t('create.avoid_other')}
-            </label>
-            <div className="create-how__other-row">
-              <input id={otherBoundaryId} className="field__control" type="text" maxLength={60} value={otherBoundary} onChange={(e) => setOtherBoundary(e.target.value)} />
-              <button type="button" className="btn btn--secondary btn--m" onClick={onAddOtherBoundary} aria-label={`Añadir ${t('create.avoid_other').toLowerCase()}`}>
-                +
-              </button>
-            </div>
+      {desktop ? (
+        <details className="create-step__avoid" data-testid="wizard-step-group">
+          <summary id="wizard-avoid-toggle">{t('wizard.avoid_toggle')}</summary>
+          <div className="create-step__avoid-body">
+            <OptionGroup mode="toggle" aria-labelledby="wizard-avoid-toggle" cols={undefined} layout="inline" className="create-how__chip-row">
+              {OPTIONAL_BOUNDARIES.map((option) => {
+                const selected = data.boundaries.includes(option);
+                return (
+                  <button key={option} type="button" aria-pressed={selected} className="chip" onClick={() => toggleBoundary(option)}>
+                    {option}
+                  </button>
+                );
+              })}
+              {!showOtherBoundary ? (
+                <button type="button" className="chip chip--add" onClick={() => setShowOtherBoundary(true)}>
+                  {t('create.avoid_other')}
+                </button>
+              ) : null}
+            </OptionGroup>
+            {showOtherBoundary ? (
+              <div className="create-how__other-inline field">
+                <label className="field__label" htmlFor={otherBoundaryId}>
+                  {t('create.avoid_other')}
+                </label>
+                <div className="create-how__other-row">
+                  <input id={otherBoundaryId} className="field__control" type="text" maxLength={60} value={otherBoundary} onChange={(e) => setOtherBoundary(e.target.value)} />
+                  <button type="button" className="btn btn--secondary btn--m" onClick={onAddOtherBoundary} aria-label={`Añadir ${t('create.avoid_other').toLowerCase()}`}>
+                    +
+                  </button>
+                </div>
+              </div>
+            ) : null}
           </div>
-        ) : null}
-        {!desktop ? (
+        </details>
+      ) : (
+        <section className="create-who__section" aria-labelledby="wizard-boundaries" data-testid="wizard-step-group">
+          <h2 id="wizard-boundaries" className="create-who__label">
+            Temas a evitar <span className="create-who__optional">(opcional)</span>
+          </h2>
+          <OptionGroup mode="toggle" aria-labelledby="wizard-boundaries" cols={3} className="create-how__chip-row">
+            {OPTIONAL_BOUNDARIES.map((option) => {
+              const selected = data.boundaries.includes(option);
+              return (
+                <button key={option} type="button" aria-pressed={selected} className={selected ? 'create-option create-option--selected' : 'create-option'} onClick={() => toggleBoundary(option)}>
+                  {option}
+                </button>
+              );
+            })}
+          </OptionGroup>
           <div className="create-how__other-boundary">
             <label htmlFor={otherBoundaryId}>{t('create.avoid_other')}</label>
             <div className="create-how__other-row">
@@ -477,15 +490,19 @@ function CreateWizardStep({ stepIndex }: { stepIndex: number }) {
               </button>
             </div>
           </div>
-        ) : null}
-      </section>
+        </section>
+      )}
+      <p className={desktop ? 'banner--info' : 'create-how__basic-limits'} role="note">
+        {desktop ? <AppIcon name="shield-checkmark-outline" /> : null}
+        {basicLimitsText}
+      </p>
     </>
   );
 
   const step3Body = (desktop: boolean) => (
     <>
       {stepIntro}
-      <section className="create-who__section" aria-labelledby="wizard-interests">
+      <section className="create-who__section" aria-labelledby="wizard-interests" data-testid="wizard-step-group">
         <div className="create-who__interests-head">
           <h2 id="wizard-interests" className={desktop ? 'create-who__section-title' : 'create-who__label'}>
             Intereses
@@ -510,7 +527,7 @@ function CreateWizardStep({ stepIndex }: { stepIndex: number }) {
   );
 
   const consentBlock = (
-    <section className="create-who__section" aria-labelledby="wizard-consent">
+    <section className="create-who__section" aria-labelledby="wizard-consent" data-testid="wizard-step-group">
       <h2 id="wizard-consent" className="create-who__section-title">
         {tApp('companion.create.consent_title')}
       </h2>
@@ -540,7 +557,7 @@ function CreateWizardStep({ stepIndex }: { stepIndex: number }) {
   const step4Body = (desktop: boolean) => (
     <>
       {stepIntro}
-      <section className="create-who__section" aria-labelledby="wizard-name">
+      <section className="create-who__section" aria-labelledby="wizard-name" data-testid="wizard-step-group">
         {desktop ? (
           <div className="field">
             <span id="wizard-name" className="field__label">
@@ -621,12 +638,7 @@ function CreateWizardStep({ stepIndex }: { stepIndex: number }) {
     <div data-testid="create-wizard">
       <DesktopShell
         header={
-          <CreationShellHeader
-            step={wizardStepDisplay as 1 | 2 | 3 | 4}
-            backLabel={stepIndex > 0 ? t('create.back') : undefined}
-            onBack={stepIndex > 0 ? onBack : undefined}
-            onConfirmLeave={onConfirmLeave}
-          />
+          <CreationShellHeader step={wizardStepDisplay as 1 | 2 | 3 | 4} onConfirmLeave={onConfirmLeave} />
         }
         preview={
           <CreationPreview
@@ -639,26 +651,32 @@ function CreateWizardStep({ stepIndex }: { stepIndex: number }) {
         }
         footer={
           <div className="creation-shell-footer">
-            {stepIndex < 3 && missingText ? (
-              <p id={missingId} className="creation-shell-footer__hint" role="status">
-                <AppIcon name="information-circle-outline" />
-                {missingText}
-              </p>
-            ) : stepIndex === 3 && !canSubmit ? (
-              <p id={missingId} className="creation-shell-footer__hint" role="status">
-                <AppIcon name="information-circle-outline" />
-                {submitMissing}
-              </p>
-            ) : (
-              <span />
-            )}
-            <div className="creation-shell-footer__actions">
-              {stepIndex === 2 && data.interests.length >= 3 ? (
+            <div className="creation-shell-footer__start">
+              {stepIndex > 0 ? (
+                <button type="button" className="btn btn--secondary btn--l" onClick={onBack}>
+                  {t('create.back')}
+                </button>
+              ) : null}
+            </div>
+            <div className="creation-shell-footer__center">
+              {stepIndex < 3 && missingText ? (
+                <p id={missingId} className="creation-shell-footer__hint" role="status">
+                  <AppIcon name="information-circle-outline" />
+                  {missingText}
+                </p>
+              ) : stepIndex === 3 && !canSubmit ? (
+                <p id={missingId} className="creation-shell-footer__hint" role="status">
+                  <AppIcon name="information-circle-outline" />
+                  {submitMissing}
+                </p>
+              ) : stepIndex === 2 && data.interests.length >= 3 ? (
                 <p className="creation-shell-footer__counter" data-testid="interests-counter-done">
                   <AppIcon name="checkmark-circle" />
                   {t('create.interests_done', { count: data.interests.length })}
                 </p>
               ) : null}
+            </div>
+            <div className="creation-shell-footer__actions">
               {stepIndex < 3 ? (
                 <button type="button" className="btn btn--primary btn--l creation-shell-footer__primary" disabled={!canAdvance || !loaded} aria-describedby={missingText ? missingId : undefined} onClick={() => void onContinue()}>
                   {t('create.continue')}
@@ -673,11 +691,20 @@ function CreateWizardStep({ stepIndex }: { stepIndex: number }) {
         }
       >
         {stepIndex === 3 ? (
-          <form id="create-wizard-form" className="create-how create-who" onSubmit={(e) => void onSubmit(e)}>
+          <form
+            id="create-wizard-form"
+            key={stepIndex}
+            className="create-how create-who create-wizard-step-panel"
+            data-create-wizard-main
+            data-testid="wizard-step-panel"
+            onSubmit={(e) => void onSubmit(e)}
+          >
             {stepContent(true)}
           </form>
         ) : (
-          <div className="create-who">{stepContent(true)}</div>
+          <div key={stepIndex} className="create-who create-wizard-step-panel" data-create-wizard-main data-testid="wizard-step-panel">
+            {stepContent(true)}
+          </div>
         )}
       </DesktopShell>
     </div>

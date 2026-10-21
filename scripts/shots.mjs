@@ -2,7 +2,7 @@
 /* eslint-disable no-undef -- evaluate() corre en el navegador */
 /**
  * Capturas de referencia (modo demo). Requiere `npm run build:demo` previo.
- * Uso: node scripts/shots.mjs [inicio|acceso|vista-2|vista-3|chat-creando|chat-listo|chat-error|editar]
+ * Uso: node scripts/shots.mjs [inicio|acceso|paso-1|paso-2|paso-3|paso-4|chat-creando|chat-listo|chat-error|editar]
  */
 import { createHash } from 'node:crypto';
 import { spawn } from 'node:child_process';
@@ -20,8 +20,10 @@ const outDir = path.join(root, 'docs', 'screens');
 const ALL = [
   'inicio',
   'acceso',
-  'vista-2',
-  'vista-3',
+  'paso-1',
+  'paso-2',
+  'paso-3',
+  'paso-4',
   'chat-creando',
   'chat-listo',
   'chat-error',
@@ -36,8 +38,10 @@ const ASSERT_MS = 10_000;
 const SCREEN_ASSERT = {
   inicio: { url: /\/\/[^/]+\/?(\?.*)?$/, testIds: ['page-inicio'] },
   acceso: { url: /\/acceso\/?(\?.*)?$/, testIds: ['page-acceso'] },
-  'vista-2': { url: /\/crear\/paso-1\/?(\?.*)?$/, testIds: ['create-wizard'] },
-  'vista-3': { url: /\/crear\/paso-4\/?(\?.*)?$/, testIds: ['create-wizard'] },
+  'paso-1': { url: /\/crear\/paso-1\/?(\?.*)?$/, testIds: ['create-wizard'] },
+  'paso-2': { url: /\/crear\/paso-2\/?(\?.*)?$/, testIds: ['create-wizard'] },
+  'paso-3': { url: /\/crear\/paso-3\/?(\?.*)?$/, testIds: ['create-wizard'] },
+  'paso-4': { url: /\/crear\/paso-4\/?(\?.*)?$/, testIds: ['create-wizard'] },
   'chat-creando': { url: /\/chat\/?(\?.*)?$/, testIds: ['chat-creating-panel'] },
   'chat-listo': { url: /\/chat\/?(\?.*)?$/, testIds: ['chat-messages', 'chat-conv-header'] },
   'chat-error': { url: /\/chat\/?(\?.*)?$/, testIds: ['chat-error-banner'] },
@@ -82,23 +86,26 @@ async function demoLogin(page) {
   await page.waitForURL(/\/(crear|chat)/, { timeout: 20_000 });
 }
 
-async function fillWhoStep(page) {
+async function fillWizardThroughStep3(page) {
   await page.goto('/crear/paso-1');
   await page.getByRole('radio', { name: 'Femenino' }).click();
+  await page.getByRole('radio', { name: 'Amigable y empática' }).click();
   await page.getByRole('radio', { name: 'Realista' }).click();
+  await page.getByRole('button', { name: 'Continuar' }).click();
+  await page.waitForURL(/\/crear\/paso-2/, { timeout: 15_000 });
+  await page.getByRole('button', { name: 'Continuar' }).click();
+  await page.waitForURL(/\/crear\/paso-3/, { timeout: 15_000 });
   for (const label of ['Música', 'Cine y series', 'Viajes']) {
     await page.getByRole('button', { name: label }).click();
   }
   await page.getByRole('button', { name: 'Continuar' }).click();
-  await page.waitForURL(/\/crear\/como/, { timeout: 15_000 });
+  await page.waitForURL(/\/crear\/paso-4/, { timeout: 15_000 });
 }
 
 async function fillHowAndCreate(page, { demoFailCreate = false } = {}) {
   if (demoFailCreate) {
     await page.goto('/crear/paso-4?demoFail=create');
   }
-  await page.getByRole('radio', { name: 'Amigable y empática' }).click();
-  await page.getByRole('radio', { name: 'Equilibrada' }).click();
   await page.locator('#create-wizard-form .field__control').first().fill('Luna');
   await page.locator('.check__input').nth(0).check();
   await page.locator('.check__input').nth(1).check();
@@ -107,7 +114,7 @@ async function fillHowAndCreate(page, { demoFailCreate = false } = {}) {
 }
 
 async function completeDemoCreation(page, options = {}) {
-  await fillWhoStep(page);
+  await fillWizardThroughStep3(page);
   await fillHowAndCreate(page, options);
 }
 
@@ -128,19 +135,37 @@ async function prepareScreen(page, id) {
     case 'acceso':
       await page.goto('/acceso');
       break;
-    case 'vista-2':
+    case 'paso-1':
       await demoLogin(page);
       await page.goto('/crear/paso-1');
       break;
-    case 'vista-3':
+    case 'paso-2':
       await demoLogin(page);
-      await page.goto('/crear/paso-4');
+      await page.goto('/crear/paso-1');
+      await page.getByRole('radio', { name: 'Femenino' }).click();
+      await page.getByRole('radio', { name: 'Amigable y empática' }).click();
+      await page.getByRole('radio', { name: 'Realista' }).click();
+      await page.getByRole('button', { name: 'Continuar' }).click();
+      await page.waitForURL(/\/crear\/paso-2/, { timeout: 15_000 });
+      break;
+    case 'paso-3':
+      await demoLogin(page);
+      await page.goto('/crear/paso-1');
+      await page.getByRole('radio', { name: 'Femenino' }).click();
+      await page.getByRole('radio', { name: 'Amigable y empática' }).click();
+      await page.getByRole('radio', { name: 'Realista' }).click();
+      await page.getByRole('button', { name: 'Continuar' }).click();
+      await page.waitForURL(/\/crear\/paso-2/, { timeout: 15_000 });
+      await page.getByRole('button', { name: 'Continuar' }).click();
+      await page.waitForURL(/\/crear\/paso-3/, { timeout: 15_000 });
+      break;
+    case 'paso-4':
+      await demoLogin(page);
+      await fillWizardThroughStep3(page);
       break;
     case 'chat-creando':
       await demoLogin(page);
-      await fillWhoStep(page);
-      await page.getByRole('radio', { name: 'Amigable y empática' }).click();
-      await page.getByRole('radio', { name: 'Equilibrada' }).click();
+      await fillWizardThroughStep3(page);
       await page.locator('#create-wizard-form .field__control').first().fill('Luna');
       await page.locator('.check__input').nth(0).check();
       await page.locator('.check__input').nth(1).check();

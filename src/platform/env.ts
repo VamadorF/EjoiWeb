@@ -27,8 +27,8 @@ export const FORCE_SPONTANEOUS_PICTURE = false;
 export const REVENUECAT_IOS_API_KEY = '';
 export const REVENUECAT_ANDROID_API_KEY = '';
 
-export const ENABLE_ETHNICITY = (env.VITE_ENABLE_ETHNICITY ?? 'true') === 'true';
-export const ENABLE_AGE = (env.VITE_ENABLE_AGE ?? 'true') === 'true';
+export const ENABLE_ETHNICITY = (env.VITE_ENABLE_ETHNICITY ?? 'false') === 'true';
+export const ENABLE_AGE = (env.VITE_ENABLE_AGE ?? 'false') === 'true';
 
 export const isOAuthConfigured = {
   google: GOOGLE_CLIENT_ID.length > 0,

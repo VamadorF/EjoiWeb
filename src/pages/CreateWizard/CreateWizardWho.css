@@ -108,9 +108,9 @@
 }
 
 .opt--style .opt__thumb {
-  width: 112px;
-  height: 112px;
-  max-height: var(--create-style-thumb-max-h, 112px);
+  width: 100px;
+  height: 100px;
+  max-height: var(--create-style-thumb-max-h, 100px);
   object-fit: cover;
   border-radius: 8px;
 }
