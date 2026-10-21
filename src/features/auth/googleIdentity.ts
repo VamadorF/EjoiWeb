@@ -57,6 +57,13 @@ export async function mountGoogleButton(
     },
   });
 
-  container.replaceChildren();
-  gis.renderButton(container, { type: 'standard', size: 'large', theme: 'outline', width: 320 });
+  // GIS acepta 200–400px de ancho y renderiza 40px de alto: se estira con transform para cubrir el host.
+  const { width, height } = container.getBoundingClientRect();
+  const renderWidth = Math.round(Math.min(400, Math.max(200, width || 320)));
+  const inner = document.createElement('div');
+  inner.style.width = `${renderWidth}px`;
+  inner.style.transformOrigin = 'top left';
+  if (width && height) inner.style.transform = `scale(${width / renderWidth}, ${height / 40})`;
+  container.replaceChildren(inner);
+  gis.renderButton(inner, { type: 'standard', size: 'large', theme: 'outline', width: renderWidth });
 }

@@ -205,8 +205,15 @@ export default function WelcomePage() {
 
           <div id={providersGroupId} className="welcome-actions__providers">
             {isOAuthConfigured.google ? (
-              <div className="welcome-actions__google-row">
-                <div ref={googleHostRef} />
+              <div className="welcome-actions__google" data-busy={busy || undefined}>
+                <span className="btn btn--l welcome-actions__google-face" aria-hidden="true">
+                  <span className="welcome-actions__google-badge">
+                    <img src="/logos/google-g.svg" alt="" width={18} height={18} />
+                  </span>
+                  {t('auth.login.continue_google')}
+                </span>
+                {/* Botón real de GIS (id_token) invisible encima de la cara visual. */}
+                <div ref={googleHostRef} className="welcome-actions__google-host" />
               </div>
             ) : null}
             {isAppleSignInConfigured() ? (

@@ -19,15 +19,15 @@ export async function removeAuthToken(): Promise<void> {
 }
 
 export async function getRefreshToken(): Promise<string | null> {
-  return null;
+  return session.getRefreshToken();
 }
 
-export async function setRefreshToken(): Promise<void> {
-  /* refresh en cookie HttpOnly */
+export async function setRefreshToken(token: string): Promise<void> {
+  session.setRefreshToken(token);
 }
 
 export async function removeRefreshToken(): Promise<void> {
-  /* noop */
+  session.clearRefreshToken();
 }
 
 export async function setUserData(user: string): Promise<void> {

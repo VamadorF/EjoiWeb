@@ -12,6 +12,16 @@ describe('fromWebAuthResponse', () => {
     });
     expect(result.accessToken).toBe('at-1');
     expect(result.user.id).toBe('u1');
+    expect(result.refreshToken).toBeUndefined();
+  });
+
+  it('devuelve el refresh_token cuando el backend lo manda en el cuerpo', () => {
+    const result = fromWebAuthResponse({
+      access_token: 'at-1',
+      refresh_token: 'rt-1',
+      user: { userId: 'u1', email: 'a@ejoi.cl', name: 'Ana' },
+    });
+    expect(result.refreshToken).toBe('rt-1');
   });
 });
 
