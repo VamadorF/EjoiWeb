@@ -36,8 +36,8 @@ const ASSERT_MS = 10_000;
 const SCREEN_ASSERT = {
   inicio: { url: /\/\/[^/]+\/?(\?.*)?$/, testIds: ['page-inicio'] },
   acceso: { url: /\/acceso\/?(\?.*)?$/, testIds: ['page-acceso'] },
-  'vista-2': { url: /\/crear\/quien\/?(\?.*)?$/, testIds: ['page-quien'] },
-  'vista-3': { url: /\/crear\/como\/?(\?.*)?$/, testIds: ['page-como'] },
+  'vista-2': { url: /\/crear\/paso-1\/?(\?.*)?$/, testIds: ['create-wizard'] },
+  'vista-3': { url: /\/crear\/paso-4\/?(\?.*)?$/, testIds: ['create-wizard'] },
   'chat-creando': { url: /\/chat\/?(\?.*)?$/, testIds: ['chat-creating-panel'] },
   'chat-listo': { url: /\/chat\/?(\?.*)?$/, testIds: ['chat-messages', 'chat-conv-header'] },
   'chat-error': { url: /\/chat\/?(\?.*)?$/, testIds: ['chat-error-banner'] },
@@ -83,7 +83,7 @@ async function demoLogin(page) {
 }
 
 async function fillWhoStep(page) {
-  await page.goto('/crear/quien');
+  await page.goto('/crear/paso-1');
   await page.getByRole('radio', { name: 'Femenino' }).click();
   await page.getByRole('radio', { name: 'Realista' }).click();
   for (const label of ['Música', 'Cine y series', 'Viajes']) {
@@ -95,11 +95,11 @@ async function fillWhoStep(page) {
 
 async function fillHowAndCreate(page, { demoFailCreate = false } = {}) {
   if (demoFailCreate) {
-    await page.goto('/crear/como?demoFail=create');
+    await page.goto('/crear/paso-4?demoFail=create');
   }
   await page.getByRole('radio', { name: 'Amigable y empática' }).click();
   await page.getByRole('radio', { name: 'Equilibrada' }).click();
-  await page.locator('#create-how-form .field__control').first().fill('Luna');
+  await page.locator('#create-wizard-form .field__control').first().fill('Luna');
   await page.locator('.check__input').nth(0).check();
   await page.locator('.check__input').nth(1).check();
   await page.getByRole('button', { name: /Crear a Luna/ }).click();
@@ -130,18 +130,18 @@ async function prepareScreen(page, id) {
       break;
     case 'vista-2':
       await demoLogin(page);
-      await page.goto('/crear/quien');
+      await page.goto('/crear/paso-1');
       break;
     case 'vista-3':
       await demoLogin(page);
-      await page.goto('/crear/como');
+      await page.goto('/crear/paso-4');
       break;
     case 'chat-creando':
       await demoLogin(page);
       await fillWhoStep(page);
       await page.getByRole('radio', { name: 'Amigable y empática' }).click();
       await page.getByRole('radio', { name: 'Equilibrada' }).click();
-      await page.locator('#create-how-form .field__control').first().fill('Luna');
+      await page.locator('#create-wizard-form .field__control').first().fill('Luna');
       await page.locator('.check__input').nth(0).check();
       await page.locator('.check__input').nth(1).check();
       await page.getByRole('button', { name: /Crear a Luna/ }).click();

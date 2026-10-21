@@ -1,30 +1,31 @@
 import { expect, type Page } from '@playwright/test';
 
-export async function pickWhoWithKeyboard(page: Page) {
+import { fillWizardStep1, fillWizardStep3Interests } from './wizardFlow';
+
+export async function pickWizardThroughStep3WithKeyboard(page: Page) {
   await page.waitForSelector('.opt');
-  await page.locator('[role="radio"]').first().focus();
+  await page.locator('[aria-labelledby="wizard-gender"] [role="radio"]').first().focus();
   await page.keyboard.press(' ');
-  await page.locator('[aria-labelledby="create-who-style"] [role="radio"]').first().focus();
+  await page.locator('[aria-labelledby="wizard-persona"] [role="radio"]').first().focus();
   await page.keyboard.press(' ');
-  const interests = page.locator('[aria-labelledby="create-who-interests"] button');
+  await page.locator('[aria-labelledby="wizard-style"] [role="radio"]').first().focus();
+  await page.keyboard.press(' ');
+  await page.getByRole('button', { name: 'Continuar' }).click();
+  await page.waitForURL('**/crear/paso-2');
+  await page.getByRole('button', { name: 'Continuar' }).click();
+  await page.waitForURL('**/crear/paso-3');
+  const interests = page.locator('[aria-labelledby="wizard-interests"] button');
   for (let i = 0; i < 3; i += 1) {
     await interests.nth(i).focus();
     await page.keyboard.press(' ');
   }
-  await page.getByRole('button', { name: 'Continuar' }).focus();
-  await page.keyboard.press('Enter');
-  await page.waitForURL('**/crear/como');
+  await page.getByRole('button', { name: 'Continuar' }).click();
+  await page.waitForURL('**/crear/paso-4');
 }
 
-export async function pickHowWithKeyboard(page: Page) {
-  await page.waitForSelector('.create-how');
-  const persona = page.getByRole('radio', { name: 'Amigable y empática' });
-  await persona.focus();
-  await page.keyboard.press(' ');
-  const intensity = page.getByRole('radio', { name: 'Equilibrada' });
-  await intensity.focus();
-  await page.keyboard.press(' ');
-  const nameInput = page.locator('#create-how-form .field__control').first();
+export async function pickWizardStep4WithKeyboard(page: Page) {
+  await page.waitForSelector('#create-wizard-form');
+  const nameInput = page.locator('#create-wizard-form .field__control').first();
   await nameInput.focus();
   await page.keyboard.type('Luna');
   const consents = page.locator('.check__input');
@@ -34,6 +35,23 @@ export async function pickHowWithKeyboard(page: Page) {
   await page.keyboard.press(' ');
   await page.getByRole('button', { name: /Crear a .+ y conversar/ }).focus();
   await page.keyboard.press('Enter');
+}
+
+/** @deprecated use pickWizardThroughStep3WithKeyboard */
+export async function pickWhoWithKeyboard(page: Page) {
+  await fillWizardStep1(page);
+  await page.getByRole('button', { name: 'Continuar' }).click();
+  await page.waitForURL('**/crear/paso-2');
+  await page.getByRole('button', { name: 'Continuar' }).click();
+  await page.waitForURL('**/crear/paso-3');
+  await fillWizardStep3Interests(page);
+  await page.getByRole('button', { name: 'Continuar' }).click();
+  await page.waitForURL('**/crear/paso-4');
+}
+
+/** @deprecated use pickWizardStep4WithKeyboard */
+export async function pickHowWithKeyboard(page: Page) {
+  await pickWizardStep4WithKeyboard(page);
 }
 
 export async function sendChatWithKeyboard(page: Page, text: string) {

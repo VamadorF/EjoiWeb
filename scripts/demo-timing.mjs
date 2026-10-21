@@ -56,17 +56,20 @@ async function main() {
     await page.goto('/acceso');
     await page.getByRole('button', { name: 'Entrar en modo demo' }).click();
     await page.waitForURL(/\/(crear|chat)/, { timeout: 20_000 });
-    await page.goto('/crear/quien');
+    await page.goto('/crear/paso-1');
     await page.getByRole('radio', { name: 'Femenino' }).click();
+    await page.getByRole('radio', { name: 'Amigable y empática' }).click();
     await page.getByRole('radio', { name: 'Realista' }).click();
+    await page.getByRole('button', { name: 'Continuar' }).click();
+    await page.waitForURL(/\/crear\/paso-2/, { timeout: 15_000 });
+    await page.getByRole('button', { name: 'Continuar' }).click();
+    await page.waitForURL(/\/crear\/paso-3/, { timeout: 15_000 });
     for (const label of ['Música', 'Cine y series', 'Viajes']) {
       await page.getByRole('button', { name: label }).click();
     }
     await page.getByRole('button', { name: 'Continuar' }).click();
-    await page.waitForURL(/\/crear\/como/, { timeout: 15_000 });
-    await page.getByRole('radio', { name: 'Amigable y empática' }).click();
-    await page.getByRole('radio', { name: 'Equilibrada' }).click();
-    await page.locator('#create-how-form .field__control').first().fill('Luna');
+    await page.waitForURL(/\/crear\/paso-4/, { timeout: 15_000 });
+    await page.locator('#create-wizard-form .field__control').first().fill('Luna');
     await page.locator('.check__input').nth(0).check();
     await page.locator('.check__input').nth(1).check();
     await page.getByRole('button', { name: /Crear a Luna/ }).click();

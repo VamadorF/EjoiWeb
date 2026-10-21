@@ -15,8 +15,10 @@ export type DesktopShellProps = {
   children: ReactNode;
 };
 
+const WIZARD_STEP_SECONDS = [15, 15, 20, 10] as const;
+
 export type CreationShellHeaderProps = {
-  step: 2 | 3;
+  step: 1 | 2 | 3 | 4;
   backLabel?: string;
   onBack?: () => void;
   onConfirmLeave: () => void | Promise<void>;
@@ -26,7 +28,11 @@ export function CreationShellHeader({ step, backLabel, onBack, onConfirmLeave }:
   const { t } = useTranslation();
   const { t: tWeb } = useTranslation('web');
   const dialogRef = useRef<HTMLDialogElement>(null);
-  const stepLabel = t('onboarding.v2.step_hint', { step, total: 3, seconds: 30 });
+  const stepLabel = t('onboarding.v2.step_hint', {
+    step,
+    total: 4,
+    seconds: WIZARD_STEP_SECONDS[step - 1] ?? 15,
+  });
 
   const openLeaveDialog = () => {
     dialogRef.current?.showModal();
@@ -60,11 +66,11 @@ export function CreationShellHeader({ step, backLabel, onBack, onConfirmLeave }:
             className="creation-shell-header__progress"
             role="progressbar"
             aria-valuemin={1}
-            aria-valuemax={3}
+            aria-valuemax={4}
             aria-valuenow={step}
             aria-label={stepLabel}
           >
-            {[1, 2, 3].map((n) => (
+            {[1, 2, 3, 4].map((n) => (
               <span
                 key={n}
                 className={

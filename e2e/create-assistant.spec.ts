@@ -5,6 +5,7 @@ import {
   loginWithTestSession,
   resetIntegrationMockState,
 } from './fixtures/integrationMock';
+import { advanceToWizardStep, fillWizardStep1, fillWizardStep3Interests } from './fixtures/wizardFlow';
 
 test.describe('Asistente de creación SCRUM-166', () => {
   test.use({ viewport: { width: 1440, height: 900 } });
@@ -18,7 +19,7 @@ test.describe('Asistente de creación SCRUM-166', () => {
     await page.goto('/acceso');
     await loginWithTestSession(page);
     await page.reload();
-    await page.waitForURL('**/crear/quien', { timeout: 15_000 });
+    await page.waitForURL('**/crear/paso-1', { timeout: 15_000 });
   }
 
   test('Salir pide confirmación y conserva el draft tras volver a entrar', async ({ page }) => {
@@ -26,12 +27,13 @@ test.describe('Asistente de creación SCRUM-166', () => {
     await page.goto('/acceso');
     await loginWithTestSession(page);
     await page.reload();
-    await page.goto('/crear/quien');
-    await page.getByRole('radio', { name: 'Femenino' }).click();
-    await page.getByRole('radio', { name: 'Realista' }).click();
-    for (const label of ['Música', 'Cine y series', 'Viajes']) {
-      await page.getByRole('button', { name: label }).click();
-    }
+    await page.goto('/crear/paso-1');
+    await fillWizardStep1(page);
+    await page.getByRole('button', { name: 'Continuar' }).click();
+    await page.waitForURL('**/crear/paso-2');
+    await page.getByRole('button', { name: 'Continuar' }).click();
+    await page.waitForURL('**/crear/paso-3');
+    await fillWizardStep3Interests(page);
     await page.waitForTimeout(500);
 
     await page.getByTestId('create-exit').click();
@@ -49,34 +51,13 @@ test.describe('Asistente de creación SCRUM-166', () => {
 
     await loginWithTestSession(page);
     await page.reload();
-    await page.goto('/crear/quien');
-    await expect(page.getByRole('radio', { name: 'Femenino' })).toHaveAttribute('aria-checked', 'true');
+    await page.goto('/crear/paso-3');
     await expect(page.getByRole('button', { name: 'Música' })).toHaveAttribute('aria-pressed', 'true');
-  });
-
-  async function fillWho(page: import('@playwright/test').Page) {
-    await page.getByRole('radio', { name: 'Femenino' }).click();
-    await page.getByRole('radio', { name: 'Realista' }).click();
-    for (const label of ['Música', 'Cine y series', 'Viajes']) {
-      await page.getByRole('button', { name: label }).click();
-    }
-  }
-
-  test('presencia muestra descripción y Recomendada en Equilibrada', async ({ page }) => {
-    await boot(page);
-    await fillWho(page);
-    await page.getByRole('button', { name: 'Continuar' }).click();
-    await page.waitForURL('**/crear/como');
-    await expect(page.getByTestId('presence-balanced')).toContainText('Equilibrio entre cercanía');
-    await expect(page.getByTestId('presence-balanced')).toContainText('Recomendada');
-    await expect(page.getByTestId('presence-soft')).toContainText('Una presencia ligera');
   });
 
   test('preview cita intereses con nombre válido', async ({ page }) => {
     await boot(page);
-    await fillWho(page);
-    await page.getByRole('button', { name: 'Continuar' }).click();
-    await page.waitForURL('**/crear/como');
+    await advanceToWizardStep(page, 4);
 
     await page.route('**/api/companion/greeting-preview', async (route) => {
       const body = route.request().postDataJSON() as { interests?: string[] };
@@ -94,7 +75,7 @@ test.describe('Asistente de creación SCRUM-166', () => {
       });
     });
 
-    await page.locator('#create-how-form .field__control').first().fill('Luna');
+    await page.locator('#create-wizard-form .field__control').first().fill('Luna');
     await expect(page.getByTestId('creation-preview-greeting')).toContainText(/música y cine y series/i, {
       timeout: 5_000,
     });

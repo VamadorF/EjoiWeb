@@ -128,7 +128,7 @@ test.describe('Teclado desktop (SCRUM-113)', () => {
 
   test('preview de creación no recibe foco', async ({ page }) => {
     await mockAuthedApi(page);
-    await page.goto('/crear/quien');
+    await page.goto('/crear/paso-1');
     await page.waitForSelector('[data-testid="shell-preview"]');
     const previewFocused = await page.evaluate(() => {
       const preview = document.querySelector('[data-testid="shell-preview"]');
@@ -200,22 +200,10 @@ test.describe('Teclado desktop (SCRUM-113)', () => {
 
   test('flujo principal solo con teclado hasta editar nombre', async ({ page }) => {
     await mockAuthedApi(page);
-    await page.goto('/crear/quien');
+    await page.goto('/crear/paso-1');
     await page.waitForSelector('.opt');
-    await page.locator('[role="radio"]').first().focus();
-    await page.keyboard.press(' ');
-    await page.locator('[aria-labelledby="create-who-style"] [role="radio"]').first().focus();
-    await page.keyboard.press(' ');
-    const interests = page.locator('[aria-labelledby="create-who-interests"] button');
-    await interests.nth(0).focus();
-    await page.keyboard.press(' ');
-    await interests.nth(1).focus();
-    await page.keyboard.press(' ');
-    await interests.nth(2).focus();
-    await page.keyboard.press(' ');
-    await page.getByRole('button', { name: 'Continuar' }).focus();
-    await page.keyboard.press('Enter');
-    await page.waitForURL('**/crear/como');
+    const { pickWizardThroughStep3WithKeyboard } = await import('./fixtures/keyboardFlow');
+    await pickWizardThroughStep3WithKeyboard(page);
 
     await page.goto('/chat');
     await page.waitForSelector('[data-testid="chat-composer"]');

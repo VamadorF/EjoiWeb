@@ -82,8 +82,8 @@ test.describe('Tema claro/oscuro (SCRUM-112)', () => {
   test('seis pantallas respetan claro y oscuro', async ({ page }) => {
     const screens: { id: string; path: string; setup?: () => Promise<void> }[] = [
       { id: 'acceso', path: '/acceso' },
-      { id: 'quien', path: '/crear/quien' },
-      { id: 'como', path: '/crear/como' },
+      { id: 'quien', path: '/crear/paso-1' },
+      { id: 'como', path: '/crear/paso-4' },
       {
         id: 'chat-creating',
         path: '/chat',
@@ -154,7 +154,7 @@ test.describe('Tema claro/oscuro (SCRUM-112)', () => {
       await route.fulfill({ status: 200, contentType: 'application/json', body: '{}' });
     });
 
-    await page.goto('/crear/quien');
+    await page.goto('/crear/paso-1');
     await page.getByTestId('shell-footer').waitFor();
     const headerBefore = await page.getByTestId('shell-header').boundingBox();
     const footerBefore = await page.getByTestId('shell-footer').boundingBox();
@@ -179,7 +179,7 @@ test.describe('Tema claro/oscuro (SCRUM-112)', () => {
 
   test('hover y foco distinguibles en ambos temas', async ({ page }) => {
     for (const theme of ['light', 'dark'] as const) {
-      await page.goto('/acceso');
+      await page.goto('/');
       await applyTheme(page, theme);
       const btn = page.getByRole('button', { name: 'Iniciar sesión' });
       await btn.hover();

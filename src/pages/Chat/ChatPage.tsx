@@ -389,7 +389,7 @@ function ChatPageContent() {
               <button type="button" className="btn btn--primary btn--m" onClick={() => void retryCreation()}>
                 {t('chat.error_retry')}
               </button>
-              <button type="button" className="btn btn--text btn--m" onClick={() => navigate('/crear/como')}>
+              <button type="button" className="btn btn--text btn--m" onClick={() => navigate('/crear/paso-4')}>
                 {t('chat.error_review')}
               </button>
             </div>

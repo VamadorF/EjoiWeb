@@ -167,7 +167,7 @@ for (const theme of ['light', 'dark'] as const) {
     });
 
     test('selección .opt', async ({ page }) => {
-      await page.goto('/crear/quien');
+      await page.goto('/crear/paso-1');
       await setTheme(page, theme);
       const femenino = page.getByRole('radio', { name: 'Femenino' });
       await femenino.click();
@@ -206,8 +206,15 @@ for (const theme of ['light', 'dark'] as const) {
     });
 
     test('chip seleccionado', async ({ page }) => {
-      await page.goto('/crear/quien');
+      await page.goto('/crear/paso-1');
       await setTheme(page, theme);
+      await page.getByRole('radio', { name: 'Femenino' }).click();
+      await page.getByRole('radio', { name: 'Amigable y empática' }).click();
+      await page.getByRole('radio', { name: 'Realista' }).click();
+      await page.getByRole('button', { name: 'Continuar' }).click();
+      await page.waitForURL('**/crear/paso-2');
+      await page.getByRole('button', { name: 'Continuar' }).click();
+      await page.waitForURL('**/crear/paso-3');
       const chip = page.getByRole('button', { name: 'Música' });
       await chip.click();
       await expect(chip).toHaveAttribute('aria-pressed', 'true');
@@ -217,8 +224,13 @@ for (const theme of ['light', 'dark'] as const) {
     });
 
     test('segmento activo .seg', async ({ page }) => {
-      await page.goto('/crear/como');
+      await page.goto('/crear/paso-1');
       await setTheme(page, theme);
+      await page.getByRole('radio', { name: 'Femenino' }).click();
+      await page.getByRole('radio', { name: 'Amigable y empática' }).click();
+      await page.getByRole('radio', { name: 'Realista' }).click();
+      await page.getByRole('button', { name: 'Continuar' }).click();
+      await page.waitForURL('**/crear/paso-2');
       const active = page.getByRole('radio', { name: 'Activa' });
       await active.click();
       await expect(active).toHaveAttribute('aria-checked', 'true');

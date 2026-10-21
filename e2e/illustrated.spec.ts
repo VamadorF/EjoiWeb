@@ -40,7 +40,7 @@ test.describe('Estilo ilustrado end-to-end (SCRUM-115)', () => {
 
   test('onboarding: selector ilustrado y preview coherente', async ({ page }) => {
     await mockDraftApi(page, { gender: '', visualStyle: '', interests: [] });
-    await page.goto('/crear/quien');
+    await page.goto('/crear/paso-1');
 
     await page.getByRole('radio', { name: /Ilustrado/i }).click();
     await page.getByRole('radio', { name: 'Femenino' }).click();

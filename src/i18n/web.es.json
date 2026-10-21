@@ -33,6 +33,16 @@
     "mock_login": "Entrar en modo demo",
     "dev_no_provider": "Falta configurar VITE_GOOGLE_CLIENT_ID en .env.local para ver el acceso con Google."
   },
+  "wizard": {
+    "s1_title": "Crea tu compañía",
+    "s1_sub": "Elige cómo quieres que sea. Todo se puede cambiar después.",
+    "s2_title": "Define cómo conversará",
+    "s2_sub": "Su forma de conversar y los temas que prefieres dejar fuera.",
+    "s3_title": "Elige sus intereses",
+    "s3_sub": "De esto hablará contigo. Elige al menos 3.",
+    "s4_title": "Dale un nombre",
+    "s4_sub": "Así se presentará en la conversación."
+  },
   "create": {
     "step2": "Paso 2 de 3",
     "step3": "Paso 3 de 3",

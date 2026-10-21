@@ -54,21 +54,18 @@ async function mockCreationApi(page: Page) {
   });
 }
 
-async function pickMinimalWho(page: Page) {
-  await page.waitForSelector('.opt');
+async function pickMinimalStep1(page: Page) {
+  await page.waitForSelector('.opt, .create-option');
   await page.getByRole('radio', { name: 'Femenino' }).click({ force: true });
+  await page.getByRole('radio', { name: 'Amigable y empática' }).click({ force: true });
   await page.getByRole('radio', { name: 'Realista' }).click({ force: true });
-  const interests = page.locator('[aria-labelledby="create-who-interests"] button');
-  for (const interest of ['Música', 'Cine', 'Viajes']) {
-    await interests.filter({ hasText: interest }).click({ force: true });
-  }
 }
 
 test.describe('Responsive creación', () => {
   test('1280×800 preview 360 px y retrato 140 px', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
     await mockCreationApi(page);
-    await page.goto('/crear/quien');
+    await page.goto('/crear/paso-1');
     const preview = page.getByTestId('shell-preview');
     await expect(preview).toHaveCSS('width', '360px');
     const thumb = page.locator('.opt__thumb').first();
@@ -78,10 +75,15 @@ test.describe('Responsive creación', () => {
   test('1024×768 franja preview 72 px e intereses 4 columnas', async ({ page }) => {
     await page.setViewportSize({ width: 1024, height: 768 });
     await mockCreationApi(page);
-    await page.goto('/crear/quien');
+    await page.goto('/crear/paso-1');
     const preview = page.getByTestId('shell-preview');
     await expect(preview).toHaveCSS('height', '72px');
-    const interestsGrid = page.locator('[aria-labelledby="create-who-interests"] .option-grid');
+    await pickMinimalStep1(page);
+    await page.getByRole('button', { name: 'Continuar' }).click();
+    await page.waitForURL('**/crear/paso-2');
+    await page.getByRole('button', { name: 'Continuar' }).click();
+    await page.waitForURL('**/crear/paso-3');
+    const interestsGrid = page.locator('[aria-labelledby="wizard-interests"] .option-grid');
     const columns = await interestsGrid.evaluate((el) =>
       getComputedStyle(el).gridTemplateColumns.split(' ').filter(Boolean).length,
     );
@@ -91,24 +93,23 @@ test.describe('Responsive creación', () => {
   test('800 px usa flujo móvil de 4 pasos', async ({ page }) => {
     await page.setViewportSize({ width: 800, height: 1000 });
     await mockCreationApi(page);
-    await page.goto('/crear/quien');
-    await expect(page.getByTestId('create-mobile')).toBeVisible();
-    await expect(page.getByTestId('create-mobile-step')).toContainText('1/4');
+    await page.goto('/crear/paso-1');
+    await expect(page.getByTestId('create-wizard')).toBeVisible();
+    await expect(page.getByTestId('create-wizard-step')).toContainText('1/4');
   });
 
   test('cambiar ancho no descarta el draft', async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await mockCreationApi(page);
-    await page.goto('/crear/quien');
-    await expect(page.getByRole('heading', { level: 1, name: '¿Quién es tu eJoi?' })).toBeVisible();
-    await pickMinimalWho(page);
+    await page.goto('/crear/paso-1');
+    await expect(page.getByRole('heading', { level: 1, name: 'Crea tu compañía' })).toBeVisible();
+    await pickMinimalStep1(page);
     await page.waitForTimeout(400);
     await page.setViewportSize({ width: 800, height: 1000 });
-    await expect(page.getByTestId('create-mobile')).toBeVisible();
+    await expect(page.getByTestId('create-wizard')).toBeVisible();
     await expect(page.getByRole('radio', { name: 'Femenino' })).toHaveAttribute('aria-checked', 'true');
     await page.getByRole('button', { name: 'Continuar' }).click();
-    await expect(page.getByTestId('create-mobile-step')).toContainText('2/4');
-    await expect(page.getByRole('button', { name: 'Música' })).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.getByTestId('create-wizard-step')).toContainText('2/4');
   });
 });
 

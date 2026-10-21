@@ -7,6 +7,8 @@ import {
   RawAuthResponse,
   toProviderAuthDto,
 } from '../authWeb.adapter';
+import { resolvePostLoginWizardPath } from '~/features/creation/wizardSteps';
+
 import { clearPendingReferralCode, getPendingReferralCode } from '../referralCode';
 
 export type FounderCountResponse = { claimed: number; max: number };
@@ -95,10 +97,7 @@ export async function resolvePostLoginPath(): Promise<string> {
     return '/chat';
   }
   const draft = await getOnboardingDraft();
-  const view = draft?.data?.webView;
-  if (view === 'como') return '/crear/como';
-  if (view === 'chat') return '/chat';
-  return '/crear/quien';
+  return resolvePostLoginWizardPath(draft);
 }
 
 export async function finishLoginAfterProvider(): Promise<string> {

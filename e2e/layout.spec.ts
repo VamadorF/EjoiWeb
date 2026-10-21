@@ -37,8 +37,8 @@ test.describe('Desktop shell 1440×900', () => {
     });
   });
 
-  test('/crear/quien cabe sin scroll vertical', async ({ page }) => {
-    await page.goto('/crear/quien');
+  test('/crear/paso-1 cabe sin scroll vertical', async ({ page }) => {
+    await page.goto('/crear/paso-1');
     const scrollHeight = await page.evaluate(() => document.documentElement.scrollHeight);
     expect(scrollHeight).toBeLessThanOrEqual(900);
     const main = page.locator('#main-content');
@@ -49,21 +49,28 @@ test.describe('Desktop shell 1440×900', () => {
     expect(mainScroll.scrollHeight).toBeLessThanOrEqual(mainScroll.clientHeight);
   });
 
-  test('/crear/como muestra el título al cargar', async ({ page }) => {
+  test('/crear/paso-4 muestra el título al cargar', async ({ page }) => {
     await page.addInitScript(() => {
       sessionStorage.setItem('ejoi-mock-demo-logged-in', '1');
     });
-    await page.goto('/crear/como');
-    await expect(page.getByRole('heading', { name: /Cómo habla tu eJoi/i })).toBeVisible();
-    await expect(page.getByText(/Paso 3 de 3 · ~30 s/)).toBeVisible();
+    await page.goto('/crear/paso-4');
+    await expect(page.getByRole('heading', { name: /Dale un nombre/i })).toBeVisible();
+    await expect(page.getByText(/Paso 4 de 4 · ~10 s/)).toBeVisible();
   });
 
-  test('mosaico de intereses con altura uniforme en Vista 2', async ({ page }) => {
+  test('mosaico de intereses con altura uniforme en paso 3', async ({ page }) => {
     await page.addInitScript(() => {
       sessionStorage.setItem('ejoi-mock-demo-logged-in', '1');
     });
-    await page.goto('/crear/quien');
-    await page.getByTestId('page-quien').waitFor({ state: 'visible', timeout: 10_000 });
+    await page.goto('/crear/paso-1');
+    await page.getByRole('radio', { name: 'Femenino' }).click();
+    await page.getByRole('radio', { name: 'Amigable y empática' }).click();
+    await page.getByRole('radio', { name: 'Realista' }).click();
+    await page.getByRole('button', { name: 'Continuar' }).click();
+    await page.waitForURL('**/crear/paso-2');
+    await page.getByRole('button', { name: 'Continuar' }).click();
+    await page.waitForURL('**/crear/paso-3');
+    await page.getByTestId('create-wizard').waitFor({ state: 'visible', timeout: 10_000 });
     const heights = await page.getByTestId('interest-tile').evaluateAll((els) =>
       els.map((el) => Math.round(el.getBoundingClientRect().height)),
     );
@@ -73,7 +80,7 @@ test.describe('Desktop shell 1440×900', () => {
   });
 
   test('opción seleccionada en Vista 2 usa borde de selección', async ({ page }) => {
-    await page.goto('/crear/quien');
+    await page.goto('/crear/paso-1');
     const femenino = page.getByRole('radio', { name: 'Femenino' });
     await femenino.click();
     const styles = await femenino.evaluate((el) => {
@@ -88,7 +95,7 @@ test.describe('Desktop shell 1440×900', () => {
   });
 
   test('medidas del shell de creación', async ({ page }) => {
-    await page.goto('/crear/quien');
+    await page.goto('/crear/paso-1');
     const header = page.getByTestId('shell-header');
     const preview = page.getByTestId('shell-preview');
     const footer = page.getByTestId('shell-footer');
@@ -265,7 +272,7 @@ test.describe('Desktop shell 1280×800', () => {
       }
       await route.fulfill({ status: 200, contentType: 'application/json', body: '{}' });
     });
-    await page.goto('/crear/quien');
+    await page.goto('/crear/paso-1');
     await expect(page.getByTestId('shell-preview')).toHaveCSS('width', '360px');
   });
 });
@@ -294,7 +301,7 @@ test.describe('Desktop shell 1024×768', () => {
       }
       await route.fulfill({ status: 200, contentType: 'application/json', body: '{}' });
     });
-    await page.goto('/crear/quien');
+    await page.goto('/crear/paso-1');
     await expect(page.getByTestId('shell-preview')).toHaveCSS('height', '72px');
   });
 });

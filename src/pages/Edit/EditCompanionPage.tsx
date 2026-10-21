@@ -39,8 +39,8 @@ import { useDesktopShortcuts } from '~/layout/useDesktopShortcuts';
 import { ENABLE_AGE, ENABLE_ETHNICITY } from '~/platform/env';
 import { HAIR_COLOR_OPTIONS } from '~/theme/hairSwatches';
 
-import '../CreateHow/CreateHowPage.css';
-import '../CreateWho/CreateWhoPage.css';
+import '../CreateWizard/CreateWizardHow.css';
+import '../CreateWizard/CreateWizardWho.css';
 import './EditCompanionPage.css';
 
 const ETHNICITY_LABELS: Record<(typeof ETHNICITY_IDS)[number], string> = {

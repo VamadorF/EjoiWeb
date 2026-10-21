@@ -8,10 +8,10 @@ import { routeConfig } from './routes';
 import { applyCssVars } from '~/theme/cssVars';
 
 describe('App shell', () => {
-  it('renderiza DesktopShell en /crear/quien', async () => {
+  it('renderiza DesktopShell en /crear/paso-1', async () => {
     applyCssVars();
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('no session')));
-    const router = createMemoryRouter(routeConfig, { initialEntries: ['/crear/quien'] });
+    const router = createMemoryRouter(routeConfig, { initialEntries: ['/crear/paso-1'] });
     render(
       <WebSessionProvider>
         <Suspense fallback={null}>
