@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef } from 'react';
 import type { CSSProperties } from 'react';
 import { Renderer, Program, Mesh, Triangle, Geometry, RenderTarget, Texture } from 'ogl';
 
+import { CRYSTAL_BALL_PRESET_COLORS } from '~/theme/crystalBallColors';
+
 type Preset = 'plasma' | 'aurora' | 'nebula' | 'ember' | 'frost' | 'solar' | 'eclipse' | 'abyss';
 type Motion = 'rise' | 'fall' | 'drift' | 'orbit';
 type ParticleShape = 'square' | 'round';
@@ -93,7 +95,7 @@ interface DustLayer {
 
 const BALL_PRESETS: Record<Preset, PresetValues> = {
   plasma: {
-    color: '#F25BD0',
+    color: CRYSTAL_BALL_PRESET_COLORS.plasma,
     strands: 6,
     crackle: 0.85,
     flares: 0.65,
@@ -110,7 +112,7 @@ const BALL_PRESETS: Record<Preset, PresetValues> = {
     dustSpeed: 1
   },
   aurora: {
-    color: '#5CFFC8',
+    color: CRYSTAL_BALL_PRESET_COLORS.aurora,
     strands: 5,
     crackle: 0.6,
     flares: 0.5,
@@ -127,7 +129,7 @@ const BALL_PRESETS: Record<Preset, PresetValues> = {
     dustSpeed: 1
   },
   nebula: {
-    color: '#9478FF',
+    color: CRYSTAL_BALL_PRESET_COLORS.nebula,
     strands: 6,
     crackle: 1,
     flares: 0.5,
@@ -144,7 +146,7 @@ const BALL_PRESETS: Record<Preset, PresetValues> = {
     dustSpeed: 1.2
   },
   ember: {
-    color: '#FF8A2A',
+    color: CRYSTAL_BALL_PRESET_COLORS.ember,
     strands: 5,
     crackle: 0.9,
     flares: 0.8,
@@ -161,7 +163,7 @@ const BALL_PRESETS: Record<Preset, PresetValues> = {
     dustSpeed: 1.6
   },
   frost: {
-    color: '#BFE6FF',
+    color: CRYSTAL_BALL_PRESET_COLORS.frost,
     strands: 3,
     crackle: 0.3,
     flares: 0.3,
@@ -178,7 +180,7 @@ const BALL_PRESETS: Record<Preset, PresetValues> = {
     dustSpeed: 0.7
   },
   solar: {
-    color: '#FFD36E',
+    color: CRYSTAL_BALL_PRESET_COLORS.solar,
     strands: 6,
     crackle: 0.7,
     flares: 1,
@@ -195,7 +197,7 @@ const BALL_PRESETS: Record<Preset, PresetValues> = {
     dustSpeed: 1
   },
   eclipse: {
-    color: '#FFFFFF',
+    color: CRYSTAL_BALL_PRESET_COLORS.eclipse,
     strands: 4,
     crackle: 0.5,
     flares: 0.4,
@@ -212,7 +214,7 @@ const BALL_PRESETS: Record<Preset, PresetValues> = {
     dustSpeed: 0.8
   },
   abyss: {
-    color: '#3F7BFF',
+    color: CRYSTAL_BALL_PRESET_COLORS.abyss,
     strands: 5,
     crackle: 0.55,
     flares: 0.6,
@@ -255,7 +257,7 @@ const parseColor = (value: string, fallback: Rgb): Rgb => {
   try {
     const ctx = document.createElement('canvas').getContext('2d');
     if (!ctx) return fallback;
-    ctx.fillStyle = '#000000';
+    ctx.fillStyle = 'black';
     ctx.fillStyle = value;
     const resolved = ctx.fillStyle;
     if (resolved.startsWith('#')) {
@@ -968,7 +970,13 @@ const CrystalizedBall = ({
     const container = containerRef.current;
     if (!container) return undefined;
 
-    const renderer = new Renderer({ alpha: true, premultipliedAlpha: true, antialias: false, depth: false });
+    let renderer: Renderer;
+    try {
+      renderer = new Renderer({ alpha: true, premultipliedAlpha: true, antialias: false, depth: false });
+    } catch {
+      // Sin WebGL (navegadores antiguos, jsdom): la bola es decorativa, no se dibuja.
+      return undefined;
+    }
     const gl = renderer.gl;
     const gl2 = gl as unknown as WebGL2RenderingContext;
     if (!renderer.isWebgl2) {

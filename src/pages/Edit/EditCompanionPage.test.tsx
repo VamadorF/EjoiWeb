@@ -54,10 +54,11 @@ describe('EditCompanionPage', () => {
       </Suspense>,
     );
 
-    expect(await screen.findByTestId('edit-companion-page')).toBeTruthy();
+    // La ruta es lazy: con la suite en paralelo cargarla tarda más que el 1 s por defecto.
+    expect(await screen.findByTestId('edit-companion-page', {}, { timeout: 5000 })).toBeTruthy();
     expect(screen.getByRole('heading', { name: 'Editar eJoi' })).toBeTruthy();
     expect(screen.queryByText(/Paso 2 de 3/)).toBeNull();
 
     vi.unstubAllGlobals();
-  });
+  }, 10_000);
 });
