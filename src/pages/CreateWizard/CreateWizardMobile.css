@@ -2,11 +2,11 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  min-height: 0;
-  max-width: 640px;
+  min-height: 100dvh;
+  max-width: none;
   margin: 0 auto;
-  padding: 1rem;
-  background: var(--c-bg);
+  padding: var(--space-4) var(--gutter);
+  background: var(--bg-brand-gradient);
 }
 
 .create-mobile__header {
@@ -19,34 +19,71 @@
 }
 
 .create-mobile__main {
+  display: flex;
   flex: 1;
+  flex-direction: column;
+  justify-content: safe center;
+  align-items: stretch;
+  gap: var(--space-4);
   min-height: 0;
   overflow: auto;
+  padding-block: var(--space-2);
+}
+
+.create-mobile .create-who {
+  position: relative;
+  isolation: isolate;
+  padding: var(--space-4) 0;
+  overflow: visible;
 }
 
 .create-mobile__footer {
   display: flex;
-  gap: 0.75rem;
-  justify-content: flex-end;
-  padding-top: 1rem;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  padding-top: var(--space-4);
+  border-top: var(--border-card) solid var(--c-line);
+  background: color-mix(in srgb, var(--c-surface) 92%, transparent);
+  margin: 0 calc(-1 * var(--gutter));
+  padding-left: var(--gutter);
+  padding-right: var(--gutter);
+  padding-bottom: max(var(--space-3), env(safe-area-inset-bottom));
+}
+
+.create-mobile .creation-shell-footer__hint {
+  flex: 1 1 100%;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-control);
+  border: var(--border-card) solid var(--c-line);
+  background: var(--c-surface);
+  color: var(--c-ink);
+}
+
+.create-mobile .creation-shell-footer__hint .app-icon {
+  color: var(--c-brand-text);
 }
 
 .create-mobile__back {
-  margin-right: auto;
-  min-height: calc(var(--size-button-l) * 1px);
+  position: absolute;
+  left: var(--gutter);
+  margin-right: 0;
+  min-height: var(--size-button-l);
   padding: 0 1rem;
-  border-radius: calc(var(--radius-control) * 1px);
-  border: calc(var(--border-card) * 1px) solid var(--c-line);
+  border-radius: var(--radius-control);
+  border: var(--border-card) solid var(--c-line);
   background: var(--c-surface);
   color: var(--c-ink);
   font-weight: 600;
 }
 
 .create-mobile__continue {
-  min-height: calc(var(--size-button-l) * 1px);
+  min-height: var(--size-button-l);
   padding: 0 1.5rem;
   border: none;
-  border-radius: calc(var(--radius-control) * 1px);
+  border-radius: var(--radius-control);
   background: var(--c-brand);
   color: var(--c-on-brand);
   font-weight: 700;
@@ -56,6 +93,11 @@
 .create-mobile__back:disabled {
   opacity: 0.45;
   cursor: not-allowed;
+}
+
+.create-mobile__continue {
+  flex: 0 0 auto;
+  min-width: min(220px, 100%);
 }
 
 .create-mobile__missing {
@@ -88,10 +130,10 @@
   align-items: center;
   justify-content: center;
   gap: 0.35rem;
-  min-height: calc(var(--size-button-l) * 1px);
+  min-height: var(--size-button-l);
   padding: 0.5rem;
-  border-radius: calc(var(--radius-control) * 1px);
-  border: calc(var(--border-card) * 1px) solid var(--c-line);
+  border-radius: var(--radius-control);
+  border: var(--border-card) solid var(--c-line);
   background: var(--c-surface);
   color: var(--c-ink);
   text-align: center;
@@ -108,15 +150,15 @@
   width: 100%;
   max-height: var(--create-style-thumb-max-h, 72px);
   object-fit: cover;
-  border-radius: calc(var(--radius-control) * 0.5px);
+  border-radius: var(--radius-checkbox);
 }
 
 .create-mobile .create-who__age {
   width: 5rem;
-  min-height: calc(var(--size-button-l) * 1px);
+  min-height: var(--size-button-l);
   padding: 0 0.75rem;
-  border-radius: calc(var(--radius-control) * 1px);
-  border: calc(var(--border-card) * 1px) solid var(--c-line);
+  border-radius: var(--radius-control);
+  border: var(--border-card) solid var(--c-line);
   background: var(--c-surface);
   color: var(--c-ink);
 }

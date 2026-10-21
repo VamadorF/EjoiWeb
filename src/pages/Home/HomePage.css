@@ -17,7 +17,7 @@ html.home-route .desktop-shell__main {
 }
 
 html.home-route .desktop-shell__footer {
-  border-top: calc(var(--border-card) * 1px) solid var(--c-line);
+  border-top: var(--border-card) solid var(--c-line);
   padding: var(--space-4) var(--gutter);
 }
 
@@ -238,7 +238,7 @@ html.home-route .desktop-shell__footer {
 .home-control {
   padding: var(--space-8) var(--gutter) var(--space-9);
   background: var(--c-surface);
-  border-top: calc(var(--border-card) * 1px) solid var(--c-line);
+  border-top: var(--border-card) solid var(--c-line);
 }
 
 .home-control__title {

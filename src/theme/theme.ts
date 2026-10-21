@@ -20,6 +20,10 @@ export function readThemePreference(): ThemePreference {
 
 export function writeThemePreference(pref: ThemePreference): void {
   try {
+    if (pref === 'system') {
+      localStorage.removeItem(THEME_STORAGE_KEY);
+      return;
+    }
     localStorage.setItem(THEME_STORAGE_KEY, pref);
   } catch {
     /* storage blocked */
@@ -45,12 +49,16 @@ const THEME_TRANSITION_MS = 150;
 
 export function applyResolvedTheme(theme: ResolvedTheme, animate = false): void {
   const root = document.documentElement;
-  if (!animate) {
+  const apply = () => {
     root.dataset.theme = theme;
+    root.style.colorScheme = theme;
+  };
+  if (!animate) {
+    apply();
     return;
   }
   root.classList.add('theme-transition');
-  root.dataset.theme = theme;
+  apply();
   window.setTimeout(() => root.classList.remove('theme-transition'), THEME_TRANSITION_MS);
 }
 

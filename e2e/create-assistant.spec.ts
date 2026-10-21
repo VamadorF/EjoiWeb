@@ -6,6 +6,7 @@ import {
   resetIntegrationMockState,
 } from './fixtures/integrationMock';
 import { advanceToWizardStep, fillWizardStep1, fillWizardStep3Interests } from './fixtures/wizardFlow';
+import { WIZARD_V2_SCREENS } from '../src/platform/mocks/wizard';
 
 test.describe('Asistente de creación SCRUM-166', () => {
   test.use({ viewport: { width: 1440, height: 900 } });
@@ -19,7 +20,7 @@ test.describe('Asistente de creación SCRUM-166', () => {
     await page.goto('/acceso');
     await loginWithTestSession(page);
     await page.reload();
-    await page.waitForURL('**/crear/paso-1', { timeout: 15_000 });
+    await page.waitForURL(`**${WIZARD_V2_SCREENS.genero}`, { timeout: 15_000 });
   }
 
   test('Salir pide confirmación y conserva el draft tras volver a entrar', async ({ page }) => {
@@ -27,12 +28,14 @@ test.describe('Asistente de creación SCRUM-166', () => {
     await page.goto('/acceso');
     await loginWithTestSession(page);
     await page.reload();
-    await page.goto('/crear/paso-1');
+    await page.goto(WIZARD_V2_SCREENS.genero);
     await fillWizardStep1(page);
-    await page.getByRole('button', { name: 'Continuar' }).click();
-    await page.waitForURL('**/crear/paso-2');
-    await page.getByRole('button', { name: 'Continuar' }).click();
-    await page.waitForURL('**/crear/paso-3');
+    await page.getByRole('button', { name: 'Siguiente' }).click();
+    await page.waitForURL(`**${WIZARD_V2_SCREENS.presencia}`);
+    await page.getByRole('button', { name: 'Siguiente' }).click();
+    await page.waitForURL(`**${WIZARD_V2_SCREENS.limites}`);
+    await page.getByRole('button', { name: 'Siguiente' }).click();
+    await page.waitForURL(`**${WIZARD_V2_SCREENS.intereses}`);
     await fillWizardStep3Interests(page);
     await page.waitForTimeout(500);
 
@@ -51,33 +54,15 @@ test.describe('Asistente de creación SCRUM-166', () => {
 
     await loginWithTestSession(page);
     await page.reload();
-    await page.goto('/crear/paso-3');
+    await page.goto(WIZARD_V2_SCREENS.intereses);
     await expect(page.getByRole('button', { name: 'Música' })).toHaveAttribute('aria-pressed', 'true');
   });
 
-  test('preview cita intereses con nombre válido', async ({ page }) => {
+  test('el nombre no abre el panel lateral', async ({ page }) => {
     await boot(page);
     await advanceToWizardStep(page, 4);
-
-    await page.route('**/api/companion/greeting-preview', async (route) => {
-      const body = route.request().postDataJSON() as { interests?: string[] };
-      const i1 = body.interests?.[0]?.toLowerCase() ?? 'música';
-      const i2 = body.interests?.[1]?.toLowerCase() ?? 'viajes';
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          greeting: `¡Hola! Soy Luna. Vi que te interesan ${i1} y ${i2}, así que tengo curiosidad.`,
-          basedOnInterests: body.interests ?? [],
-          quickReplies: [],
-          source: 'template',
-        }),
-      });
-    });
-
-    await page.locator('#create-wizard-form .field__control').first().fill('Luna');
-    await expect(page.getByTestId('creation-preview-greeting')).toContainText(/música y cine y series/i, {
-      timeout: 5_000,
-    });
+    await page.locator('#companion-name-input').fill('Luna');
+    await expect(page.getByTestId('shell-preview')).toHaveCount(0);
+    await expect(page.getByTestId('creation-preview-card')).toHaveCount(0);
   });
 });

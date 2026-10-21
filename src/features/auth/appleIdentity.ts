@@ -58,7 +58,7 @@ export async function signInWithApple(): Promise<{
   auth.init({
     clientId: APPLE_CLIENT_ID,
     scope: 'name email',
-    redirectURI: `${window.location.origin}/acceso`,
+    redirectURI: `${window.location.origin}/`,
     usePopup: true,
   });
 

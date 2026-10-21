@@ -79,7 +79,7 @@ async function mockAuthedApi(page: Page) {
 }
 
 const screens = [
-  { name: 'acceso', path: '/acceso' },
+  { name: 'bienvenida', path: '/' },
   { name: 'quien', path: '/crear/paso-1' },
   { name: 'como', path: '/crear/paso-4' },
   { name: 'chat-ready', path: '/chat' },

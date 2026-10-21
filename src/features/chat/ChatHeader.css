@@ -1,0 +1,125 @@
+.chat-header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 68px;
+  padding: var(--space-3) var(--space-4);
+  padding-right: calc(var(--space-4) + 52px);
+  border-bottom: 1px solid var(--c-line);
+  background: var(--c-surface);
+  flex-shrink: 0;
+}
+
+.chat-header__leading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  flex-shrink: 0;
+}
+
+.chat-header__peer {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.chat-header__avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.chat-header__presence {
+  position: absolute;
+  right: -1px;
+  bottom: -1px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--c-surface);
+  background: var(--c-ink2);
+}
+
+.chat-header__presence--online {
+  background: var(--presence-online);
+}
+
+.chat-header__presence--typing {
+  background: var(--presence-typing);
+}
+
+.chat-header__presence--listening {
+  background: var(--presence-listening);
+}
+
+.chat-header__presence--thinking {
+  background: var(--presence-thinking);
+}
+
+.chat-header__presence--recording {
+  background: var(--presence-recording);
+}
+
+.chat-header__presence--away {
+  background: var(--presence-away);
+}
+
+.chat-header__presence--offline {
+  background: var(--presence-offline);
+}
+
+.chat-header__presence--reconnecting {
+  background: var(--presence-reconnecting);
+}
+
+.chat-header__text {
+  min-width: 0;
+}
+
+.chat-header__name {
+  margin: 0;
+  font: 700 20px/28px Apis, system-ui, sans-serif;
+  color: var(--c-ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chat-header__subtitle {
+  margin: 0;
+  font: var(--font-caption);
+  color: var(--c-ink2);
+}
+
+.chat-header__quota {
+  flex-shrink: 0;
+  font: var(--font-caption);
+  color: var(--c-ink2);
+  text-align: right;
+}
+
+.chat-header__menu-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--c-ink);
+  cursor: pointer;
+}
+
+@media (min-width: 1024px) {
+  .chat-header__menu-btn {
+    display: none;
+  }
+
+  .chat-header__leading {
+    width: 0;
+    overflow: hidden;
+  }
+}

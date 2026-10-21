@@ -18,13 +18,25 @@ export type DesktopShellProps = {
 const WIZARD_STEP_SECONDS = [15, 15, 20, 10] as const;
 
 export type CreationShellHeaderProps = {
+  /** Paso visible 1–4 (`getV2WizardGroupIndex`). */
   step: 1 | 2 | 3 | 4;
-  backLabel?: string;
+  /** Progreso continuo 0–1 (`getV2WizardProgress`). */
+  progress: number;
+  showBack?: boolean;
   onBack?: () => void;
   onConfirmLeave: () => void | Promise<void>;
+  /** Tags de lo ya elegido, bajo la barra de progreso. */
+  crumbs?: ReactNode;
 };
 
-export function CreationShellHeader({ step, backLabel, onBack, onConfirmLeave }: CreationShellHeaderProps) {
+export function CreationShellHeader({
+  step,
+  progress,
+  showBack = false,
+  onBack,
+  onConfirmLeave,
+  crumbs,
+}: CreationShellHeaderProps) {
   const { t } = useTranslation();
   const { t: tWeb } = useTranslation('web');
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -33,6 +45,7 @@ export function CreationShellHeader({ step, backLabel, onBack, onConfirmLeave }:
     total: 4,
     seconds: WIZARD_STEP_SECONDS[step - 1] ?? 15,
   });
+  const progressPct = Math.round(Math.max(0, Math.min(1, progress)) * 100);
 
   const openLeaveDialog = () => {
     dialogRef.current?.showModal();
@@ -51,46 +64,44 @@ export function CreationShellHeader({ step, backLabel, onBack, onConfirmLeave }:
     <>
       <div className="creation-shell-header">
         <div className="creation-shell-header__brand">
-          {onBack && backLabel ? (
-            <button type="button" className="btn btn--text creation-shell-header__back" onClick={onBack}>
-              <AppIcon name="chevron-back-outline" />
-              {backLabel}
-            </button>
-          ) : (
-            <Logo height={28} />
-          )}
+          <Logo width={64} />
         </div>
         <div className="creation-shell-header__progress-wrap">
           <p className="label">{stepLabel}</p>
           <div
             className="creation-shell-header__progress"
             role="progressbar"
-            aria-valuemin={1}
-            aria-valuemax={4}
-            aria-valuenow={step}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={progressPct}
             aria-label={stepLabel}
           >
-            {[1, 2, 3, 4].map((n) => (
-              <span
-                key={n}
-                className={
-                  n <= step
-                    ? 'creation-shell-header__seg creation-shell-header__seg--done'
-                    : 'creation-shell-header__seg'
-                }
-              />
-            ))}
+            <span
+              className="creation-shell-header__progress-fill"
+              style={{ width: `${progressPct}%` }}
+            />
           </div>
+          {crumbs}
         </div>
         <div className="creation-shell-header__actions">
+          {showBack && onBack ? (
+            <button
+              type="button"
+              className="btn btn--icon btn--text creation-shell-header__nav-back"
+              aria-label={tWeb('create.back')}
+              onClick={onBack}
+            >
+              <AppIcon name="chevron-back-outline" />
+            </button>
+          ) : null}
           <button
             type="button"
-            className="btn btn--text creation-shell-header__exit"
+            className="btn btn--icon btn--text creation-shell-header__exit"
             data-testid="create-exit"
+            aria-label={tWeb('create.exit')}
             onClick={openLeaveDialog}
           >
             <AppIcon name="close-outline" />
-            {tWeb('create.exit')}
           </button>
         </div>
       </div>
@@ -127,12 +138,7 @@ export function DesktopShell({ header, footer, preview, children }: DesktopShell
           {children}
         </main>
         {preview ? (
-          <aside
-            className="desktop-shell__preview"
-            data-testid="shell-preview"
-            inert
-            aria-hidden
-          >
+          <aside className="desktop-shell__preview" data-testid="shell-preview">
             {preview}
           </aside>
         ) : null}

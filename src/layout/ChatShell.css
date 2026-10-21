@@ -4,7 +4,7 @@
   top: auto;
   z-index: 100;
   padding: 0.75rem 1rem;
-  border-radius: calc(var(--radius-control) * 1px);
+  border-radius: var(--radius-control);
   background: var(--c-surface);
   color: var(--c-ink);
   font-weight: 600;
@@ -43,7 +43,7 @@
 
 .chat-shell__menu {
   background: var(--c-surface);
-  border-right: calc(var(--border-card) * 1px) solid var(--c-line);
+  border-right: var(--border-card) solid var(--c-line);
   padding: var(--space-6);
 }
 
@@ -55,7 +55,7 @@
 
 .chat-shell__profile {
   background: var(--c-surface);
-  border-left: calc(var(--border-card) * 1px) solid var(--c-line);
+  border-left: var(--border-card) solid var(--c-line);
   padding: var(--space-6);
 }
 
@@ -82,9 +82,9 @@
 
   .chat-shell__mobile-toggle {
     flex: 1;
-    min-height: calc(var(--size-button-l) * 1px);
-    border-radius: calc(var(--radius-control) * 1px);
-    border: calc(var(--border-card) * 1px) solid var(--c-line);
+    min-height: var(--size-button-l);
+    border-radius: var(--radius-control);
+    border: var(--border-card) solid var(--c-line);
     background: var(--c-surface);
     color: var(--c-ink);
     font-weight: 600;

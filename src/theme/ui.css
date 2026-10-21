@@ -1,5 +1,9 @@
 /* Componentes base UX v2 (web). Las páginas migran a estas clases en tarjetas UI-03+. */
 
+.bg-brand {
+  background: var(--bg-brand-gradient);
+}
+
 .btn {
   display: inline-flex;
   align-items: center;
@@ -7,7 +11,7 @@
   gap: var(--space-2);
   margin: 0;
   border: none;
-  border-radius: calc(var(--radius-control) * 1px);
+  border-radius: var(--radius-control);
   font: var(--font-button);
   text-decoration: none;
   cursor: pointer;
@@ -22,7 +26,7 @@
 .btn:disabled {
   background: var(--c-dis-bg);
   color: var(--c-dis-ink);
-  border: calc(var(--border-card) * 1.5px) dashed var(--c-control-border);
+  border: var(--border-control) dashed var(--c-control-border);
   box-shadow: none;
   cursor: not-allowed;
   transform: none;
@@ -42,7 +46,7 @@
 .btn--secondary {
   background: var(--c-surface);
   color: var(--c-ink);
-  border: calc(var(--border-card) * 1.5px) solid var(--c-line-strong);
+  border: var(--border-control) solid var(--c-line-strong);
   box-shadow: none;
 }
 
@@ -210,7 +214,7 @@
   min-height: 44px;
   padding: 0 var(--space-4);
   border-radius: 12px;
-  border: calc(var(--border-card) * 1.5px) solid var(--c-line-strong);
+  border: var(--border-control) solid var(--c-line-strong);
   background: var(--c-surface);
   color: var(--c-ink);
   font: var(--font-button);
@@ -219,9 +223,32 @@
 
 .chip[aria-checked='true'],
 .chip[aria-pressed='true'] {
+  position: relative;
   border: 2px solid var(--c-sel-border);
   background: var(--c-sel-fill);
   color: var(--c-sel-ink);
+  padding-right: calc(var(--space-4) + 22px);
+}
+
+.chip[aria-checked='true']::before,
+.chip[aria-pressed='true']::before {
+  content: '✓';
+  position: absolute;
+  right: var(--space-3);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--c-sel-border);
+  background: var(--c-sel-border);
+  color: var(--c-on-brand);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
 }
 
 .chip--add {
@@ -285,7 +312,7 @@
   min-height: 56px;
   padding: 0 var(--space-4);
   border-radius: 12px;
-  border: calc(var(--border-card) * 1.5px) solid var(--c-control-border);
+  border: var(--border-control) solid var(--c-control-border);
   background: var(--c-surface);
   color: var(--c-ink);
   font-size: 16px;
@@ -326,7 +353,7 @@
   height: 24px;
   margin: 0;
   border-radius: 6px;
-  border: calc(var(--border-card) * 1.5px) solid var(--c-control-border);
+  border: var(--border-control) solid var(--c-control-border);
   background: var(--c-surface);
 }
 
@@ -378,7 +405,7 @@
 
 .card {
   padding: var(--space-6);
-  border-radius: calc(var(--radius-card) * 1px);
+  border-radius: var(--radius-card);
   border: 1px solid var(--c-line);
   background: var(--c-surface);
 }
@@ -447,16 +474,16 @@
 
 .bubble--ai,
 .bubble--user {
-  max-width: 520px;
-  padding: var(--space-3) var(--space-4);
-  font: var(--font-body);
+  max-width: min(78%, 560px);
+  padding: 10px 16px;
+  font: 400 16px/22px Apis, system-ui, sans-serif;
 }
 
 .bubble--ai {
   align-self: flex-start;
-  border: 1px solid var(--c-line);
-  border-radius: 16px 16px 16px 4px;
-  background: var(--c-surface);
+  border: none;
+  border-radius: 18px 18px 18px 4px;
+  background: var(--c-surface2);
   color: var(--c-ink);
 }
 
@@ -467,9 +494,39 @@
 
 .bubble--user {
   align-self: flex-end;
-  border-radius: 16px 16px 4px 16px;
+  border-radius: 18px 18px 4px 18px;
   background: var(--c-brand);
   color: var(--c-on-brand);
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: var(--space-6);
+  transform: translateX(-50%) translateY(120%);
+  z-index: 100;
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-control);
+  background: var(--c-ink);
+  color: var(--c-bg);
+  font: var(--font-body);
+  box-shadow: var(--elev-3);
+  animation: ui-toast-in 200ms ease forwards;
+}
+
+.toast--visible {
+  animation: ui-toast-in 200ms ease forwards;
+}
+
+@keyframes ui-toast-in {
+  from {
+    transform: translateX(-50%) translateY(120%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
 }
 
 .skeleton {

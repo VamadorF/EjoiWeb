@@ -5,7 +5,8 @@ import { moveRovingFocus, syncRovingTabIndex, type OptionGroupMode } from './opt
 
 export type OptionGroupProps = {
   mode: OptionGroupMode;
-  'aria-labelledby': string;
+  'aria-labelledby'?: string;
+  'aria-label'?: string;
   cols?: OptionGridCols;
   layout?: 'grid' | 'inline';
   className?: string;
@@ -15,6 +16,7 @@ export type OptionGroupProps = {
 export function OptionGroup({
   mode,
   'aria-labelledby': labelledBy,
+  'aria-label': ariaLabel,
   cols = 3,
   layout = 'grid',
   className,
@@ -47,6 +49,7 @@ export function OptionGroup({
       ref={ref}
       role={mode === 'radio' ? 'radiogroup' : 'group'}
       aria-labelledby={labelledBy}
+      aria-label={labelledBy ? undefined : ariaLabel}
       className={className}
       onKeyDown={onKeyDown}
     >

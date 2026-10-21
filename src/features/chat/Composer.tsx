@@ -1,9 +1,10 @@
-import { useCallback, useState, type FormEvent, type KeyboardEvent } from 'react';
+import { useCallback, useEffect, useState, type FormEvent, type KeyboardEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { MESSAGE_MAX_LENGTH } from '@/features/chat/constants';
 
 import { AppIcon } from '~/components/AppIcon';
+import { isSpeechRecognitionSupported } from '~/platform/speech';
 
 const COUNTER_FROM = 760;
 const MAX_INPUT_ROWS = 5;
@@ -12,11 +13,19 @@ export type ComposerProps = {
   disabled?: boolean;
   onSend: (text: string) => void | Promise<void>;
   hint?: string;
+  onDraftChange?: (text: string) => void;
+  listening?: boolean;
 };
 
-export function Composer({ disabled, onSend, hint }: ComposerProps) {
-  const { t } = useTranslation('web');
+export function Composer({ disabled, onSend, hint, onDraftChange, listening }: ComposerProps) {
+  const { t } = useTranslation();
+  const { t: tWeb } = useTranslation('web');
   const [text, setText] = useState('');
+  const speechSupported = isSpeechRecognitionSupported();
+
+  useEffect(() => {
+    onDraftChange?.(text);
+  }, [onDraftChange, text]);
 
   const resizeInput = useCallback((element: HTMLTextAreaElement) => {
     element.rows = 1;
@@ -42,18 +51,35 @@ export function Composer({ disabled, onSend, hint }: ComposerProps) {
     void submit(event);
   };
 
+  const placeholder = listening
+    ? t('chat.composer.placeholder_listening')
+    : hint
+      ? tWeb('chat.placeholder')
+      : tWeb('chat.placeholder');
+
   return (
     <form className="chat-composer" onSubmit={(e) => void submit(e)} data-testid="chat-composer">
       {hint ? <p className="chat-composer__hint">{hint}</p> : null}
       <div className="chat-composer__row">
+        {speechSupported ? (
+          <button
+            type="button"
+            className="btn btn--icon chat-composer__mic"
+            disabled={disabled}
+            aria-label={t('chat.voice.start')}
+            data-testid="chat-speech-btn"
+          >
+            <AppIcon name="mic-outline" />
+          </button>
+        ) : null}
         <textarea
           className="chat-composer__input"
           value={text}
           maxLength={MESSAGE_MAX_LENGTH}
           disabled={disabled}
           rows={1}
-          placeholder={t('chat.placeholder')}
-          aria-label={t('chat.placeholder')}
+          placeholder={placeholder}
+          aria-label={tWeb('chat.placeholder')}
           onChange={(e) => {
             setText(e.target.value);
             resizeInput(e.target);
@@ -71,7 +97,7 @@ export function Composer({ disabled, onSend, hint }: ComposerProps) {
             text.trim() ? ' chat-composer__send--ready' : ' chat-composer__send--empty'
           }`}
           disabled={disabled || !text.trim()}
-          aria-label={t('chat.send_label')}
+          aria-label={tWeb('chat.send_label')}
         >
           <AppIcon name="send" />
         </button>

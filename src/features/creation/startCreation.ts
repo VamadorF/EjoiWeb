@@ -93,20 +93,26 @@ export type StartCreationParams = {
   data: OnboardingData;
   step: number;
   webView: WebView;
+  avatarUrl: string;
+  avatarStoragePath?: string;
 };
 
-/** Orden: draft chat → consentimiento → creación (sin await) → navegación. */
+/** Orden: draft → consentimiento → creación (sin await) → pantalla creando. */
 export async function startCreation(
   params: StartCreationParams,
   onNavigate: (path: string) => void,
 ): Promise<void> {
-  const body = buildPutBody(params.step, params.data, 'chat');
+  const body = buildPutBody(params.step, params.data, params.webView);
   await putOnboardingDraft(body);
   await postConsentsWeb();
 
-  void httpClient
-    .post('/companion/me', buildCreateCompanionPayload(params.data))
-    .catch(() => undefined);
+  const payload = {
+    ...buildCreateCompanionPayload(params.data),
+    avatarUrl: params.avatarUrl,
+    ...(params.avatarStoragePath ? { avatarStoragePath: params.avatarStoragePath } : {}),
+  };
 
-  onNavigate('/chat');
+  void httpClient.post('/companion/me', payload).catch(() => undefined);
+
+  onNavigate('/crear/creando');
 }

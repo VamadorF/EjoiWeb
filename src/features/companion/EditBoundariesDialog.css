@@ -1,0 +1,42 @@
+.edit-boundaries-dialog {
+  border: none;
+  padding: 0;
+  max-width: min(480px, 92vw);
+  background: transparent;
+}
+
+.edit-boundaries-dialog::backdrop {
+  background: color-mix(in srgb, var(--c-ink) 45%, transparent);
+}
+
+.edit-boundaries-dialog__panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-5);
+}
+
+.edit-boundaries-dialog__title {
+  margin: 0;
+  font: var(--font-h3);
+}
+
+.edit-boundaries-dialog__subtitle {
+  margin: 0;
+  font: var(--font-body);
+  color: var(--c-ink2);
+}
+
+.edit-boundaries-dialog__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  max-height: min(50vh, 320px);
+  overflow: auto;
+}
+
+.edit-boundaries-dialog__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}

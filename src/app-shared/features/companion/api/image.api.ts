@@ -1,4 +1,4 @@
-// AUTO-SINCRONIZADO desde ejoiFE origin/develop@b20f6d62a97a0266796ebfb82e772f0961ed9136:src/features/companion/api/image.api.ts. No editar: npm run sync:app
+// AUTO-SINCRONIZADO desde ejoiFE b20f6d62a97a0266796ebfb82e772f0961ed9136@b20f6d62a97a0266796ebfb82e772f0961ed9136:src/features/companion/api/image.api.ts. No editar: npm run sync:app
 /**
  * API para generación de imágenes del companion
  * Usa el backend eJoi-BE-Image (DALL-E)

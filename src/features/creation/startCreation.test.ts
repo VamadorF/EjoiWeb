@@ -94,11 +94,23 @@ describe('startCreation', () => {
     const data = sampleData();
     const navigate = vi.fn();
 
-    await startCreation({ data, step: 14, webView: 'como' }, navigate);
+    await startCreation(
+      {
+        data,
+        step: 14,
+        webView: 'revision',
+        avatarUrl: 'https://example.com/avatar.webp',
+        avatarStoragePath: 'mock/avatar.webp',
+      },
+      navigate,
+    );
 
     expect(order).toEqual(['draft', 'consent', 'create']);
     expect(httpClient.request).toHaveBeenCalledWith('/users/me/consents', expect.objectContaining({ method: 'POST' }));
-    expect(httpClient.post).toHaveBeenCalledWith('/companion/me', expect.objectContaining({ name: 'Luna' }));
-    expect(navigate).toHaveBeenCalledWith('/chat');
+    expect(httpClient.post).toHaveBeenCalledWith(
+      '/companion/me',
+      expect.objectContaining({ name: 'Luna', avatarUrl: 'https://example.com/avatar.webp' }),
+    );
+    expect(navigate).toHaveBeenCalledWith('/crear/creando');
   });
 });

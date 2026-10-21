@@ -126,33 +126,30 @@ async function collectTabStops(page: Page) {
 test.describe('Teclado desktop (SCRUM-113)', () => {
   test.use({ viewport: { width: 1440, height: 900 } });
 
-  test('preview de creación no recibe foco', async ({ page }) => {
+  test('el wizard no monta el panel lateral de preview', async ({ page }) => {
     await mockAuthedApi(page);
     await page.goto('/crear/paso-1');
-    await page.waitForSelector('[data-testid="shell-preview"]');
-    const previewFocused = await page.evaluate(() => {
-      const preview = document.querySelector('[data-testid="shell-preview"]');
-      return preview?.contains(document.activeElement) ?? false;
-    });
-    expect(previewFocused).toBe(false);
-    await expect(page.locator('[data-testid="shell-preview"]')).toHaveAttribute('inert', '');
+    await expect(page.getByTestId('shell-header')).toBeVisible();
+    await expect(page.getByTestId('shell-preview')).toHaveCount(0);
   });
 
-  test('Tab recorre acceso sin atrapar foco', async ({ page }) => {
-    await mockAuthedApi(page);
-    await page.goto('/acceso');
-    await page.waitForLoadState('networkidle');
+  test('Tab recorre bienvenida sin atrapar foco', async ({ page }) => {
+    await page.route('**/api/**', async (route) => {
+      const path = new URL(route.request().url()).pathname.replace(/^\/api/, '');
+      if (path.includes('/auth/refresh')) {
+        await route.fulfill({ status: 401, contentType: 'application/json', body: '{}' });
+        return;
+      }
+      await route.fulfill({ status: 200, contentType: 'application/json', body: '{}' });
+    });
+    await page.goto('/');
+    await expect(page.getByTestId('page-bienvenida')).toBeVisible();
     await page.locator('body').click({ position: { x: 8, y: 8 } });
     const stops = await collectTabStops(page);
     expect(stops.length).toBeGreaterThan(1);
-
-    const skip = page.locator('.skip-to-content');
-    await skip.focus();
-    await skip.press('Enter');
-    await expect(page.locator('#main-content')).toBeFocused();
   });
 
-  test('acceso: returning y código por teclado', async ({ page }) => {
+  test('bienvenida: returning y código por teclado', async ({ page }) => {
     await page.route('**/api/**', async (route) => {
       const path = new URL(route.request().url()).pathname.replace(/^\/api/, '');
       if (path.includes('/auth/refresh')) {
@@ -177,12 +174,11 @@ test.describe('Teclado desktop (SCRUM-113)', () => {
     await expect(page.getByRole('heading', { name: 'Qué bueno verte de nuevo' })).toBeVisible();
 
     await page.goto('/acceso');
-    await expect(page.getByTestId('page-acceso')).toBeVisible();
+    await expect(page.getByTestId('page-bienvenida')).toBeVisible();
     const codeBtn = page.getByRole('button', { name: 'Tengo un código' });
     await codeBtn.focus();
     await expect(codeBtn).toBeFocused();
-    await page.keyboard.press('Enter');
-    await expect(page.locator('#access-invite-code')).toBeFocused();
+    await expect(codeBtn).toBeDisabled();
   });
 
   test('Enter envía y Shift+Enter no envía en el chat', async ({ page }) => {

@@ -1,4 +1,4 @@
-// AUTO-SINCRONIZADO desde ejoiFE origin/develop@b20f6d62a97a0266796ebfb82e772f0961ed9136:src/shared/utils/companionImagePrompt.realista.ts. No editar: npm run sync:app
+// AUTO-SINCRONIZADO desde ejoiFE b20f6d62a97a0266796ebfb82e772f0961ed9136@b20f6d62a97a0266796ebfb82e772f0961ed9136:src/shared/utils/companionImagePrompt.realista.ts. No editar: npm run sync:app
 import { COMPANION_DEFAULT_AGE } from '../../features/onboarding/constants/onboardingSteps';
 import type { CompanionArchetypeId } from '../../features/onboarding/types';
 import { buildRealisticAgeAppearance } from './companionAgeAppearance';

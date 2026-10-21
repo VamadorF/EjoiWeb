@@ -77,13 +77,13 @@ export function SessionRouting() {
     if (boot !== 'ready') return;
 
     if (!isAuthenticated) {
-      if (location.pathname !== '/acceso' && location.pathname !== '/') {
-        navigate('/acceso', { replace: true });
+      if (location.pathname !== '/') {
+        navigate('/', { replace: true });
       }
       return;
     }
 
-    if (location.pathname === '/acceso' || location.pathname === '/') {
+    if (location.pathname === '/') {
       void resolvePostLoginPath().then((path) => {
         if (location.pathname !== path) navigate(path, { replace: true });
       });

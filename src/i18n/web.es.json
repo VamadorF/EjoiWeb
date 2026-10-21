@@ -33,7 +33,12 @@
     "mock_login": "Entrar en modo demo",
     "dev_no_provider": "Falta configurar VITE_GOOGLE_CLIENT_ID en .env.local para ver el acceso con Google."
   },
+  "tabs": {
+    "aria": "Secciones de tu eJoi"
+  },
   "wizard": {
+    "choose_neutral": "Elige tu compañía",
+    "neutral_companion": "tu compañía",
     "s1_title": "Crea tu compañía",
     "s1_sub": "Elige cómo quieres que sea. Todo se puede cambiar después.",
     "s2_title": "Define cómo conversará",
@@ -75,6 +80,13 @@
     "basic_limits": "Siempre activos: {{limits}}",
     "suggest_name": "Sugerir",
     "cta_create": "Crear a {{name}} y conversar"
+  },
+  "creating": {
+    "error_title": "No pudimos crear a {{name}}"
+  },
+  "ready": {
+    "no_interests": "Sin intereses todavía",
+    "no_boundaries": "Sin límites definidos"
   },
   "chat": {
     "creating_title": "Creando a {{name}}",

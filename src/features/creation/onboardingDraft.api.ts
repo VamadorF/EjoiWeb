@@ -7,7 +7,7 @@ import * as session from '~/platform/session';
 
 export const ONBOARDING_DRAFT_SCHEMA_VERSION = 1;
 
-export type WebView = 'quien' | 'como' | 'chat';
+export type WebView = 'quien' | 'como' | 'chat' | 'revision';
 
 export type OnboardingDraftRecord = {
   schemaVersion: number;

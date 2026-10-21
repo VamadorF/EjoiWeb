@@ -67,7 +67,7 @@ export default function HomePage() {
         header={
           <div className="home-header">
             <Link to="/" className="home-header__logo" aria-label="eJoi inicio">
-              <Logo height={28} />
+              <Logo width={64} />
             </Link>
             <div className="home-header__actions">
               <button type="button" className="btn btn--text" onClick={goAccessReturning}>

@@ -74,7 +74,7 @@ describe('mockApi', () => {
       authToken,
       body: { name: 'Sofía', interests: demoInterests, persona: 'Amigable', intensity: 'balanced' },
     });
-    vi.advanceTimersByTime(3100);
+    vi.advanceTimersByTime(4100);
     const creation = handleMockApiRequest('/api/companion/me/creation', { method: 'GET', authToken });
     const first = (creation?.data as { firstMessage?: { content: string } }).firstMessage;
     expect(first?.content).toContain('Vi que te interesan música y viajes');

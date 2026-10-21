@@ -1,4 +1,4 @@
-// AUTO-SINCRONIZADO desde ejoiFE origin/develop@b20f6d62a97a0266796ebfb82e772f0961ed9136:src/shared/theme/tokens.ts. No editar: npm run sync:app
+// AUTO-SINCRONIZADO desde ejoiFE b20f6d62a97a0266796ebfb82e772f0961ed9136@b20f6d62a97a0266796ebfb82e772f0961ed9136:src/shared/theme/tokens.ts. No editar: npm run sync:app
 /**
  * UX v2 design tokens (anexo manual + provisionales PO §4.1).
  * Inmutable respecto a theme packs; las vistas v2 leen `UxV2`, no `Colors`.

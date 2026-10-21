@@ -1,7 +1,7 @@
 .option-grid {
   display: grid;
-  gap: calc(var(--radius-control) * 1px);
-  padding: calc(var(--radius-control) * 1px);
+  gap: var(--radius-control);
+  padding: var(--radius-control);
 }
 
 .option-grid[data-cols='3'] {

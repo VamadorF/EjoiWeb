@@ -81,7 +81,7 @@ test.describe('Tema claro/oscuro (SCRUM-112)', () => {
 
   test('seis pantallas respetan claro y oscuro', async ({ page }) => {
     const screens: { id: string; path: string; setup?: () => Promise<void> }[] = [
-      { id: 'acceso', path: '/acceso' },
+      { id: 'bienvenida', path: '/' },
       { id: 'quien', path: '/crear/paso-1' },
       { id: 'como', path: '/crear/paso-4' },
       {
@@ -171,13 +171,38 @@ test.describe('Tema claro/oscuro (SCRUM-112)', () => {
   });
 
   test('preferencia persiste tras recargar', async ({ page }) => {
-    await page.goto('/acceso');
+    await page.goto('/');
     await applyTheme(page, 'dark');
     await page.reload();
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   });
 
-  test('tema se cambia desde Ajustes en el chat', async ({ page }) => {
+  test('tema se elige en la bienvenida', async ({ page }) => {
+    await page.goto('/');
+    await page.getByTestId('theme-settings-trigger').click();
+    await page.getByTestId('theme-settings-dialog').getByRole('radio', { name: 'Oscuro' }).click();
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+    await expect
+      .poll(() => page.evaluate(() => localStorage.getItem('ejoi.theme')))
+      .toBe('dark');
+  });
+
+  test('sin override sigue prefers-color-scheme del dispositivo', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await page.goto('/');
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+    await expect
+      .poll(() => page.evaluate(() => localStorage.getItem('ejoi.theme')))
+      .toBeNull();
+
+    await page.getByTestId('theme-settings-trigger').click();
+    await page.getByTestId('theme-settings-dialog').getByRole('radio', { name: 'Auto' }).click();
+    await expect
+      .poll(() => page.evaluate(() => localStorage.getItem('ejoi.theme')))
+      .toBeNull();
+  });
+
+  test('tema se cambia desde el menú lateral en el chat', async ({ page }) => {
     await mockApi(page, {
       state: 'ready',
       profile: { name: 'Luna', visualStyle: 'realista' },
@@ -186,15 +211,9 @@ test.describe('Tema claro/oscuro (SCRUM-112)', () => {
     await page.goto('/chat');
     await page.getByTestId('chat-read').waitFor();
 
-    const settings = page.getByTestId('chat-settings-open');
-    await settings.click();
-    const dialog = page.getByTestId('chat-settings-dialog');
-    await expect(dialog).toBeVisible();
-    await dialog.getByRole('radio', { name: 'Oscuro' }).click();
+    await page.getByTestId('theme-settings-trigger').click();
+    await page.getByTestId('theme-settings-dialog').getByRole('radio', { name: 'Oscuro' }).click();
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
-    await dialog.getByRole('button', { name: 'Cancelar' }).click();
-    await expect(dialog).toBeHidden();
-    await expect(settings).toBeFocused();
   });
 
   test('hover y foco distinguibles en ambos temas', async ({ page }) => {

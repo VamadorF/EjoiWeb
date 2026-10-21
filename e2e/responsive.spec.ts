@@ -62,22 +62,20 @@ async function pickMinimalStep1(page: Page) {
 }
 
 test.describe('Responsive creación', () => {
-  test('1280×800 preview 360 px y retrato 140 px', async ({ page }) => {
+  test('1280×800 sin panel lateral y retrato 140 px', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
     await mockCreationApi(page);
     await page.goto('/crear/paso-1');
-    const preview = page.getByTestId('shell-preview');
-    await expect(preview).toHaveCSS('width', '360px');
+    await expect(page.getByTestId('shell-preview')).toHaveCount(0);
     const thumb = page.locator('.opt__thumb').first();
     await expect(thumb).toHaveCSS('max-height', '140px');
   });
 
-  test('1024×768 franja preview 72 px e intereses 4 columnas', async ({ page }) => {
+  test('1024×768 sin panel lateral e intereses en 4 columnas', async ({ page }) => {
     await page.setViewportSize({ width: 1024, height: 768 });
     await mockCreationApi(page);
     await page.goto('/crear/paso-1');
-    const preview = page.getByTestId('shell-preview');
-    await expect(preview).toHaveCSS('height', '72px');
+    await expect(page.getByTestId('shell-preview')).toHaveCount(0);
     await pickMinimalStep1(page);
     await page.getByRole('button', { name: 'Continuar' }).click();
     await page.waitForURL('**/crear/paso-2');
@@ -197,9 +195,8 @@ test.describe('Chat bajo 1024', () => {
     expect(readBox?.width ?? 0).toBeGreaterThan(700);
 
     await page.getByTestId('chat-menu-toggle').click();
-    await expect(page.locator('.chat-shell__menu--drawer-open')).toBeVisible();
+    await expect(page.locator('.home-shell__menu--drawer-open')).toBeVisible();
     await page.getByRole('button', { name: 'Cerrar menú' }).click();
-    await page.getByTestId('chat-profile-toggle').click();
-    await expect(page.locator('.chat-shell__profile--drawer-open')).toBeVisible();
+    await expect(page.locator('.home-shell__menu--drawer-open')).toBeHidden();
   });
 });

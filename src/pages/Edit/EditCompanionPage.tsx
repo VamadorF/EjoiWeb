@@ -33,6 +33,8 @@ import { useRegeneration } from '~/features/edit/useRegeneration';
 import { useSectionDialog } from '~/features/edit/useSectionDialog';
 import { EDIT_VOICE_OPTIONS } from '~/features/edit/voiceOptions';
 import { stylePortraitSrcForCard, visualStyleSelectorOptions } from '~/features/creation/portraits';
+import { useGenderedTextWith } from '~/features/gender/useGenderedText';
+import { validators } from '@/shared/utils/validators';
 import { ChatShell } from '~/layout/ChatShell';
 import { OptionGroup } from '~/layout/OptionGroup';
 import { useDesktopShortcuts } from '~/layout/useDesktopShortcuts';
@@ -75,6 +77,7 @@ function EditCompanionContent() {
   const [showOtherBoundary, setShowOtherBoundary] = useState(false);
   const [activeSection, setActiveSection] = useState<EditSectionId | null>(null);
   const [draft, setDraft] = useState<EditFormSnapshot | null>(null);
+  const [nameTouched, setNameTouched] = useState(false);
 
   const {
     loaded,
@@ -90,6 +93,9 @@ function EditCompanionContent() {
   } = useEditForm(editQueryClient);
 
   const regenSource = activeSection === 'appearance' && draft ? draft : values;
+  const gendered = useGenderedTextWith((regenSource?.gender ?? '') as '' | 'femenino' | 'masculino' | 'neutro');
+  const editName = draft?.companionName ?? values?.companionName ?? '';
+  const editNameError = nameTouched && editName.length > 0 ? validators.getNameError(editName) : null;
   const regen = useRegeneration({
     queryClient: editQueryClient,
     baseline,
@@ -473,7 +479,7 @@ function EditCompanionContent() {
                             <span className="opt__icon-wrap">
                               <AppIcon name={PERSONALITY_OPTION_ICONS[option]} />
                             </span>
-                            <span>{option}</span>
+                            <span>{gendered.trait(option)}</span>
                           </button>
                         ))}
                       </OptionGroup>
@@ -486,13 +492,20 @@ function EditCompanionContent() {
                         {t('edit.name')}
                       </span>
                       <input
-                        className="field__control"
+                        className={`field__control${editNameError ? ' field__control--error' : ''}`}
                         type="text"
                         maxLength={20}
                         value={draft.companionName}
+                        aria-invalid={editNameError ? true : undefined}
                         onChange={(e) => patchDraft({ companionName: e.target.value })}
+                        onBlur={() => setNameTouched(true)}
                         aria-labelledby="edit-name"
                       />
+                      {editNameError ? (
+                        <p className="field__error" role="alert">
+                          {editNameError}
+                        </p>
+                      ) : null}
                     </div>
                   </>
                 ) : null}

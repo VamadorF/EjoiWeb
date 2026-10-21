@@ -7,6 +7,7 @@ import { httpClient } from '~/platform/http';
 export type SubscriptionMe = {
   messagesRemaining: number;
   isFreeTierExhausted?: boolean;
+  planLabel?: string;
 };
 
 export async function fetchSubscriptionMe(): Promise<SubscriptionMe> {

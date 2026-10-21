@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import type { OnboardingData } from '@/features/onboarding/types';
 
+import { useGenderedTextWith } from '~/features/gender/useGenderedText';
 import { hairColorLabelKey } from '~/theme/hairSwatches';
 import { ENABLE_AGE, ENABLE_ETHNICITY } from '~/platform/env';
 
@@ -90,9 +91,10 @@ export function ProfilePanel({
 }: ProfilePanelProps) {
   const { t } = useTranslation('web');
   const view = mergeProfileView(profile, draft);
+  const gendered = useGenderedTextWith((view.gender ?? '') as '' | 'femenino' | 'masculino' | 'neutro');
   const intensityKey = view.intensity ? INTENSITY_KEYS[view.intensity] : undefined;
   const traitPills: string[] = [];
-  if (view.persona?.trim()) traitPills.push(view.persona.trim());
+  if (view.persona?.trim()) traitPills.push(gendered.trait(view.persona.trim()));
   if (intensityKey) traitPills.push(t(intensityKey));
 
   const appearanceParts: string[] = [];
@@ -106,7 +108,8 @@ export function ProfilePanel({
     appearanceParts.push(t('chat.profile_age', { count: view.age }));
   }
   if (ENABLE_ETHNICITY && view.ethnicity) {
-    appearanceParts.push(view.ethnicity);
+    const label = gendered.ethnicity(view.ethnicity);
+    if (label) appearanceParts.push(label);
   }
   if (view.hairColor) {
     const hairKey = hairColorLabelKey(view.hairColor);
