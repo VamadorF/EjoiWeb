@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
 
 import { fromWebAuthResponse, type RawAuthResponse } from '~/features/auth/authWeb.adapter';
 import { CAMPAIGN_LANDING_URL, isOAuthConfigured, MOCK_API } from '~/platform/env';
@@ -57,6 +57,7 @@ function profileFromIdToken(idToken: string) {
 export default function AccessPage() {
   const { t } = useTranslation(['translation', 'web']);
   const navigate = useNavigate();
+  const location = useLocation();
   const { markAuthenticated } = useWebSession();
   const providersRef = useRef<HTMLDivElement>(null);
   const googleHostRef = useRef<HTMLDivElement>(null);
@@ -81,6 +82,12 @@ export default function AccessPage() {
     document.documentElement.classList.add('access-route');
     return () => document.documentElement.classList.remove('access-route');
   }, []);
+
+  useEffect(() => {
+    if ((location.state as { returning?: boolean } | null)?.returning) {
+      setReturning(true);
+    }
+  }, [location.state]);
 
   useEffect(() => {
     void getFounderCount()

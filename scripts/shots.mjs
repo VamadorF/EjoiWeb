@@ -2,7 +2,7 @@
 /* eslint-disable no-undef -- evaluate() corre en el navegador */
 /**
  * Capturas de referencia (modo demo). Requiere `npm run build:demo` previo.
- * Uso: node scripts/shots.mjs [acceso|vista-2|vista-3|chat-creando|chat-listo|chat-error|editar]
+ * Uso: node scripts/shots.mjs [inicio|acceso|vista-2|vista-3|chat-creando|chat-listo|chat-error|editar]
  */
 import { createHash } from 'node:crypto';
 import { spawn } from 'node:child_process';
@@ -18,6 +18,7 @@ const distDir = path.join(root, 'dist-demo');
 const outDir = path.join(root, 'docs', 'screens');
 
 const ALL = [
+  'inicio',
   'acceso',
   'vista-2',
   'vista-3',
@@ -33,6 +34,7 @@ const ASSERT_MS = 10_000;
 
 /** @type {Record<string, { url: RegExp; testIds: string[] }>} */
 const SCREEN_ASSERT = {
+  inicio: { url: /\/\/[^/]+\/?(\?.*)?$/, testIds: ['page-inicio'] },
   acceso: { url: /\/acceso\/?(\?.*)?$/, testIds: ['page-acceso'] },
   'vista-2': { url: /\/crear\/quien\/?(\?.*)?$/, testIds: ['page-quien'] },
   'vista-3': { url: /\/crear\/como\/?(\?.*)?$/, testIds: ['page-como'] },
@@ -120,6 +122,9 @@ async function assertScreen(page, screenId) {
 
 async function prepareScreen(page, id) {
   switch (id) {
+    case 'inicio':
+      await page.goto('/');
+      break;
     case 'acceso':
       await page.goto('/acceso');
       break;

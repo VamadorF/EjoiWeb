@@ -1,4 +1,19 @@
 {
+  "home": {
+    "cta_create": "Crear mi eJoi",
+    "cta_login": "Ya tengo cuenta",
+    "example_label": "Ejemplo",
+    "example_ai": "¡Hola! Soy Sofía. Vi que te interesan música y viajes, así que tengo curiosidad: ¿qué es lo que más te gusta de música?",
+    "example_user": "¡Me encanta descubrir bandas nuevas!",
+    "how_title": "Cómo funciona",
+    "how_1_title": "Elige cómo es",
+    "how_1_body": "Su estilo, su personalidad y su forma de conversar.",
+    "how_2_title": "Cuéntale qué te interesa",
+    "how_2_body": "Elige al menos 3 temas para empezar.",
+    "how_3_title": "Conversa en un minuto",
+    "how_3_body": "Su primer mensaje parte de lo que elegiste.",
+    "control_title": "Tú tienes el control"
+  },
   "access": {
     "step": "Paso 1 de 3",
     "sign_in": "Iniciar sesión",
