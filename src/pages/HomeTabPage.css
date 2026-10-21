@@ -1,0 +1,12 @@
+.home-tab-page {
+  height: 100%;
+  min-height: 0;
+  overflow: auto;
+}
+
+.home-tab-page__inner {
+  width: 100%;
+  max-width: var(--chat-read-max);
+  margin: 0 auto;
+  padding: var(--space-4) var(--space-4) var(--space-6);
+}

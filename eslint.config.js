@@ -5,7 +5,19 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
-  { ignores: ['dist', 'src/app-shared'] },
+  {
+    ignores: [
+      'dist',
+      'dist-demo',
+      'playwright-report',
+      'test-results',
+      'docs/screens',
+      'src/app-shared',
+      '.agents/**',
+      '.cursor/skills/**',
+      '.github/skills/**',
+    ],
+  },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   reactHooks.configs['recommended-latest'],

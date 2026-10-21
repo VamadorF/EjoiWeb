@@ -1,0 +1,251 @@
+html.welcome-route {
+  background: var(--c-bg);
+}
+
+.welcome-page {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  min-height: 100dvh;
+  padding: var(--space-6) var(--gutter);
+  background: var(--c-bg);
+}
+
+.welcome-page__column {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 440px;
+  gap: var(--space-8);
+  min-height: min(100dvh, 900px);
+  text-align: center;
+}
+
+.welcome-hero {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  width: 100%;
+}
+
+.welcome-hero__logo {
+  animation: welcome-logo-in 800ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes welcome-logo-in {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .welcome-hero__logo {
+    animation: none;
+  }
+}
+
+.welcome-hero__title {
+  margin: 0;
+  font: var(--font-title1);
+  font-size: 34px;
+  line-height: 41px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  color: var(--c-ink);
+}
+
+.welcome-hero__highlight {
+  color: var(--c-brand-text);
+}
+
+.welcome-hero__subtitle {
+  margin: 0;
+  max-width: 320px;
+  font: var(--font-secondary);
+  color: var(--c-ink2);
+}
+
+.welcome-hero__pills {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.welcome-hero__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 28px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--c-line);
+  border-radius: 999px;
+  background: var(--c-surface);
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 500;
+  color: var(--c-ink);
+}
+
+.welcome-hero__pill-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.welcome-hero__pill--brand .welcome-hero__pill-icon {
+  color: var(--c-brand-text);
+}
+
+.welcome-hero__pill--lav .welcome-hero__pill-icon {
+  color: var(--c-lav-ink);
+}
+
+.welcome-hero__pill--ok .welcome-hero__pill-icon {
+  color: var(--c-ok);
+}
+
+.welcome-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-3);
+  width: 100%;
+  flex-shrink: 0;
+}
+
+.welcome-actions__providers {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.welcome-actions__providers .btn {
+  width: 100%;
+}
+
+.welcome-actions__google-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 56px;
+  width: 100%;
+}
+
+.welcome-actions__apple {
+  min-height: 56px;
+  border-radius: 16px;
+  background: #000;
+  color: #fff;
+  border: none;
+}
+
+.welcome-actions__apple:hover:not(:disabled) {
+  background: #1a1a1a;
+}
+
+.welcome-actions__legal {
+  margin: 0;
+  font: var(--font-caption);
+  color: var(--c-ink2);
+}
+
+.welcome-actions__legal button {
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-weight: 500;
+  color: var(--c-ink);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.welcome-actions .btn--text:not(.welcome-actions__invite) {
+  align-self: center;
+  font-weight: 700;
+  color: var(--c-ink);
+  text-decoration: underline;
+}
+
+.welcome-actions__invite {
+  align-self: center;
+  font-weight: 700;
+  color: var(--c-dis-ink);
+  text-decoration: none;
+  opacity: 1;
+}
+
+.welcome-legal-dialog {
+  padding: 0;
+  border: none;
+  max-width: min(720px, calc(100vw - 32px));
+  background: transparent;
+}
+
+.welcome-legal-dialog::backdrop {
+  background: rgb(0 0 0 / 45%);
+}
+
+.welcome-legal-dialog__panel {
+  margin: 0;
+  max-height: min(85dvh, 720px);
+  display: flex;
+  flex-direction: column;
+  border-radius: 20px;
+}
+
+.welcome-legal-dialog__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--c-line);
+}
+
+.welcome-legal-dialog__title {
+  margin: 0;
+  font: var(--font-title2);
+  color: var(--c-ink);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.welcome-legal-dialog__body {
+  flex: 1;
+  overflow: auto;
+  padding: var(--space-5);
+  text-align: start;
+}
+
+.welcome-legal-dialog__para,
+.welcome-legal-dialog__bullet {
+  margin: 0 0 var(--space-3);
+  font: var(--font-body);
+  color: var(--c-ink2);
+}
+
+.welcome-legal-dialog__footer {
+  padding: var(--space-4) var(--space-5);
+  border-top: 1px solid var(--c-line);
+}
+
+.welcome-legal-dialog__footer .btn {
+  width: 100%;
+}

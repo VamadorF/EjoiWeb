@@ -71,7 +71,7 @@ async function main() {
 
     await page.goto('/');
     await page.getByRole('link', { name: 'Crear mi eJoi' }).first().click();
-    await page.waitForURL(/\/acceso/, { timeout: 15_000 });
+    await page.getByTestId('page-bienvenida').waitFor({ state: 'visible', timeout: 15_000 });
     await page.getByRole('button', { name: 'Entrar en modo demo' }).click();
     await page.waitForURL(/\/(crear|chat)/, { timeout: 20_000 });
     await fillWizardThroughStep3(page);

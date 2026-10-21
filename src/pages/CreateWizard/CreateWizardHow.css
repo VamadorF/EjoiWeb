@@ -45,6 +45,20 @@
   min-width: 0;
 }
 
+@keyframes create-name-suggest-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.07);
+  }
+}
+
+.create-how__suggest--pulse {
+  animation: create-name-suggest-pulse 420ms ease;
+}
+
 .create-how__chip-row {
   display: flex;
   flex-direction: column;

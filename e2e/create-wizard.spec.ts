@@ -6,8 +6,9 @@ import {
   resetIntegrationMockState,
 } from './fixtures/integrationMock';
 import { advanceToWizardStep, fillWizardStep1, fillWizardStep3Interests } from './fixtures/wizardFlow';
+import { WIZARD_V2_SCREENS } from '../src/platform/mocks/wizard';
 
-test.describe('Asistente único 4 pasos SCRUM-174', () => {
+test.describe('Asistente v2 — 7 pantallas en 4 pasos', () => {
   test.beforeEach(() => {
     resetIntegrationMockState();
   });
@@ -15,59 +16,63 @@ test.describe('Asistente único 4 pasos SCRUM-174', () => {
   test.describe('escritorio 1440', () => {
     test.use({ viewport: { width: 1440, height: 900 } });
 
-    test('pasos 1→4 y redirects quien/como', async ({ page }) => {
+    test('recorre pantallas y redirects quien/como', async ({ page }) => {
       await installIntegrationMock(page);
       await page.goto('/acceso');
       await loginWithTestSession(page);
       await page.reload();
-      await page.waitForURL('**/crear/paso-1', { timeout: 15_000 });
+      await page.waitForURL(`**${WIZARD_V2_SCREENS.genero}`, { timeout: 15_000 });
 
       await page.goto('/crear/quien');
-      await page.waitForURL('**/crear/paso-1');
+      await page.waitForURL(`**${WIZARD_V2_SCREENS.genero}`);
       await page.goto('/crear/como');
-      await page.waitForURL('**/crear/paso-4');
+      await page.waitForURL(`**${WIZARD_V2_SCREENS.nombre}`);
 
-      await page.goto('/crear/paso-1');
+      await page.goto(WIZARD_V2_SCREENS.genero);
       await fillWizardStep1(page);
-      await page.getByRole('button', { name: 'Continuar' }).click();
-      await page.waitForURL('**/crear/paso-2');
-      await page.getByRole('button', { name: 'Continuar' }).click();
-      await page.waitForURL('**/crear/paso-3');
+      await page.getByRole('button', { name: 'Siguiente' }).click();
+      await page.waitForURL(`**${WIZARD_V2_SCREENS.presencia}`);
+      await page.getByRole('button', { name: 'Siguiente' }).click();
+      await page.waitForURL(`**${WIZARD_V2_SCREENS.limites}`);
+      await page.getByRole('button', { name: 'Siguiente' }).click();
+      await page.waitForURL(`**${WIZARD_V2_SCREENS.intereses}`);
       await fillWizardStep3Interests(page);
-      await page.getByRole('button', { name: 'Continuar' }).click();
-      await page.waitForURL('**/crear/paso-4');
+      await page.getByRole('button', { name: 'Siguiente' }).click();
+      await page.waitForURL(`**${WIZARD_V2_SCREENS.nombre}`);
       await expect(page.getByTestId('create-wizard')).toBeVisible();
     });
 
-    test('presencia con descripción y Recomendada', async ({ page }) => {
+    test('presencia con descripción en Balanceada', async ({ page }) => {
       await installIntegrationMock(page);
       await page.goto('/acceso');
       await loginWithTestSession(page);
       await advanceToWizardStep(page, 2);
-      await expect(page.getByTestId('presence-balanced')).toContainText('Equilibrio entre cercanía');
-      await expect(page.getByTestId('presence-balanced')).toContainText('Recomendada');
+      await expect(page.getByTestId('presence-balanced')).toBeVisible();
+      await expect(page.locator('#main-content')).toContainText(/equilibrio entre cercan/i);
     });
   });
 
-  test('recarga en cada paso conserva elecciones', async ({ page }) => {
+  test('recarga en pantallas clave conserva elecciones', async ({ page }) => {
     await installIntegrationMock(page);
     await page.goto('/acceso');
     await loginWithTestSession(page);
-    await page.goto('/crear/paso-1');
-    await fillWizardStep1(page);
+    await page.goto(WIZARD_V2_SCREENS.genero);
+    await page.getByRole('radio', { name: 'Femenino' }).click();
     await page.waitForTimeout(400);
     await page.reload();
     await expect(page.getByRole('radio', { name: 'Femenino' })).toHaveAttribute('aria-checked', 'true');
 
-    await page.getByRole('button', { name: 'Continuar' }).click();
-    await page.waitForURL('**/crear/paso-2');
-    await page.getByRole('radio', { name: 'Equilibrada' }).click();
+    await fillWizardStep1(page);
+    await page.getByRole('button', { name: 'Siguiente' }).click();
+    await page.waitForURL(`**${WIZARD_V2_SCREENS.presencia}`);
     await page.waitForTimeout(400);
     await page.reload();
-    await expect(page.getByRole('radio', { name: 'Equilibrada' })).toHaveAttribute('aria-checked', 'true');
+    await expect(page.getByTestId('presence-balanced')).toHaveAttribute('aria-checked', 'true');
 
-    await page.getByRole('button', { name: 'Continuar' }).click();
-    await page.waitForURL('**/crear/paso-3');
+    await page.getByRole('button', { name: 'Siguiente' }).click();
+    await page.waitForURL(`**${WIZARD_V2_SCREENS.limites}`);
+    await page.getByRole('button', { name: 'Siguiente' }).click();
+    await page.waitForURL(`**${WIZARD_V2_SCREENS.intereses}`);
     await fillWizardStep3Interests(page);
     await page.waitForTimeout(400);
     await page.reload();
@@ -103,21 +108,19 @@ test.describe('Asistente único 4 pasos SCRUM-174', () => {
       });
     });
 
-    async function openWizardStep(page: import('@playwright/test').Page, step: 1 | 2 | 3 | 4) {
-      await page.goto('/crear/paso-1');
+    async function openWizardGroup(page: import('@playwright/test').Page, group: 1 | 2 | 3 | 4) {
+      await page.goto(WIZARD_V2_SCREENS.genero);
       await page.getByTestId('create-wizard').waitFor({ state: 'visible', timeout: 15_000 });
-      if (step === 1) return;
-      await advanceToWizardStep(page, step);
-      await page.waitForURL(`**/crear/paso-${step}`, { timeout: 15_000 });
+      if (group === 1) return;
+      await advanceToWizardStep(page, group);
     }
 
-    for (const step of [1, 2, 3, 4] as const) {
-      test(`paso ${step} cabe sin scroll a 1440×900`, async ({ page }) => {
-        await openWizardStep(page, step);
+    for (const group of [1, 2, 3, 4] as const) {
+      test(`grupo ${group} cabe sin scroll a 1440×900`, async ({ page }) => {
+        await openWizardGroup(page, group);
         await page.getByTestId('wizard-step-panel').waitFor({ state: 'visible' });
         await page.waitForTimeout(280);
         const scrollHeight = await page.evaluate(() => document.documentElement.scrollHeight);
-        // ponytail: 1px de holgura por subpíxeles / animación de paso
         expect(scrollHeight).toBeLessThanOrEqual(901);
         const main = page.locator('#main-content');
         const mainScroll = await main.evaluate((el) => ({
@@ -127,46 +130,52 @@ test.describe('Asistente único 4 pasos SCRUM-174', () => {
         expect(mainScroll.scrollHeight).toBeLessThanOrEqual(mainScroll.clientHeight);
       });
 
-      test(`paso ${step} tiene un h1 y como máximo 3 grupos`, async ({ page }) => {
-        await openWizardStep(page, step);
+      test(`grupo ${group} tiene un h1 y un solo grupo de opciones`, async ({ page }) => {
+        await openWizardGroup(page, group);
         await expect(page.locator('#main-content h1')).toHaveCount(1);
-        const groups = await page.getByTestId('wizard-step-group').count();
-        expect(groups).toBeGreaterThan(0);
-        expect(groups).toBeLessThanOrEqual(3);
+        expect(await page.getByTestId('wizard-step-group').count()).toBe(1);
       });
     }
 
-    test('preview vacío muestra retratos atenuados y texto', async ({ page }) => {
-      await openWizardStep(page, 1);
-      await expect(page.getByTestId('creation-preview-empty')).toBeVisible();
-      await expect(page.getByText(/Aquí verás a tu eJoi/i)).toBeVisible();
+    test('sin género no muestra preview en escritorio', async ({ page }) => {
+      await page.goto(WIZARD_V2_SCREENS.genero);
+      await expect(page.getByTestId('shell-preview')).toHaveCount(0);
+    });
+
+    test('con género las migas van bajo el progreso, sin panel lateral', async ({ page }) => {
+      await page.goto(WIZARD_V2_SCREENS.genero);
+      await page.getByRole('radio', { name: 'Femenino' }).click();
+      await expect(page.getByTestId('shell-preview')).toHaveCount(0);
+      await expect(page.getByTestId('wizard-choice-pills')).toBeVisible();
     });
 
     test('reducedMotion usa fundido sin desplazamiento', async ({ page }) => {
-      await openWizardStep(page, 1);
+      await page.goto(WIZARD_V2_SCREENS.genero);
       await page.emulateMedia({ reducedMotion: 'reduce' });
-      await fillWizardStep1(page);
-      await page.getByRole('button', { name: 'Continuar' }).click();
-      await page.waitForURL('**/crear/paso-2');
+      await page.getByRole('radio', { name: 'Femenino' }).click();
+      await page.getByRole('button', { name: 'Siguiente' }).click();
+      await page.waitForURL(`**${WIZARD_V2_SCREENS.personalidad}`);
       const panel = page.getByTestId('wizard-step-panel');
       await expect(panel).toHaveCSS('animation-name', 'create-wizard-step-fade');
     });
   });
 
-  test('800 px recorre los 4 pasos', async ({ page }) => {
+  test('800 px recorre los 4 pasos de grupo', async ({ page }) => {
     await page.setViewportSize({ width: 800, height: 900 });
     await installIntegrationMock(page);
     await page.goto('/acceso');
     await loginWithTestSession(page);
-    await page.goto('/crear/paso-1');
-    await expect(page.getByTestId('create-wizard-step')).toContainText('1/4');
+    await page.goto(WIZARD_V2_SCREENS.genero);
+    await expect(page.getByTestId('create-wizard-step')).toContainText('Paso 1 de 4');
     await fillWizardStep1(page);
-    await page.getByRole('button', { name: 'Continuar' }).click();
-    await expect(page.getByTestId('create-wizard-step')).toContainText('2/4');
-    await page.getByRole('button', { name: 'Continuar' }).click();
-    await expect(page.getByTestId('create-wizard-step')).toContainText('3/4');
+    await page.getByRole('button', { name: 'Siguiente' }).click();
+    await expect(page.getByTestId('create-wizard-step')).toContainText('Paso 2 de 4');
+    await page.getByRole('button', { name: 'Siguiente' }).click();
+    await page.waitForURL(`**${WIZARD_V2_SCREENS.limites}`);
+    await page.getByRole('button', { name: 'Siguiente' }).click();
+    await expect(page.getByTestId('create-wizard-step')).toContainText('Paso 3 de 4');
     await fillWizardStep3Interests(page);
-    await page.getByRole('button', { name: 'Continuar' }).click();
-    await expect(page.getByTestId('create-wizard-step')).toContainText('4/4');
+    await page.getByRole('button', { name: 'Siguiente' }).click();
+    await expect(page.getByTestId('create-wizard-step')).toContainText('Paso 4 de 4');
   });
 });

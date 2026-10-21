@@ -93,7 +93,10 @@ export async function getOnboardingDraft(): Promise<OnboardingDraftResponse | nu
 
 export async function resolvePostLoginPath(): Promise<string> {
   const creation = await getCompanionCreation();
-  if (creation.state === 'ready' || creation.state === 'creating' || creation.state === 'error') {
+  if (creation.state === 'creating' || creation.state === 'error') {
+    return '/crear/creando';
+  }
+  if (creation.state === 'ready') {
     return '/chat';
   }
   const draft = await getOnboardingDraft();

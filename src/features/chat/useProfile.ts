@@ -1,5 +1,7 @@
 import { useQuery, type QueryClient } from '@tanstack/react-query';
 
+import type { SharedMomentResponse } from '@/features/memories/types';
+
 import { httpClient } from '~/platform/http';
 
 export type CompanionProfile = {
@@ -18,6 +20,7 @@ export type CompanionProfile = {
   boundaries?: string[];
   voiceKey?: string;
   updatedAt?: string;
+  sharedMoments?: SharedMomentResponse[];
 };
 
 export const companionProfileQueryKey = ['companion', 'me', 'profile'] as const;

@@ -2,7 +2,7 @@
 /* eslint-disable no-undef -- evaluate() corre en el navegador */
 /**
  * Capturas de referencia (modo demo). Requiere `npm run build:demo` previo.
- * Uso: node scripts/shots.mjs [inicio|acceso|paso-1|paso-2|paso-3|paso-4|chat-creando|chat-listo|chat-error|editar]
+ * Uso: node scripts/shots.mjs [bienvenida|paso-1|paso-2|paso-3|paso-4|chat-creando|chat-listo|chat-error|editar]
  */
 import { createHash } from 'node:crypto';
 import { spawn } from 'node:child_process';
@@ -18,8 +18,7 @@ const distDir = path.join(root, 'dist-demo');
 const outDir = path.join(root, 'docs', 'screens');
 
 const ALL = [
-  'inicio',
-  'acceso',
+  'bienvenida',
   'paso-1',
   'paso-2',
   'paso-3',
@@ -36,8 +35,7 @@ const ASSERT_MS = 10_000;
 
 /** @type {Record<string, { url: RegExp; testIds: string[] }>} */
 const SCREEN_ASSERT = {
-  inicio: { url: /\/\/[^/]+\/?(\?.*)?$/, testIds: ['page-inicio'] },
-  acceso: { url: /\/acceso\/?(\?.*)?$/, testIds: ['page-acceso'] },
+  bienvenida: { url: /\/\/[^/]+\/?(\?.*)?$/, testIds: ['page-bienvenida'] },
   'paso-1': { url: /\/crear\/paso-1\/?(\?.*)?$/, testIds: ['create-wizard'] },
   'paso-2': { url: /\/crear\/paso-2\/?(\?.*)?$/, testIds: ['create-wizard'] },
   'paso-3': { url: /\/crear\/paso-3\/?(\?.*)?$/, testIds: ['create-wizard'] },
@@ -81,7 +79,7 @@ async function waitForServer(baseUrl, attempts = 40) {
 }
 
 async function demoLogin(page) {
-  await page.goto('/acceso');
+  await page.goto('/');
   await page.getByRole('button', { name: 'Entrar en modo demo' }).click();
   await page.waitForURL(/\/(crear|chat)/, { timeout: 20_000 });
 }
@@ -136,10 +134,9 @@ async function assertScreen(page, screenId) {
 async function prepareScreen(page, id) {
   switch (id) {
     case 'inicio':
-      await page.goto('/');
-      break;
     case 'acceso':
-      await page.goto('/acceso');
+    case 'bienvenida':
+      await page.goto('/');
       break;
     case 'paso-1':
       await demoLogin(page);

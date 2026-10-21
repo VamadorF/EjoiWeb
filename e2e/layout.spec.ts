@@ -97,11 +97,10 @@ test.describe('Desktop shell 1440×900', () => {
   test('medidas del shell de creación', async ({ page }) => {
     await page.goto('/crear/paso-1');
     const header = page.getByTestId('shell-header');
-    const preview = page.getByTestId('shell-preview');
     const footer = page.getByTestId('shell-footer');
 
-    await expect(header).toHaveCSS('height', '72px');
-    await expect(preview).toHaveCSS('width', '360px');
+    await expect(header).toHaveCSS('min-height', '72px');
+    await expect(page.getByTestId('shell-preview')).toHaveCount(0);
     await expect(footer).toHaveCSS('height', '88px');
   });
 
@@ -164,16 +163,14 @@ test.describe('Desktop shell 1440×900', () => {
     await page.waitForSelector('[data-testid="chat-read"]');
     const menu = page.getByTestId('chat-menu');
     const read = page.getByTestId('chat-read');
-    const profile = page.getByTestId('chat-profile');
 
     const menuBox = await menu.boundingBox();
     const readBox = await read.boundingBox();
-    const profileBox = await profile.boundingBox();
 
-    expect(menuBox?.width).toBe(264);
+    expect(menuBox?.width).toBe(320);
     expect(readBox?.width).toBeGreaterThanOrEqual(680);
     expect(readBox?.width).toBeLessThanOrEqual(900);
-    expect(profileBox?.width).toBe(320);
+    await expect(page.getByTestId('home-tabs')).toBeVisible();
   });
 
   test('chat: encabezado, cupo y burbujas del manual', async ({ page }) => {
@@ -273,7 +270,7 @@ test.describe('Desktop shell 1280×800', () => {
       await route.fulfill({ status: 200, contentType: 'application/json', body: '{}' });
     });
     await page.goto('/crear/paso-1');
-    await expect(page.getByTestId('shell-preview')).toHaveCSS('width', '360px');
+    await expect(page.getByTestId('shell-preview')).toHaveCount(0);
   });
 });
 
@@ -302,6 +299,6 @@ test.describe('Desktop shell 1024×768', () => {
       await route.fulfill({ status: 200, contentType: 'application/json', body: '{}' });
     });
     await page.goto('/crear/paso-1');
-    await expect(page.getByTestId('shell-preview')).toHaveCSS('height', '72px');
+    await expect(page.getByTestId('shell-preview')).toHaveCount(0);
   });
 });

@@ -1,0 +1,125 @@
+.account-page {
+  min-height: 100vh;
+  background: var(--bg-brand-gradient);
+}
+
+.account-page__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--c-surface);
+  border-bottom: 1px solid var(--c-line);
+}
+
+.account-page__title {
+  flex: 1;
+  margin: 0;
+  font: var(--font-h3);
+  text-align: center;
+}
+
+.account-page__body {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: var(--space-4) var(--space-4) var(--space-8);
+}
+
+.account-page__section-label {
+  margin: var(--space-5) 0 var(--space-1);
+  font: var(--font-label);
+}
+
+.account-page__section-hint {
+  margin: 0 0 var(--space-3);
+  font: var(--font-caption);
+  color: var(--c-ink2);
+}
+
+.account-page__card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.account-page__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-4);
+  border: none;
+  background: transparent;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.account-page__row--static {
+  cursor: default;
+}
+
+.account-page__row-label {
+  font: var(--font-caption);
+  color: var(--c-ink2);
+}
+
+.account-page__row-value {
+  font: var(--font-body);
+}
+
+.account-page__divider {
+  height: 1px;
+  margin: 0 var(--space-4);
+  background: var(--c-line);
+}
+
+.account-page__danger {
+  margin-top: var(--space-6);
+}
+
+.account-page__delete {
+  width: 100%;
+  margin-top: var(--space-3);
+}
+
+.account-page__toast {
+  position: fixed;
+  left: 50%;
+  bottom: var(--space-6);
+  transform: translateX(-50%);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-control);
+  background: var(--c-ink);
+  color: var(--c-surface);
+  font: var(--font-body);
+}
+
+.account-page__name-dialog {
+  border: none;
+  padding: 0;
+  max-width: min(420px, 92vw);
+  background: transparent;
+}
+
+.account-page__name-dialog::backdrop {
+  background: color-mix(in srgb, var(--c-ink) 45%, transparent);
+}
+
+.account-page__name-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-5);
+}
+
+.account-page__name-input {
+  width: 100%;
+}
+
+.account-page__name-error {
+  margin: 0;
+  color: var(--c-error);
+  font: var(--font-caption);
+}

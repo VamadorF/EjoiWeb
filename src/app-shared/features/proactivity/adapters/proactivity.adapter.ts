@@ -1,4 +1,4 @@
-// AUTO-SINCRONIZADO desde ejoiFE origin/develop@b20f6d62a97a0266796ebfb82e772f0961ed9136:src/features/proactivity/adapters/proactivity.adapter.ts. No editar: npm run sync:app
+// AUTO-SINCRONIZADO desde ejoiFE b20f6d62a97a0266796ebfb82e772f0961ed9136@b20f6d62a97a0266796ebfb82e772f0961ed9136:src/features/proactivity/adapters/proactivity.adapter.ts. No editar: npm run sync:app
 import {
   DEFAULT_PREFERRED_CONTACT,
   DEFAULT_PROACTIVITY_PREFERENCES,

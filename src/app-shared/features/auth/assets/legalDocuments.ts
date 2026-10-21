@@ -1,4 +1,4 @@
-// AUTO-SINCRONIZADO desde ejoiFE origin/develop@b20f6d62a97a0266796ebfb82e772f0961ed9136:src/features/auth/assets/legalDocuments.ts. No editar: npm run sync:app
+// AUTO-SINCRONIZADO desde ejoiFE b20f6d62a97a0266796ebfb82e772f0961ed9136@b20f6d62a97a0266796ebfb82e772f0961ed9136:src/features/auth/assets/legalDocuments.ts. No editar: npm run sync:app
 /** Versión de términos/política. Subirla cuando cambie el texto legal. */
 export const LEGAL_DOCUMENTS_VERSION = '2026-10-08';
 

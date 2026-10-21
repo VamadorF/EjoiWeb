@@ -1,76 +1,59 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
+import { ONBOARDING_STEPS } from '@/features/onboarding/constants/onboardingSteps';
+
 import { applyCssVars } from '~/theme/cssVars';
 
 import { CreationPreview } from './CreationPreview';
 
+const emptyData = {
+  gender: '' as const,
+  visualStyle: '' as const,
+  persona: '',
+  tone: '',
+  interactionStyle: '',
+  conversationDepth: '',
+  interests: [] as string[],
+  boundaries: [] as string[],
+};
+
 describe('CreationPreview', () => {
-  it('muestra retratos atenuados y texto cuando no hay estilo', () => {
+  it('muestra retratos atenuados cuando hay género pero no estilo', () => {
     applyCssVars();
     render(
       <CreationPreview
-        data={{
-          gender: '',
-          visualStyle: '',
-          persona: '',
-          tone: '',
-          interactionStyle: '',
-          conversationDepth: '',
-          interests: [],
-          boundaries: [],
-        }}
-        tagTimeline={[]}
+        data={{ ...emptyData, gender: 'femenino' }}
+        currentStep={ONBOARDING_STEPS.gender}
       />,
     );
     expect(screen.getByTestId('creation-preview-empty')).toBeTruthy();
     expect(document.querySelectorAll('.creation-preview__empty-portrait').length).toBe(2);
-    expect(screen.queryByText('e')).toBeNull();
   });
 
   it('cambia el retrato al cambiar estilo en el mismo render', () => {
     applyCssVars();
     const base = {
       gender: 'femenino' as const,
+      visualStyle: '' as const,
       persona: '',
       tone: '',
       interactionStyle: '',
       conversationDepth: '',
-      interests: [],
-      boundaries: [],
+      interests: [] as string[],
+      boundaries: [] as string[],
     };
     const { rerender } = render(
-      <CreationPreview data={{ ...base, visualStyle: 'realista' }} tagTimeline={['style']} />,
-    );
-    const img = screen.getByTestId('creation-portrait') as HTMLImageElement;
-    expect(img.getAttribute('src')).toContain('realista-femenino');
-
-    rerender(<CreationPreview data={{ ...base, visualStyle: 'anime' }} tagTimeline={['style']} />);
-    expect((screen.getByTestId('creation-portrait') as HTMLImageElement).getAttribute('src')).toContain(
-      'ilustrado-femenino',
-    );
-  });
-
-  it('marca la última etiqueta como destacada', () => {
-    applyCssVars();
-    const { container } = render(
       <CreationPreview
-        data={{
-          visualStyle: 'realista',
-          gender: 'femenino',
-          persona: '',
-          tone: '',
-          interactionStyle: '',
-          conversationDepth: '',
-          interests: ['Arte y cultura', 'Música'],
-          boundaries: [],
-        }}
-        tagTimeline={['gender', 'style', 'interest:Arte y cultura', 'interest:Música']}
+        data={{ ...base, visualStyle: 'realista' }}
+        currentStep={ONBOARDING_STEPS.visualStyle}
       />,
     );
-    const tags = container.querySelectorAll('.pill');
-    const last = tags[tags.length - 1];
-    expect(last?.textContent).toBe('Música');
-    expect(last?.classList.contains('pill--last')).toBe(true);
+    const img = screen.getByTestId('creation-portrait') as HTMLImageElement;
+    const realistaSrc = img.src;
+    rerender(
+      <CreationPreview data={{ ...base, visualStyle: 'anime' }} currentStep={ONBOARDING_STEPS.visualStyle} />,
+    );
+    expect((screen.getByTestId('creation-portrait') as HTMLImageElement).src).not.toBe(realistaSrc);
   });
 });

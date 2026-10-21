@@ -1,18 +1,26 @@
 import { describe, expect, it } from 'vitest';
 
-import { canSubmitCreateForm, isValidCompanionName } from './nameValidation';
+import { validators } from '@/shared/utils/validators';
 
-describe('isValidCompanionName', () => {
-  it('acepta nombres con apóstrofe, guion y punto', () => {
-    expect(isValidCompanionName("Ma'ría")).toBe(true);
-    expect(isValidCompanionName('Ana-Luis')).toBe(true);
-    expect(isValidCompanionName('Dr. Eva')).toBe(true);
+import { canSubmitCreateForm, isValidWizardCompanionName } from './createFormValidation';
+
+describe('isValidWizardCompanionName', () => {
+  it('acepta nombres con apóstrofe y guion', () => {
+    expect(isValidWizardCompanionName("Ma'ría")).toBe(true);
+    expect(isValidWizardCompanionName('Ana-Luis')).toBe(true);
+    expect(isValidWizardCompanionName('María José')).toBe(true);
   });
 
   it('rechaza números, longitud inválida y todo mayúsculas', () => {
-    expect(isValidCompanionName('Ana2')).toBe(false);
-    expect(isValidCompanionName('A')).toBe(false);
-    expect(isValidCompanionName('ANA')).toBe(false);
+    expect(isValidWizardCompanionName('Ana2')).toBe(false);
+    expect(isValidWizardCompanionName('A')).toBe(false);
+    expect(isValidWizardCompanionName('ANA')).toBe(false);
+    expect(isValidWizardCompanionName('Ana.')).toBe(false);
+  });
+
+  it('getNameError coincide con reglas de la app', () => {
+    expect(validators.getNameError('ANA')).toMatch(/mayúsculas/i);
+    expect(validators.getNameError('Ana2')).toMatch(/números/i);
   });
 });
 

@@ -32,6 +32,7 @@ export type CompanionCreationStatus = {
     name?: string;
     avatarUrl?: string;
     visualStyle?: string;
+    gender?: string;
   };
   firstMessage?: CreationFirstMessage;
 };

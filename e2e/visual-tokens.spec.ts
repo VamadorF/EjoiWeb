@@ -177,6 +177,20 @@ for (const theme of ['light', 'dark'] as const) {
       expect(bg).not.toMatch(/^rgba\(0, 0, 0, 0\)$/);
     });
 
+    test('radios, bordes y foco en controles base', async ({ page }) => {
+      await page.goto('/crear/paso-1');
+      await setTheme(page, theme);
+      const btn = page.getByRole('button', { name: 'Continuar' });
+      await expect(btn).toHaveCSS('border-radius', '12px');
+      const card = page.locator('.card').first();
+      if (await card.count()) {
+        await expect(card).toHaveCSS('border-radius', '16px');
+      }
+      await btn.focus();
+      const outline = await btn.evaluate((el) => getComputedStyle(el).outlineWidth);
+      expect(outline).toBe('3px');
+    });
+
     test('botón primario', async ({ page }) => {
       await mockAuthedApi(page, {
         state: 'error',
@@ -200,7 +214,7 @@ for (const theme of ['light', 'dark'] as const) {
       await page.getByTestId('chat-messages').waitFor();
       const ai = page.locator('.bubble--ai').first();
       const user = page.locator('.bubble--user').first();
-      await expectUsesToken(page, ai, 'backgroundColor', '--c-surface');
+      await expectUsesToken(page, ai, 'backgroundColor', '--c-surface2');
       await expectUsesToken(page, user, 'backgroundColor', '--c-brand');
       await expectUsesToken(page, user, 'color', '--c-on-brand');
     });

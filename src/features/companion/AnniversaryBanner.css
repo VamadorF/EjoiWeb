@@ -1,0 +1,44 @@
+.anniversary-banner {
+  flex-shrink: 0;
+  padding: var(--space-2) var(--space-4) 0;
+}
+
+.anniversary-banner__card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: 20px;
+  background: linear-gradient(135deg, var(--c-brand), var(--c-lav));
+  color: var(--c-on-brand);
+  box-shadow: var(--elev-2);
+}
+
+.anniversary-banner__copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.anniversary-banner__title {
+  margin: 0 0 2px;
+  font: var(--font-button);
+}
+
+.anniversary-banner__subtitle {
+  margin: 0;
+  font: var(--font-caption);
+  opacity: 0.92;
+}
+
+.anniversary-banner__close {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--c-on-brand) 18%, transparent);
+  color: var(--c-on-brand);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}

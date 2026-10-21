@@ -6,71 +6,103 @@
   "files": [
     {
       "path": "features/auth/assets/legalDocuments.ts",
-      "sha256": "9df17078ad99de85999c217301b4fc65887e90d0a581483fddc63ef1ebfc3ec3"
+      "sha256": "f8941160852d4a23c513aad0f1cbd28e971ca455f39a4396979a1344e0b42826"
     },
     {
       "path": "features/auth/types.ts",
-      "sha256": "4d7a720d16ac5102d04c7c239e5186855078cb57eced44df239503bc2a9848ec"
+      "sha256": "5ba78fd2d2c1b9be2cbf4e8537822fa2765637339688f482c43ea63ef4f8abed"
     },
     {
       "path": "features/chat/adapters/chat.adapter.ts",
-      "sha256": "f2561ccca2c3f7099619d8631e75fd247861e4c464750ed0370b4ce9cd82176f"
+      "sha256": "3347941adde9ab867e2a9d1a28abc126ac489b0f859d2cb2c05fd04a9ca65b3e"
     },
     {
       "path": "features/chat/api/chat.api.ts",
-      "sha256": "7c6b3e09d5cf5bc75a7ecbc45fe16acf7f361d352d69b434bb3fd66617d57912"
+      "sha256": "a99c8169c0f1baa9a6af0aa172539b156aa0a157b93281682d42e7fb5730a611"
+    },
+    {
+      "path": "features/chat/api/tts.api.ts",
+      "sha256": "e0b2a123aa8cef31140c1f08079a3927162944c67146cdcb650586805fb97da6"
     },
     {
       "path": "features/chat/constants.ts",
-      "sha256": "be5a5c70ceb582a6df92937517c97f268ec3f77feeb4444fe42360091b60cfff"
+      "sha256": "a42618be6cd724510aea03da16b67b0da12cb8d59b728d83c752097ff34c7f39"
     },
     {
       "path": "features/chat/types.ts",
-      "sha256": "8b35504ba1c178b9b02efeaba03146b9ca6b2c4ae1fe5a1a6a01c55941fd5c74"
+      "sha256": "f011c54d4240f5feb7450df0716afc1f6fad3eb3d7fe11dff265d355a9eeb299"
+    },
+    {
+      "path": "features/chat/utils/buildChatListItems.ts",
+      "sha256": "2a61147416d4312f1e289d33528a5efc36f46b11dbe7a7f68ea15af140be522d"
+    },
+    {
+      "path": "features/chat/utils/formatMessageDate.ts",
+      "sha256": "e242c9b2e1f8bba41802f06b9a505c238c6177a3f0d0786d7bd82032c1600d64"
+    },
+    {
+      "path": "features/chat/utils/inferReaction.ts",
+      "sha256": "a6d16cae43693e78f81b1b4da5a0ade3765f4cdf477f21c71fdf9e0618adfdf2"
     },
     {
       "path": "features/chat/utils/mergeChatPages.ts",
-      "sha256": "ab1fbde3c86e389bfaa6d7d24a265ffe035d7accaf31ee3c3182167abd66aadf"
+      "sha256": "9fd27fb666cfaf182a5b61eff99b03f1d28245d74b8557015ecdfcd32fa22506"
+    },
+    {
+      "path": "features/chat/utils/reactionEmojiCatalog.ts",
+      "sha256": "e71ae42705475e698e7bae603b0615959518525baeaff03fbadee954f6cac751"
     },
     {
       "path": "features/chat/utils/resolveChatMediaUrl.ts",
-      "sha256": "994c9cd77eac058376ecff47cc5204b2869dffb2618448e019ab3538f90a806c"
+      "sha256": "f8111d8cdd645309b55786b32b8a10f0579f43d92803bc0e7fc5bd9505585422"
     },
     {
       "path": "features/companion/adapters/companion.adapter.ts",
-      "sha256": "1198fe434d33d850b4b0f1a210de5576495dbdaf02b3cd0d2ba79b8e00cb68e0"
+      "sha256": "285d7ec1fd55b84ef300d0ab881ddc50f53ece1a4b89b1918d66c499a1afc15e"
     },
     {
       "path": "features/companion/api/companion.api.ts",
-      "sha256": "1e8da3ce9ffb719cca2708da07049a853480ca99b42ab5f6d747a36fca84351a"
+      "sha256": "29105d6a80c57a4901e509ecbd97ebaf8894609a4b976efc438501420194f44f"
     },
     {
       "path": "features/companion/api/image.api.ts",
-      "sha256": "ab534b71a2102370911e24bf26ad83a23680049a1b13c4f4be34a27f29673a2b"
+      "sha256": "fd7773261e367e5cd5b5a3dfb66767f08195c98813c561c4d5383b063549473a"
+    },
+    {
+      "path": "features/companion/constants/avatarVariants.ts",
+      "sha256": "135432097d9f9ec08e6ce586a7dbed252c1f02946b217a93e69af629b316a52b"
     },
     {
       "path": "features/companion/types.ts",
-      "sha256": "c910e9adb5b82ca6a05244fe488a7955ec380bd3a51118d7b393343c9c044af7"
+      "sha256": "01894af33b0ffa8114926ccd40ba8d699a738b6fe7f407e99dd7dc88d4477af1"
+    },
+    {
+      "path": "features/memories/adapters/memories.adapter.ts",
+      "sha256": "378a05bf3ecc280c24507fdcee1a650760a7c905332230f2b1cd9792892936e2"
+    },
+    {
+      "path": "features/memories/api/memories.api.ts",
+      "sha256": "854a8601dd3966cf5c444a1dbfa0f4ed1dc156093dcd177e1b52d8e3a90499e7"
     },
     {
       "path": "features/memories/types.ts",
-      "sha256": "184d18ca6a11e87b35ea76252beb148ffd297981babe3a9adc796fdea0afcea5"
+      "sha256": "a79d57a97ce9e5f6946374dd3e9205c914a405bc782df9244f7175cbdad7714c"
     },
     {
       "path": "features/onboarding/constants/onboardingSteps.ts",
-      "sha256": "09fe48288db28b4f01fc033a0b4a11899d47a9b0ac5e14486f83fdf288c7f5c2"
+      "sha256": "b92903e4170df71708ea6a105eed892f43a6d6f49bb3248af1be58350128beaf"
     },
     {
       "path": "features/onboarding/data/boundaryOptions.ts",
-      "sha256": "db709aa87b79874259f48a1e74ea9fe62aba4e13275aa7a499b5337c4df494d5"
+      "sha256": "97506132e3c45ebb585d9271ed30831c597391bc2e5be99226ad4aa929beab33"
     },
     {
       "path": "features/onboarding/data/companionArchetypes.ts",
-      "sha256": "7b8151b45803c8ad685e57241a198660929f7399dbbbf64416e5aa7271d88597"
+      "sha256": "76aefef24abd1d9cb2341246769f91554d97aee5c01a3633a256d2bdf951f279"
     },
     {
       "path": "features/onboarding/data/companionIntensity.ts",
-      "sha256": "ae408957cb40c5821a87e1399d1ce6416959a00cdd823702582de3034e951ef1"
+      "sha256": "416aa101295b3042669e197ab3e30815035d1e2fdf26bee613c675ad8ab8fd0e"
     },
     {
       "path": "features/onboarding/data/companionNames.json",
@@ -78,35 +110,55 @@
     },
     {
       "path": "features/onboarding/data/companionNames.ts",
-      "sha256": "7c1c0aa9439e2b8f84515db9021723b9c183cc57694686b362b177342021b7a5"
+      "sha256": "1929927578a94219884823f9f5716a89d121aaf2640a85cf0edeeb6a4ab4798d"
     },
     {
       "path": "features/onboarding/data/getRandomCompanionName.ts",
-      "sha256": "7f19fac87e28c842f7d24a882451bd1c9014e8e930a7ba9dce32d1231e9a704b"
+      "sha256": "e12d46f1465f82dd9ab3e7d208677744207ee0d699909330085473568b44dd66"
     },
     {
       "path": "features/onboarding/data/interestOptions.ts",
-      "sha256": "99232e8458cb4c4d41c8af35a941ad854f0188520acd2bf0d9d72c590c98d3fb"
+      "sha256": "11c44dbab51e556a8bfe14db0ac6e5e5655b343a6f049be761a6cf0392cba4b3"
     },
     {
       "path": "features/onboarding/data/personalityOptions.ts",
-      "sha256": "c9d28e68db5d1e090583278ff9eb2347fe45c48515de44e8e0a28c66ef5c1e72"
+      "sha256": "70bd3121353719b647c7d9ac97b94a26bcb1979203be6fedc237efaa29b0e7b3"
     },
     {
       "path": "features/onboarding/types.ts",
-      "sha256": "0fa56430bd5b406c57ad7b6975976e71fb0f658314c996bdc85c4b5c05c07508"
+      "sha256": "efa8cc946859278a63da30fb2a186bf15eaee5bac41ca8706a7154e370d91de1"
+    },
+    {
+      "path": "features/onboarding/utils/wizardPreviewCrumbs.ts",
+      "sha256": "ba2a144dfc0749bfa64c1056f01abe3ec0ab33cb439224d3dd4836c734c0cece"
+    },
+    {
+      "path": "features/presence/types.ts",
+      "sha256": "5979312397390a6a34db7ef3e1cb6d9b6772ce78ac9aca95b39c42bdeb255a3a"
+    },
+    {
+      "path": "features/presence/utils/derivePresence.ts",
+      "sha256": "f19d9a17783c6620ff2e89aa236536b8c2ae4a24f28f7c2824ba53771a6a26ed"
+    },
+    {
+      "path": "features/presence/utils/formatLastSeen.ts",
+      "sha256": "2ee2e5ddc4d75a26c1c73e1532047bed412215ddb6e5fb57b34116ab0e270f93"
     },
     {
       "path": "features/proactivity/adapters/proactivity.adapter.ts",
-      "sha256": "1828ee3533a615dbbea799d2cf98dc3797f254ea4f0045fd7e34c91b1cd6b1ca"
+      "sha256": "6ac416422db9813581a3b731f6c9399ccfefb810a84bfe5d33d68508e4710d5f"
+    },
+    {
+      "path": "features/proactivity/api/proactivity.api.ts",
+      "sha256": "672229f19964599e80674c6476f4db69d4e8b329e49339cc812fe22cae4db0be"
     },
     {
       "path": "features/proactivity/types.ts",
-      "sha256": "8409aa2427b80cdec125efb86f765a7eeb8d96e584161b91246fddb3ea4abb7b"
+      "sha256": "082400bab34e5a40dada00a51f4b6f85d8b322c36757876e5feab75b4ae27c8d"
     },
     {
       "path": "shared/i18n/index.ts",
-      "sha256": "d24c2d926659207d9e9bf9a76b114d6232f784e2dfee66edf114b79c6a5044be"
+      "sha256": "192a395aafe31fa44521ed9a92ed7304a03f509ee9af753e4234d01225a99b2d"
     },
     {
       "path": "shared/i18n/locales/achievements.es.json",
@@ -142,39 +194,55 @@
     },
     {
       "path": "shared/lib/queryKeys.ts",
-      "sha256": "6e079a3e1f3c360380cabe1fb23c703798953fdb1f48a4f4b03ec3a5d4f1cce7"
+      "sha256": "cb19b30bec30814d88baed988872640d3705888aad41414bc531e1057294e32e"
     },
     {
       "path": "shared/theme/tokens.ts",
-      "sha256": "960c94f5bc3cdfd2628593d938cd8233ef94ec108efe5a8430dd43561d1ccec5"
+      "sha256": "532c02c736f46a9c6cbb07911865448ac584d3c9398168e49c7151fabcbefaf0"
     },
     {
       "path": "shared/utils/ageToDob.ts",
-      "sha256": "86ea196a8be5c496c21f4687a0598b34d4640b9c02fd745fa49045d50bdfebf0"
+      "sha256": "41f48123993f193634d9f3d656320d4c3c9fb3033873eafe4f8b61ad9b04c401"
     },
     {
       "path": "shared/utils/companionAgeAppearance.ts",
-      "sha256": "1b0e10d515f04354432406ec90c2e8dfe25b13ba7f2175ae60e4587ea496d9c9"
+      "sha256": "f48f48f812c08659921afdbebae0f214bed134755c71c1e47e73763c77068b09"
     },
     {
       "path": "shared/utils/companionImagePrompt.anime.ts",
-      "sha256": "5e172ce91be874e221f451a10c60d0bd7849309345ea85969c23964360a649e5"
+      "sha256": "9ba2411bf49ecb9bcb7a5b3591dc28574a0dc600838885355c27fe75681f9058"
     },
     {
       "path": "shared/utils/companionImagePrompt.realista.ts",
-      "sha256": "21f209ebf7d73cc9ca5db8dab07c1c0ada2b0a891d303bcba759e9c3b429db30"
+      "sha256": "65c4df9b5d3a51ee4141ae833df259c785535e95d07479363ddb908b5837b0fc"
     },
     {
       "path": "shared/utils/companionImagePrompt.ts",
-      "sha256": "15c2c828ae71c47ee34627517105f1e41834f5d06805e102faaa9c82f9c29a2d"
+      "sha256": "c62b779a169181fd225b41c3d4029cd4ff12e635412baaffcd8d4863be085d04"
+    },
+    {
+      "path": "shared/utils/companionTextGenerator.ts",
+      "sha256": "d5bb713fa7de2019d75ff423a4822d28ed21cf9f615dd6f75ecfeb6edc59d005"
+    },
+    {
+      "path": "shared/utils/ethnicityLabel.ts",
+      "sha256": "2be65ef102a479e3a68111ac2bde6bd1d73de142522fa8a5927321abd23a8129"
+    },
+    {
+      "path": "shared/utils/genderedText.ts",
+      "sha256": "59889cc555ec364d78196e0c430e5e4f816497d1725ee233c84140191651579b"
     },
     {
       "path": "shared/utils/logger.ts",
-      "sha256": "a58dc89cd9a7f31cd76873eaae974eea7742d4483a35dc58476d3577052580e5"
+      "sha256": "43dbd5d423a85583bcfaf9185154e51ec24c4572db0f37a66791bda415f6a05c"
     },
     {
       "path": "shared/utils/uuid.ts",
-      "sha256": "11ff48c0543fc5251b136f9ae551214fce3af990ecfa8436e4d3062d6e6ad6c6"
+      "sha256": "8ca65c223bbf2f94336e57fcb6eb3f01587b71ca8cd21592690b5de0f4d894ac"
+    },
+    {
+      "path": "shared/utils/validators.ts",
+      "sha256": "f023a15aa37e9862712c6891d4741899582978c1e9f64e6c1f94c1539f0d8dde"
     }
   ],
   "assets": [
@@ -220,19 +288,27 @@
     },
     {
       "path": "public/portraits/ilustrado-femenino.webp",
-      "sha256": "2d2d383de36394a023b8f2717b33f10882e5b1aa3866537898c4a74f78c8aae7"
+      "sha256": "a6a1111f44cd57934247323bbcc65bea2f2d5e5486f586b5db789d2de57f7132"
     },
     {
       "path": "public/portraits/ilustrado-masculino.webp",
-      "sha256": "bfc3de21561473a40b6bdf1cd871a2691725ec1f22230dfa9fc78977e0f37029"
+      "sha256": "3c91c1dfbdf8183a140d85aea92ecfea4799254f1c3500a5b017a96bc630b9ba"
+    },
+    {
+      "path": "public/portraits/ilustrado-neutro.webp",
+      "sha256": "f6cd44483d54a7b24ef0d8198b97fc7635ed2d5ee67ff04a2c006db063096cea"
     },
     {
       "path": "public/portraits/realista-femenino.webp",
-      "sha256": "266d4390335d8011ac2bea7a35dc3b1304a1e76224eed03e84189e5d18f929eb"
+      "sha256": "35cab6969bfdeb049605ad287ccdad0621f41ebbe1d54519686a7d792abc47b7"
     },
     {
       "path": "public/portraits/realista-masculino.webp",
-      "sha256": "1b7930b29a9530c336fc5a80c15045f13688fc284760cf2e4d2a1e71e20ff55d"
+      "sha256": "2c1848d9f607224806e3bbdf0b9492c766a98c9716e5a223be9f3fb07b5c6c1a"
+    },
+    {
+      "path": "public/portraits/realista-neutro.webp",
+      "sha256": "6274b9351827431fc68fa9320b28bbafcbf61b6e017679796e364172057bf3f2"
     }
   ]
 }

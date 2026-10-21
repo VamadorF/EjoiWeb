@@ -1,4 +1,4 @@
-// AUTO-SINCRONIZADO desde ejoiFE origin/develop@b20f6d62a97a0266796ebfb82e772f0961ed9136:src/features/onboarding/data/boundaryOptions.ts. No editar: npm run sync:app
+// AUTO-SINCRONIZADO desde ejoiFE b20f6d62a97a0266796ebfb82e772f0961ed9136@b20f6d62a97a0266796ebfb82e772f0961ed9136:src/features/onboarding/data/boundaryOptions.ts. No editar: npm run sync:app
 /** Etiquetas canónicas de límites (onboarding, perfil y detección en chat). */
 export const BOUNDARY_OPTIONS = [
   'No temas sexuales',

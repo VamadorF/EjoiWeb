@@ -1,0 +1,109 @@
+.memories-page__book {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+  margin-bottom: var(--space-5);
+}
+
+.memories-page__spine {
+  width: 6px;
+  align-self: stretch;
+  border-radius: 3px;
+  background: var(--c-brand-gradient);
+}
+
+.memories-page__book-title {
+  margin: 0;
+  font: var(--font-h3);
+}
+
+.memories-page__book-subtitle {
+  margin: var(--space-1) 0 0;
+  font: var(--font-caption);
+  color: var(--c-ink2);
+}
+
+.memories-page__stats {
+  display: flex;
+  gap: var(--space-3);
+  justify-content: space-around;
+  margin-bottom: var(--space-5);
+  padding: var(--space-4);
+  border-radius: var(--radius-card);
+  background: var(--c-surface);
+  box-shadow: var(--elev-1);
+}
+
+.memories-page__stat {
+  text-align: center;
+}
+
+.memories-page__stat-n {
+  display: block;
+  font: var(--font-h3);
+}
+
+.memories-page__stat-label {
+  font: var(--font-caption);
+  color: var(--c-ink2);
+}
+
+.memories-page__empty {
+  text-align: center;
+  padding: var(--space-6) var(--space-4);
+}
+
+.memories-page__section {
+  margin-bottom: var(--space-5);
+}
+
+.memories-page__section-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-3);
+  font: var(--font-label);
+}
+
+.memories-page__featured {
+  padding: var(--space-4);
+  border-radius: var(--radius-card);
+  background: var(--c-brand-gradient);
+  color: var(--c-on-brand);
+}
+
+.memories-page__card {
+  width: 100%;
+  margin-bottom: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--c-line);
+  border-radius: var(--radius-card);
+  background: var(--c-surface);
+  text-align: left;
+  cursor: pointer;
+}
+
+.memories-page__card-title {
+  margin: 0;
+  font: var(--font-button);
+}
+
+.memories-page__card-date {
+  margin: var(--space-1) 0 0;
+  font: var(--font-caption);
+  color: var(--c-ink2);
+}
+
+.memories-page__card-preview {
+  margin: var(--space-2) 0 0;
+  font: var(--font-body);
+}
+
+.memories-page__mood {
+  display: inline-block;
+  margin-top: var(--space-2);
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--c-surface-2);
+  font: var(--font-caption);
+}

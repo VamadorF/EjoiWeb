@@ -90,6 +90,27 @@ describe('cssGuard', () => {
     expect(css).toMatch(/\[data-theme="dark"\][\s\S]*--elev-1: none/);
   });
 
+  it('no multiplica tokens CSS que ya incluyen unidad (calc var * Npx)', () => {
+    const bad =
+      /calc\s*\(\s*var\(\s*--(?:radius|border|size|motion)-[^)]+\)\s*\*\s*[\d.]+(?:px|ms)\s*\)/;
+    const hits: string[] = [];
+    for (const [key, text] of Object.entries(cssRaw)) {
+      const rel = relPath(key);
+      if (isAppShared(rel)) continue;
+      text.split('\n').forEach((line, i) => {
+        if (bad.test(line)) hits.push(`${rel}:${i + 1}: ${line.trim()}`);
+      });
+    }
+    for (const [key, text] of Object.entries(tsxRaw)) {
+      const rel = relPath(key);
+      if (isAppShared(rel) || isTheme(rel)) continue;
+      text.split('\n').forEach((line, i) => {
+        if (bad.test(line)) hits.push(`${rel}:${i + 1}: ${line.trim()}`);
+      });
+    }
+    expect(hits, hits.join('\n') || undefined).toEqual([]);
+  });
+
   it('no usa variables CSS inexistentes ni literales de color fuera de src/theme/', () => {
     const { missingVars, colorLiterals } = scanUsageAndLiterals();
     const missingMsg = missingVars.map((v) => `${v.file}: ${v.name}`).join('\n');

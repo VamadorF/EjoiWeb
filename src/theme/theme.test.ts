@@ -62,6 +62,13 @@ describe('theme', () => {
     expect(resolveEffectiveTheme()).toBe('dark');
   });
 
+  it('system no persiste override (sigue al dispositivo)', () => {
+    writeThemePreference('dark');
+    writeThemePreference('system');
+    expect(localStorage.getItem(THEME_STORAGE_KEY)).toBeNull();
+    expect(readThemePreference()).toBe('system');
+  });
+
   it('aplica data-theme al cambiar preferencia', () => {
     setThemePreference('light');
     expect(document.documentElement.dataset.theme).toBe('light');

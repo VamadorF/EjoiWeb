@@ -8,10 +8,10 @@ import { routeConfig } from './routes';
 import { applyCssVars } from '~/theme/cssVars';
 
 describe('App shell', () => {
-  it('renderiza DesktopShell en /crear/paso-1', async () => {
+  it('renderiza DesktopShell en /crear/paso-1/genero', async () => {
     applyCssVars();
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('no session')));
-    const router = createMemoryRouter(routeConfig, { initialEntries: ['/crear/paso-1'] });
+    const router = createMemoryRouter(routeConfig, { initialEntries: ['/crear/paso-1/genero'] });
     render(
       <WebSessionProvider>
         <Suspense fallback={null}>
@@ -20,8 +20,8 @@ describe('App shell', () => {
       </WebSessionProvider>,
     );
     expect(await screen.findByTestId('shell-header')).toBeTruthy();
-    expect(screen.getByTestId('shell-preview')).toBeTruthy();
     expect(screen.getByTestId('shell-footer')).toBeTruthy();
+    expect(screen.queryByTestId('shell-preview')).toBeNull();
     vi.unstubAllGlobals();
   });
 });

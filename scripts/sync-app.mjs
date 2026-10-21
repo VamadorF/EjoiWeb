@@ -30,15 +30,22 @@ function git(appArgs) {
   return execSync(`git ${appArgs}`, { cwd: appDir, encoding: 'utf8' }).trim();
 }
 
+function gitObject(ref, repoPath) {
+  return `${ref}:${repoPath.replace(/\\/g, '/')}`;
+}
+
 function gitBuffer(ref, repoPath) {
-  return execSync(`git show ${ref}:${repoPath}`, { cwd: appDir, maxBuffer: 50 * 1024 * 1024 });
+  return execSync(`git show ${JSON.stringify(gitObject(ref, repoPath))}`, {
+    cwd: appDir,
+    maxBuffer: 50 * 1024 * 1024,
+  });
 }
 
 function tryReadAtRef(ref, repoPath) {
   const candidates = candidatePaths(repoPath);
   for (const c of candidates) {
     try {
-      execSync(`git cat-file -e ${ref}:${c}`, { cwd: appDir, stdio: 'pipe' });
+      execSync(`git cat-file -e ${JSON.stringify(gitObject(ref, c))}`, { cwd: appDir, stdio: 'pipe' });
       return { path: c, content: gitBuffer(ref, c) };
     } catch {
       /* try next */

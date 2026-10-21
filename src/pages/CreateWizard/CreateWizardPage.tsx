@@ -1,43 +1,41 @@
-import { useEffect, useId, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react';
+import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react';
+import type { TFunction } from 'i18next';
 import { useTranslation } from 'react-i18next';
-import { Navigate, useNavigate, useParams } from 'react-router';
+import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router';
 
-import { LEGAL_DOCUMENTS_VERSION } from '@/features/auth/assets/legalDocuments';
 import {
   BASIC_BOUNDARIES,
   BOUNDARY_OPTIONS,
 } from '@/features/onboarding/data/boundaryOptions';
-import { ETHNICITY_IDS } from '@/features/onboarding/data/companionNames';
+import { INTENSITY_OPTIONS } from '@/features/onboarding/data/companionIntensity';
 import { getRandomCompanionName } from '@/features/onboarding/data/getRandomCompanionName';
 import { INTEREST_OPTIONS, INTEREST_OPTION_ICONS } from '@/features/onboarding/data/interestOptions';
 import {
   PERSONALITY_OPTION_ICONS,
   PERSONALITY_OPTIONS,
 } from '@/features/onboarding/data/personalityOptions';
+import { ONBOARDING_STEPS } from '@/features/onboarding/constants/onboardingSteps';
 import type { CompanionIntensity, Gender, VisualStyle } from '@/features/onboarding/types';
-import { COMPANION_MAX_AGE, COMPANION_MIN_AGE } from '@/features/onboarding/constants/onboardingSteps';
+import { validators } from '@/shared/utils/validators';
 
 import { AppIcon } from '~/components/AppIcon';
 import { logoutWeb } from '~/features/auth/api/auth.api';
-import { CreationPreview } from '~/features/creation/CreationPreview';
-import { canSubmitCreateForm, isValidCompanionName } from '~/features/creation/nameValidation';
-import {
-  buildGreetingPreviewBody,
-  fetchGreetingPreview,
-  startCreation,
-} from '~/features/creation/startCreation';
-import { DEFAULT_COMO_STEP, useCreationDraft } from '~/features/creation/useCreationDraft';
+import { CreationPreviewCrumbsStrip, WizardChoicePills } from '~/features/creation/CreationPreview';
+import { useGenderedTextWith } from '~/features/gender/useGenderedText';
+import { useCreationDraft } from '~/features/creation/useCreationDraft';
 import { stylePortraitSrcForCard, visualStyleSelectorOptions } from '~/features/creation/portraits';
 import {
-  canAdvanceWizardStep,
-  draftStepForWizardIndex,
-  parseWizardRouteSlug,
-  resolveAccessibleWizardIndex,
-  webViewForWizardIndex,
-  WIZARD_STEP_COUNT,
-  wizardPath,
+  canProceedWizardScreen,
+  getV2WizardGroupIndex,
+  getV2WizardProgress,
+  legacyWizardRedirect,
+  nextWizardStep,
+  parseWizardRoute,
+  previousWizardStep,
+  resolveAccessibleOnboardingStep,
+  webViewForOnboardingStep,
+  wizardPathForStep,
 } from '~/features/creation/wizardSteps';
-import { CAMPAIGN_LANDING_URL, ENABLE_AGE, ENABLE_ETHNICITY } from '~/platform/env';
 import { CreationShellHeader, DesktopShell } from '~/layout/DesktopShell';
 import { OptionGroup } from '~/layout/OptionGroup';
 import { useDesktopShortcuts } from '~/layout/useDesktopShortcuts';
@@ -60,172 +58,159 @@ const STYLES: { id: VisualStyle; labelKey: 'create.style_realistic' | 'create.st
   { id: 'anime', labelKey: 'create.style_illustrated' },
 ];
 
-const ETHNICITY_LABELS: Record<(typeof ETHNICITY_IDS)[number], string> = {
-  latina: 'Latina',
-  caucasica: 'Caucásica',
-  afrodescendiente: 'Afrodescendiente',
-  asiatica: 'Asiática',
-  arabe: 'Árabe',
-  india: 'India',
-  mixta: 'Mixta',
-};
+function portraitGenderForCard(gender: Gender | ''): 'femenino' | 'masculino' {
+  return gender === 'masculino' ? 'masculino' : 'femenino';
+}
 
-const PRESENCE: {
-  id: CompanionIntensity;
-  labelKey: 'create.presence_soft' | 'create.presence_balanced' | 'create.presence_intense';
-  descKey: 'create.presence_desc_soft' | 'create.presence_desc_balanced' | 'create.presence_desc_intense';
-  icon: string;
-  recommended?: boolean;
-}[] = [
-  { id: 'soft', labelKey: 'create.presence_soft', descKey: 'create.presence_desc_soft', icon: 'leaf-outline' },
-  {
-    id: 'balanced',
-    labelKey: 'create.presence_balanced',
-    descKey: 'create.presence_desc_balanced',
-    icon: 'pulse-outline',
-    recommended: true,
-  },
-  { id: 'intense', labelKey: 'create.presence_intense', descKey: 'create.presence_desc_intense', icon: 'flash-outline' },
-];
-
-const OPTIONAL_BOUNDARIES = BOUNDARY_OPTIONS.filter(
-  (option) => !(BASIC_BOUNDARIES as readonly string[]).includes(option),
-);
-
-const LEGAL_TERMS_URL = `${CAMPAIGN_LANDING_URL}/terminos`;
-const LEGAL_PRIVACY_URL = `${CAMPAIGN_LANDING_URL}/privacidad`;
-const GREETING_DEBOUNCE_MS = 400;
-const WIZARD_TITLE_KEYS = ['wizard.s1_title', 'wizard.s2_title', 'wizard.s3_title', 'wizard.s4_title'] as const;
-const WIZARD_SUB_KEYS = ['wizard.s1_sub', 'wizard.s2_sub', 'wizard.s3_sub', 'wizard.s4_sub'] as const;
-
-function wizardMissingItems(stepIndex: number, data: { gender?: string; visualStyle?: string; persona?: string; interests: string[] }): string {
-  if (stepIndex === 0) {
-    const items: string[] = [];
-    if (!data.gender) items.push('género');
-    if (!data.persona) items.push('personalidad');
-    if (!data.visualStyle) items.push('estilo visual');
-    return items.join(', ');
+function stepDisabledReason(step: number, t: TFunction): string {
+  switch (step) {
+    case ONBOARDING_STEPS.gender:
+      return 'Elige el género';
+    case ONBOARDING_STEPS.persona:
+      return 'Elige su personalidad';
+    case ONBOARDING_STEPS.visualStyle:
+      return 'Elige el estilo visual';
+    case ONBOARDING_STEPS.intensity:
+      return 'Ajusta su presencia';
+    case ONBOARDING_STEPS.interests:
+      return 'Elige intereses';
+    default:
+      return t('onboarding.v2.cta_disabled_reason', { reason: 'este paso' });
   }
-  if (stepIndex === 2 && data.interests.length < 3) return 'al menos 3 intereses';
-  return '';
 }
 
 export default function CreateWizardPage() {
-  const { wizardStep } = useParams();
-  const stepIndex = parseWizardRouteSlug(wizardStep);
-  if (stepIndex === null) return <Navigate to={wizardPath(0)} replace />;
-  return <CreateWizardStep stepIndex={stepIndex} />;
+  const { wizardStep, screen } = useParams();
+  const legacy = legacyWizardRedirect(wizardStep, screen);
+  if (legacy) return <Navigate to={legacy} replace />;
+
+  const onboardingStep = parseWizardRoute(wizardStep, screen);
+  if (onboardingStep === null) {
+    return <Navigate to={wizardPathForStep(ONBOARDING_STEPS.gender)} replace />;
+  }
+
+  return <CreateWizardScreen onboardingStep={onboardingStep} />;
 }
 
-function CreateWizardStep({ stepIndex }: { stepIndex: number }) {
+function CreateWizardScreen({ onboardingStep }: { onboardingStep: number }) {
   const mobile = useIsMobileLayout();
-  const { t } = useTranslation('web');
-  const { t: tApp } = useTranslation();
+  const { t } = useTranslation();
+  const { t: tWeb } = useTranslation('web');
   const navigate = useNavigate();
-  const missingId = useId();
-  const otherBoundaryId = useId();
+  const [searchParams] = useSearchParams();
+  const returnToRevision = searchParams.get('volver') === 'revision';
+  const disabledHintId = useId();
+  const [hintPhase, setHintPhase] = useState<'hidden' | 'in' | 'out'>('hidden');
   const styleOptions = useMemo(() => visualStyleSelectorOptions(), []);
 
-  const draftStep = draftStepForWizardIndex(stepIndex);
-  const webView = webViewForWizardIndex(stepIndex);
+  const webView = webViewForOnboardingStep(onboardingStep);
   const {
     data,
-    tagTimeline,
     loaded,
     setGender,
     setVisualStyle,
-    setEthnicity,
-    setAge,
-    toggleInterest,
     setPersona,
     setIntensity,
     toggleBoundary,
+    toggleInterest,
     setCompanionName,
     patchData,
     saveWithWebView,
     flushSave,
-  } = useCreationDraft({ webView, step: draftStep });
+  } = useCreationDraft({ webView, step: onboardingStep });
 
   const [adultConsent, setAdultConsent] = useState(false);
-  const [legalConsent, setLegalConsent] = useState(false);
-  const [otherBoundary, setOtherBoundary] = useState('');
-  const [showOtherBoundary, setShowOtherBoundary] = useState(false);
-  const [greeting, setGreeting] = useState<string | null>(null);
+  const [nameTouched, setNameTouched] = useState(false);
+  const [nameSuggestPulse, setNameSuggestPulse] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const step2DefaultsApplied = useRef(false);
+  const gendered = useGenderedTextWith(data.gender);
+  const defaultsApplied = useRef(false);
+
+  const wizardGroup = getV2WizardGroupIndex(onboardingStep) as 1 | 2 | 3 | 4;
+  const progress = getV2WizardProgress(onboardingStep);
+  const showBuildingPreview = Boolean(data.gender);
+  const showBack = onboardingStep !== ONBOARDING_STEPS.gender;
 
   useEffect(() => {
     if (!loaded) return;
-    const allowed = resolveAccessibleWizardIndex(data, stepIndex);
-    if (allowed !== stepIndex) navigate(wizardPath(allowed), { replace: true });
-  }, [data, loaded, navigate, stepIndex]);
+    const allowed = resolveAccessibleOnboardingStep(data, onboardingStep);
+    if (allowed !== onboardingStep) {
+      navigate(wizardPathForStep(allowed), { replace: true });
+    }
+  }, [data, loaded, navigate, onboardingStep]);
 
   useEffect(() => {
-    if (!loaded || stepIndex !== 1 || step2DefaultsApplied.current) return;
-    step2DefaultsApplied.current = true;
-    if (!data.intensity) setIntensity('balanced');
-    if (data.boundaries.length === 0) patchData({ boundaries: [...BASIC_BOUNDARIES] });
-  }, [data.boundaries.length, data.intensity, loaded, patchData, setIntensity, stepIndex]);
+    if (!loaded || defaultsApplied.current) return;
+    if (onboardingStep === ONBOARDING_STEPS.intensity && !data.intensity) {
+      setIntensity('balanced');
+    }
+    if (
+      onboardingStep === ONBOARDING_STEPS.boundaries &&
+      data.boundaries.length === 0
+    ) {
+      patchData({ boundaries: [...BASIC_BOUNDARIES] });
+    }
+    if (onboardingStep === ONBOARDING_STEPS.intensity || onboardingStep === ONBOARDING_STEPS.boundaries) {
+      defaultsApplied.current = true;
+    }
+  }, [
+    data.boundaries.length,
+    data.intensity,
+    loaded,
+    onboardingStep,
+    patchData,
+    setIntensity,
+  ]);
 
   const displayName = data.companionName?.trim() ?? '';
-  const canAdvance = canAdvanceWizardStep(stepIndex, data);
-  const canSubmit = canSubmitCreateForm(data.companionName, {
-    adult: adultConsent,
-    termsAndPrivacy: legalConsent,
+  const canProceed = canProceedWizardScreen(onboardingStep, data, {
+    adultConfirmed: adultConsent,
+    editFromRevision: returnToRevision,
   });
-  const missingItems = wizardMissingItems(stepIndex, data);
-  const missingText = missingItems ? t('create.missing', { items: missingItems }) : '';
 
-  useEffect(() => {
-    if (!loaded || stepIndex !== 3 || !isValidCompanionName(displayName)) {
-      setGreeting(null);
-      return undefined;
-    }
-    const body = buildGreetingPreviewBody(data, displayName);
-    const timer = setTimeout(() => {
-      void fetchGreetingPreview(body)
-        .then((res) => setGreeting(res.greeting))
-        .catch(() => setGreeting(null));
-    }, GREETING_DEBOUNCE_MS);
-    return () => clearTimeout(timer);
-  }, [data, displayName, loaded, stepIndex]);
+  const navigateToStep = (step: number) => {
+    navigate(wizardPathForStep(step));
+  };
 
   const onSuggestName = () => {
     const suggested = getRandomCompanionName(data.ethnicity, data.gender, data.companionName);
-    if (suggested) setCompanionName(suggested);
-  };
-
-  const onAddOtherBoundary = () => {
-    const trimmed = otherBoundary.trim();
-    if (!trimmed || trimmed.length > 60) return;
-    if (!data.boundaries.includes(trimmed)) toggleBoundary(trimmed);
-    setOtherBoundary('');
-    if (!mobile) setShowOtherBoundary(false);
+    if (suggested) {
+      setCompanionName(suggested);
+      setNameSuggestPulse(true);
+      window.setTimeout(() => setNameSuggestPulse(false), 450);
+    }
   };
 
   const onContinue = async () => {
-    if (!canAdvance || !loaded) return;
+    if (!canProceed || !loaded) return;
     flushSave(webView);
-    if (stepIndex === 2) await saveWithWebView('como');
-    navigate(wizardPath(stepIndex + 1));
+    if (onboardingStep === ONBOARDING_STEPS.interests) {
+      await saveWithWebView('como');
+    }
+
+    if (onboardingStep === ONBOARDING_STEPS.name) {
+      setSubmitting(true);
+      try {
+        await saveWithWebView('revision');
+        flushSave('revision');
+        if (returnToRevision) {
+          navigate('/crear/revision');
+        } else {
+          navigate('/crear/revision');
+        }
+      } finally {
+        setSubmitting(false);
+      }
+      return;
+    }
+
+    const next = nextWizardStep(onboardingStep);
+    if (next != null) navigate(wizardPathForStep(next));
   };
 
   const onBack = () => {
-    if (stepIndex > 0) navigate(wizardPath(stepIndex - 1));
-    else void navigate('/acceso');
-  };
-
-  const onSubmit = async (event: FormEvent) => {
-    event.preventDefault();
-    if (!canSubmit || submitting) return;
-    setSubmitting(true);
-    try {
-      await startCreation({ data, step: DEFAULT_COMO_STEP, webView: 'como' }, (path) => {
-        void navigate(path);
-      });
-    } finally {
-      setSubmitting(false);
-    }
+    const prev = previousWizardStep(onboardingStep);
+    if (prev != null) navigate(wizardPathForStep(prev));
   };
 
   const onConfirmLeave = async () => {
@@ -234,290 +219,326 @@ function CreateWizardStep({ stepIndex }: { stepIndex: number }) {
     void navigate('/acceso');
   };
 
+  const ctaLabel =
+    onboardingStep === ONBOARDING_STEPS.name
+      ? returnToRevision
+        ? 'Guardar y volver'
+        : 'Crear'
+      : 'Siguiente';
+
   useDesktopShortcuts({
     escapeEnabled: false,
-    canContinue: stepIndex < 3 ? canAdvance && loaded : canSubmit && !submitting,
-    onEnterContinue: () => {
-      if (stepIndex < 3) void onContinue();
-      else (document.getElementById('create-wizard-form') as HTMLFormElement | null)?.requestSubmit();
-    },
+    canContinue: canProceed && loaded && !submitting,
+    onEnterContinue: () => void onContinue(),
   });
 
-  const basicLimitsText = t('create.basic_limits', { limits: BASIC_BOUNDARIES.join(', ') });
-  const wizardStepDisplay = stepIndex + 1;
-  const titleKey = WIZARD_TITLE_KEYS[stepIndex];
-  const subKey = WIZARD_SUB_KEYS[stepIndex];
+  const disabledHint =
+    !canProceed && onboardingStep === ONBOARDING_STEPS.interests
+      ? t('onboarding.v2.interests_min_hint')
+      : !canProceed && onboardingStep === ONBOARDING_STEPS.name && !adultConsent
+        ? t('onboarding.v2.adult_confirm_label')
+        : !canProceed
+          ? t('onboarding.v2.cta_disabled_reason', {
+              reason: stepDisabledReason(onboardingStep, t),
+            })
+          : '';
 
   const stepIntro = (
-    <header className="create-step__intro">
-      <h1>{t(titleKey)}</h1>
-      <p>{t(subKey)}</p>
+    title: ReactNode,
+    subtitle?: ReactNode,
+    layout: 'visual' | 'form' = 'form',
+  ) => (
+    <header
+      className={
+        layout === 'visual' ? 'create-step__intro create-step__intro--visual' : 'create-step__intro'
+      }
+    >
+      <h1>{title}</h1>
+      {subtitle ? <p>{subtitle}</p> : null}
     </header>
   );
 
-  const step1Body = (desktop: boolean) => (
+  const genderTitle =
+    data.gender === '' ? (
+      tWeb('wizard.choose_neutral')
+    ) : (
+      <>
+        Elige tu <span className="brand-text">{gendered.companion()}</span>
+      </>
+    );
+
+  const genderBody = (
     <>
-      {stepIntro}
+      {data.gender ? (
+        <div
+          className={`create-wizard-glow create-wizard-glow--${data.gender}`}
+          aria-hidden
+        >
+          <span className="create-wizard-glow__orb" />
+          <span className="create-wizard-glow__ring" />
+        </div>
+      ) : null}
+      {stepIntro(genderTitle, undefined, 'visual')}
       <section className="create-who__section" aria-labelledby="wizard-gender" data-testid="wizard-step-group">
-        <h2 id="wizard-gender" className={desktop ? 'create-who__section-title' : 'create-who__label'}>
+        <h2 id="wizard-gender" className="visually-hidden">
           Género
         </h2>
-        <OptionGroup mode="radio" aria-labelledby="wizard-gender" cols={3}>
+        <div className="create-circle-grid" role="radiogroup" aria-labelledby="wizard-gender">
           {GENDERS.map(({ id, label, icon }) => (
             <button
               key={id}
               type="button"
               role="radio"
               aria-checked={data.gender === id}
-              className={desktop ? 'opt opt--gender' : data.gender === id ? 'create-option create-option--selected' : 'create-option'}
+              className={
+                data.gender === id ? 'create-circle-opt create-circle-opt--selected' : 'create-circle-opt'
+              }
               onClick={() => setGender(id)}
             >
-              {desktop ? <AppIcon name={icon} /> : null}
-              <span>{label}</span>
+              <span className="create-circle-opt__ring">
+                <AppIcon name={icon} />
+              </span>
+              <span className="create-circle-opt__label">{label}</span>
             </button>
           ))}
-        </OptionGroup>
+        </div>
       </section>
+    </>
+  );
 
-      <section className="create-who__section" aria-labelledby="wizard-persona" data-testid="wizard-step-group">
-        <h2 id="wizard-persona" className={desktop ? 'create-who__section-title' : 'create-who__label'}>
+  const personalityBody = (
+    <>
+      {stepIntro(
+        'Elige su personalidad',
+        'Selecciona cómo quieres que sea tu compañía',
+      )}
+      <section
+        className="create-who__section"
+        aria-labelledby="wizard-persona"
+        data-testid="wizard-step-group"
+      >
+        <h2 id="wizard-persona" className="visually-hidden">
           Personalidad
-        </h2>
-        <OptionGroup mode="radio" aria-labelledby="wizard-persona" cols={desktop ? 4 : 4}>
-          {PERSONALITY_OPTIONS.map((option) => (
-            <button
-              key={option}
-              type="button"
-              role="radio"
-              aria-checked={data.persona === option}
-              className={
-                desktop
-                  ? 'opt opt--personality'
-                  : data.persona === option
-                    ? 'create-option create-option--selected'
-                    : 'create-option'
-              }
-              onClick={() => setPersona(option)}
-            >
-              {desktop ? (
-                <span className="opt__icon-wrap">
-                  <AppIcon name={PERSONALITY_OPTION_ICONS[option]} />
-                </span>
-              ) : (
-                <AppIcon name={PERSONALITY_OPTION_ICONS[option]} />
-              )}
-              <span>{option}</span>
-            </button>
-          ))}
-        </OptionGroup>
-      </section>
-
-      <section className="create-who__section" aria-labelledby="wizard-style" data-testid="wizard-step-group">
-        <h2 id="wizard-style" className={desktop ? 'create-who__section-title' : 'create-who__label'}>
-          Estilo visual
         </h2>
         <OptionGroup
           mode="radio"
-          aria-labelledby="wizard-style"
-          cols={desktop ? undefined : 3}
-          layout={desktop ? 'inline' : undefined}
-          className={desktop ? 'create-who__style-grid' : undefined}
+          aria-labelledby="wizard-persona"
+          cols={4}
+          className="create-personality-grid"
         >
-          {(desktop ? styleOptions : STYLES).map((item) => {
-            const id = item.id;
-            const label = desktop ? t(item.labelKey) : t(item.labelKey);
+          {PERSONALITY_OPTIONS.map((option) => {
+            const label = gendered.trait(option);
             return (
+              <button
+                key={option}
+                type="button"
+                role="radio"
+                aria-checked={data.persona === option}
+                className={data.persona === option ? 'opt opt--personality opt--selected' : 'opt opt--personality'}
+                onClick={() => setPersona(option)}
+              >
+                <span className="opt__icon-wrap">
+                  <AppIcon name={PERSONALITY_OPTION_ICONS[option]} />
+                </span>
+                <span>{label}</span>
+                {data.persona === option ? (
+                  <AppIcon name="checkmark" className="opt__check" />
+                ) : null}
+              </button>
+            );
+          })}
+        </OptionGroup>
+      </section>
+    </>
+  );
+
+  const styleBody = (desktop: boolean) => (
+    <>
+      {data.visualStyle ? (
+        <div
+          className={`create-wizard-glow create-wizard-glow--style-${data.visualStyle}`}
+          aria-hidden
+        >
+          <span className="create-wizard-glow__orb" />
+          <span className="create-wizard-glow__ring" />
+        </div>
+      ) : null}
+      {stepIntro(
+        data.gender ? (
+          <>
+            Elige el estilo de tu <span className="brand-text">{gendered.companion()}</span>
+          </>
+        ) : (
+          'Elige su estilo visual'
+        ),
+        undefined,
+        'visual',
+      )}
+      <section className="create-who__section" aria-labelledby="wizard-style" data-testid="wizard-step-group">
+        <h2 id="wizard-style" className="visually-hidden">
+          Estilo visual
+        </h2>
+        {desktop ? (
+          <div className="create-circle-grid" role="radiogroup" aria-labelledby="wizard-style">
+            {styleOptions.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                role="radio"
+                aria-checked={data.visualStyle === item.id}
+                className={
+                  data.visualStyle === item.id
+                    ? 'create-circle-opt create-circle-opt--selected'
+                    : 'create-circle-opt'
+                }
+                onClick={() => setVisualStyle(item.id)}
+              >
+                <span className="create-circle-opt__ring">
+                  <img
+                    className="create-circle-opt__thumb"
+                    src={stylePortraitSrcForCard(item.id, portraitGenderForCard(data.gender))}
+                    alt=""
+                  />
+                </span>
+                <span className="create-circle-opt__label">{tWeb(item.labelKey)}</span>
+              </button>
+            ))}
+          </div>
+        ) : (
+          <OptionGroup mode="radio" aria-labelledby="wizard-style" cols={4}>
+            {STYLES.map(({ id, labelKey }) => (
               <button
                 key={id}
                 type="button"
                 role="radio"
                 aria-checked={data.visualStyle === id}
-                className={
-                  desktop
-                    ? 'opt opt--style'
-                    : data.visualStyle === id
-                      ? 'create-option create-option--selected'
-                      : 'create-option'
-                }
+                className={data.visualStyle === id ? 'create-option create-option--selected' : 'create-option'}
                 onClick={() => setVisualStyle(id)}
               >
-                <img className={desktop ? 'opt__thumb' : 'create-option__thumb'} src={stylePortraitSrcForCard(id, 'femenino')} alt="" />
-                <span>{label}</span>
+                <img
+                  className="create-option__thumb"
+                  src={stylePortraitSrcForCard(id, portraitGenderForCard(data.gender))}
+                  alt=""
+                />
+                <span>{tWeb(labelKey)}</span>
+              </button>
+            ))}
+          </OptionGroup>
+        )}
+      </section>
+    </>
+  );
+
+  const presenceBody = (
+    <>
+      {stepIntro(
+        'Ajusta su presencia',
+        'Esto ajusta cómo se siente su personalidad y la energía de su imagen.',
+      )}
+      <section
+        className="create-who__section"
+        aria-labelledby="wizard-presence"
+        data-testid="wizard-step-group"
+      >
+        <h2 id="wizard-presence" className="visually-hidden">
+          Presencia
+        </h2>
+        <div className="create-presence-segmented" role="radiogroup" aria-labelledby="wizard-presence">
+          {INTENSITY_OPTIONS.map((option) => (
+            <button
+              key={option.id}
+              type="button"
+              role="radio"
+              aria-checked={data.intensity === option.id}
+              data-testid={`presence-${option.id}`}
+              className={
+                data.intensity === option.id
+                  ? 'create-presence-segmented__btn create-presence-segmented__btn--selected'
+                  : 'create-presence-segmented__btn'
+              }
+              onClick={() => setIntensity(option.id as CompanionIntensity)}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+        {data.intensity ? (
+          <p className="create-who__section-desc">
+            {INTENSITY_OPTIONS.find((o) => o.id === data.intensity)?.description}
+          </p>
+        ) : null}
+      </section>
+    </>
+  );
+
+  const boundariesBody = (
+    <>
+      {stepIntro('Agrega tus límites', t('onboarding.v2.boundaries_basic'))}
+      <section
+        className="create-who__section"
+        aria-labelledby="wizard-boundaries"
+        data-testid="wizard-step-group"
+      >
+        <h2 id="wizard-boundaries" className="visually-hidden">
+          Límites
+        </h2>
+        <OptionGroup mode="toggle" aria-labelledby="wizard-boundaries" layout="inline" className="create-how__chip-row">
+          {BOUNDARY_OPTIONS.map((option) => {
+            const isBasic = (BASIC_BOUNDARIES as readonly string[]).includes(option);
+            const selected = data.boundaries.includes(option);
+            return (
+              <button
+                key={option}
+                type="button"
+                aria-pressed={selected}
+                aria-disabled={isBasic || undefined}
+                disabled={isBasic}
+                className={selected ? 'chip create-boundary-chip chip--selected' : 'chip create-boundary-chip'}
+                onClick={() => {
+                  if (!isBasic) toggleBoundary(option);
+                }}
+              >
+                {option}
+                {isBasic ? <AppIcon name="lock-closed-outline" className="create-boundary-chip__lock" /> : null}
+                {selected && !isBasic ? <AppIcon name="checkmark" /> : null}
               </button>
             );
           })}
         </OptionGroup>
       </section>
-
-      {ENABLE_ETHNICITY || ENABLE_AGE ? (
-        <div className={ENABLE_ETHNICITY && ENABLE_AGE ? 'create-who__row create-who__row--split' : 'create-who__row'}>
-          {ENABLE_ETHNICITY ? (
-            <section className="create-who__section" aria-labelledby="wizard-ethnicity">
-              <h2 id="wizard-ethnicity" className={desktop ? 'create-who__section-title' : 'create-who__label'}>
-                Etnia <span className="create-who__optional">(opcional)</span>
-              </h2>
-              <OptionGroup mode="radio" aria-labelledby="wizard-ethnicity" cols={desktop ? undefined : 4} layout={desktop ? 'inline' : undefined} className={desktop ? 'create-who__chip-wrap' : undefined}>
-                <button type="button" role="radio" aria-checked={!data.ethnicity} className={desktop ? 'chip' : !data.ethnicity ? 'create-option create-option--selected' : 'create-option'} onClick={() => setEthnicity(undefined)}>
-                  Sin preferencia
-                </button>
-                {ETHNICITY_IDS.map((id) => (
-                  <button
-                    key={id}
-                    type="button"
-                    role="radio"
-                    aria-checked={data.ethnicity === ETHNICITY_LABELS[id]}
-                    className={desktop ? 'chip' : data.ethnicity === ETHNICITY_LABELS[id] ? 'create-option create-option--selected' : 'create-option'}
-                    onClick={() => setEthnicity(ETHNICITY_LABELS[id])}
-                  >
-                    {ETHNICITY_LABELS[id]}
-                  </button>
-                ))}
-              </OptionGroup>
-            </section>
-          ) : null}
-          {ENABLE_AGE ? (
-            <section className="create-who__section" aria-labelledby="wizard-age">
-              <h2 id="wizard-age" className={desktop ? 'create-who__section-title' : 'create-who__label'}>
-                Edad aparente <span className="create-who__optional">(opcional)</span>
-              </h2>
-              {desktop ? (
-                <div className="create-who__age-row">
-                  <div className="stepper" aria-labelledby="wizard-age">
-                    <button type="button" className="btn btn--icon btn--secondary" aria-label="Reducir edad" disabled={(data.age ?? 28) <= COMPANION_MIN_AGE} onClick={() => setAge(Math.max(COMPANION_MIN_AGE, (data.age ?? 28) - 1))}>
-                      <AppIcon name="remove-outline" />
-                    </button>
-                    <span className="stepper__value">{data.age ?? 28}</span>
-                    <button type="button" className="btn btn--icon btn--secondary" aria-label="Aumentar edad" disabled={(data.age ?? 28) >= COMPANION_MAX_AGE} onClick={() => setAge(Math.min(COMPANION_MAX_AGE, (data.age ?? 28) + 1))}>
-                      <AppIcon name="add-outline" />
-                    </button>
-                  </div>
-                  <span className="create-who__age-unit">{t('create.age_unit')}</span>
-                </div>
-              ) : (
-                <input className="create-who__age" type="number" min={COMPANION_MIN_AGE} max={COMPANION_MAX_AGE} value={data.age ?? ''} onChange={(e) => setAge(Number(e.target.value))} aria-labelledby="wizard-age" />
-              )}
-            </section>
-          ) : null}
-        </div>
-      ) : null}
     </>
   );
 
-  const step2Body = (desktop: boolean) => (
+  const interestsBody = (
     <>
-      {stepIntro}
-      <section className="create-who__section" aria-labelledby="wizard-presence" data-testid="wizard-step-group">
-        <h2 id="wizard-presence" className={desktop ? 'create-who__section-title' : 'create-who__label'}>
-          Presencia
+      {stepIntro('Tus intereses', t('onboarding.v2.interests_need', { count: 3, selected: data.interests.length }))}
+      <section
+        className="create-who__section"
+        aria-labelledby="wizard-interests"
+        data-testid="wizard-step-group"
+      >
+        <h2 id="wizard-interests" className="visually-hidden">
+          Intereses
         </h2>
-        <OptionGroup mode="radio" aria-labelledby="wizard-presence" cols={desktop ? 3 : undefined} layout={desktop ? undefined : 'inline'} className={desktop ? undefined : 'create-how__presence'}>
-          {PRESENCE.map(({ id, labelKey, descKey, icon, recommended }) => (
-            <button
-              key={id}
-              type="button"
-              role="radio"
-              aria-checked={data.intensity === id}
-              className={desktop ? 'opt opt--presence' : data.intensity === id ? 'create-how__presence-btn create-how__presence-btn--selected' : 'create-how__presence-btn'}
-              data-testid={`presence-${id}`}
-              onClick={() => setIntensity(id)}
-            >
-              {desktop ? <AppIcon name={icon} className="opt--presence__icon" /> : null}
-              <span className={desktop ? 'opt--presence__title' : undefined}>
-                {t(labelKey)}
-                {recommended ? <span className={desktop ? 'pill opt--presence__pill' : undefined}> {desktop ? t('create.recommended') : ''}</span> : null}
-              </span>
-              {desktop ? <span className="opt--presence__desc">{t(descKey)}</span> : null}
-            </button>
-          ))}
-        </OptionGroup>
-      </section>
-
-      {desktop ? (
-        <details className="create-step__avoid" data-testid="wizard-step-group">
-          <summary id="wizard-avoid-toggle">{t('wizard.avoid_toggle')}</summary>
-          <div className="create-step__avoid-body">
-            <OptionGroup mode="toggle" aria-labelledby="wizard-avoid-toggle" cols={undefined} layout="inline" className="create-how__chip-row">
-              {OPTIONAL_BOUNDARIES.map((option) => {
-                const selected = data.boundaries.includes(option);
-                return (
-                  <button key={option} type="button" aria-pressed={selected} className="chip" onClick={() => toggleBoundary(option)}>
-                    {option}
-                  </button>
-                );
-              })}
-              {!showOtherBoundary ? (
-                <button type="button" className="chip chip--add" onClick={() => setShowOtherBoundary(true)}>
-                  {t('create.avoid_other')}
-                </button>
-              ) : null}
-            </OptionGroup>
-            {showOtherBoundary ? (
-              <div className="create-how__other-inline field">
-                <label className="field__label" htmlFor={otherBoundaryId}>
-                  {t('create.avoid_other')}
-                </label>
-                <div className="create-how__other-row">
-                  <input id={otherBoundaryId} className="field__control" type="text" maxLength={60} value={otherBoundary} onChange={(e) => setOtherBoundary(e.target.value)} />
-                  <button type="button" className="btn btn--secondary btn--m" onClick={onAddOtherBoundary} aria-label={`Añadir ${t('create.avoid_other').toLowerCase()}`}>
-                    +
-                  </button>
-                </div>
-              </div>
-            ) : null}
-          </div>
-        </details>
-      ) : (
-        <section className="create-who__section" aria-labelledby="wizard-boundaries" data-testid="wizard-step-group">
-          <h2 id="wizard-boundaries" className="create-who__label">
-            Temas a evitar <span className="create-who__optional">(opcional)</span>
-          </h2>
-          <OptionGroup mode="toggle" aria-labelledby="wizard-boundaries" cols={3} className="create-how__chip-row">
-            {OPTIONAL_BOUNDARIES.map((option) => {
-              const selected = data.boundaries.includes(option);
-              return (
-                <button key={option} type="button" aria-pressed={selected} className={selected ? 'create-option create-option--selected' : 'create-option'} onClick={() => toggleBoundary(option)}>
-                  {option}
-                </button>
-              );
-            })}
-          </OptionGroup>
-          <div className="create-how__other-boundary">
-            <label htmlFor={otherBoundaryId}>{t('create.avoid_other')}</label>
-            <div className="create-how__other-row">
-              <input id={otherBoundaryId} className="create-how__other-input" type="text" maxLength={60} value={otherBoundary} onChange={(e) => setOtherBoundary(e.target.value)} />
-              <button type="button" className="create-how__other-add" onClick={onAddOtherBoundary} aria-label={`Añadir ${t('create.avoid_other').toLowerCase()}`}>
-                +
-              </button>
-            </div>
-          </div>
-        </section>
-      )}
-      <p className={desktop ? 'banner--info' : 'create-how__basic-limits'} role="note">
-        {desktop ? <AppIcon name="shield-checkmark-outline" /> : null}
-        {basicLimitsText}
-      </p>
-    </>
-  );
-
-  const step3Body = (desktop: boolean) => (
-    <>
-      {stepIntro}
-      <section className="create-who__section" aria-labelledby="wizard-interests" data-testid="wizard-step-group">
-        <div className="create-who__interests-head">
-          <h2 id="wizard-interests" className={desktop ? 'create-who__section-title' : 'create-who__label'}>
-            Intereses
-          </h2>
-          <span className={data.interests.length >= 3 ? 'create-who__counter create-who__counter--ok' : 'create-who__counter'}>
-            {t('create.interests_counter', { count: data.interests.length })}
-          </span>
-        </div>
-        <OptionGroup mode="toggle" aria-labelledby="wizard-interests" cols={desktop ? 6 : 4} className={desktop ? 'create-who__interests-mosaic' : undefined}>
+        <OptionGroup
+          mode="toggle"
+          aria-labelledby="wizard-interests"
+          cols={mobile ? 4 : 6}
+          className={mobile ? undefined : 'create-who__interests-mosaic'}
+        >
           {INTEREST_OPTIONS.map((interest) => {
             const selected = data.interests.includes(interest);
             return (
-              <button key={interest} type="button" aria-pressed={selected} className={desktop ? 'opt opt--interest' : selected ? 'create-option create-option--selected' : 'create-option'} data-testid={desktop ? 'interest-tile' : undefined} onClick={() => toggleInterest(interest)}>
-                <AppIcon name={INTEREST_OPTION_ICONS[interest]} className={desktop ? 'opt--interest__icon' : undefined} />
-                <span className={desktop ? 'opt--interest__label' : undefined}>{interest}</span>
+              <button
+                key={interest}
+                type="button"
+                aria-pressed={selected}
+                className={selected ? 'opt opt--interest opt--selected' : 'opt opt--interest'}
+                data-testid="interest-tile"
+                onClick={() => toggleInterest(interest)}
+              >
+                <AppIcon name={INTEREST_OPTION_ICONS[interest]} className="opt--interest__icon" />
+                <span className="opt--interest__label">{interest}</span>
               </button>
             );
           })}
@@ -526,186 +547,201 @@ function CreateWizardStep({ stepIndex }: { stepIndex: number }) {
     </>
   );
 
-  const consentBlock = (
-    <section className="create-who__section" aria-labelledby="wizard-consent" data-testid="wizard-step-group">
-      <h2 id="wizard-consent" className="create-who__section-title">
-        {tApp('companion.create.consent_title')}
-      </h2>
-      {mobile ? null : <p className="create-how__consent-hint">{tApp('companion.create.consent_cta_hint')}</p>}
-      <label className={mobile ? 'create-how__consent' : 'check'}>
-        <input className={mobile ? undefined : 'check__input'} type="checkbox" checked={adultConsent} onChange={(e) => setAdultConsent(e.target.checked)} />
-        <span>{tApp('auth.login.age_gate')}</span>
-      </label>
-      <label className={mobile ? 'create-how__consent' : 'check'}>
-        <input className={mobile ? undefined : 'check__input'} type="checkbox" checked={legalConsent} onChange={(e) => setLegalConsent(e.target.checked)} />
-        <span>
-          {tApp('auth.login.legal_gate_prefix')}{' '}
-          <a className={mobile ? undefined : 'create-how__legal-link'} href={LEGAL_TERMS_URL} target="_blank" rel="noreferrer">
-            {tApp('auth.login.terms_link')}
-          </a>
-          {tApp('auth.login.and_privacy')}
-          <a className={mobile ? undefined : 'create-how__legal-link'} href={LEGAL_PRIVACY_URL} target="_blank" rel="noreferrer">
-            {tApp('auth.login.privacy_link')}
-          </a>
-          {tApp('auth.login.legal_gate_suffix')}
-        </span>
-      </label>
-      <input type="hidden" name="documentsVersion" value={LEGAL_DOCUMENTS_VERSION} readOnly aria-hidden tabIndex={-1} />
-    </section>
-  );
+  const nameError =
+    nameTouched && displayName.length > 0 ? validators.getNameError(data.companionName ?? '') : null;
+  const nameInvalid = Boolean(nameError);
 
-  const step4Body = (desktop: boolean) => (
+  const nameBody = (
     <>
-      {stepIntro}
+      {stepIntro(t('onboarding.name.title'))}
       <section className="create-who__section" aria-labelledby="wizard-name" data-testid="wizard-step-group">
-        {desktop ? (
-          <div className="field">
-            <span id="wizard-name" className="field__label">
-              Nombre
-            </span>
-            <div className="create-how__name-row">
-              <input className="field__control" type="text" maxLength={20} value={data.companionName ?? ''} onChange={(e) => setCompanionName(e.target.value)} aria-labelledby="wizard-name" />
-              <button type="button" className="btn btn--tonal btn--s" onClick={onSuggestName}>
-                {t('create.suggest_name')}
-              </button>
-            </div>
+        <div className="field">
+          <label id="wizard-name" className="field__label" htmlFor="companion-name-input">
+            Nombre
+          </label>
+          <div className="create-how__name-row">
+            <input
+              id="companion-name-input"
+              className={`field__control${nameInvalid ? ' field__control--error' : ''}`}
+              type="text"
+              maxLength={20}
+              value={data.companionName ?? ''}
+              placeholder={t(`onboarding.name.placeholder_${data.gender || 'femenino'}`)}
+              aria-invalid={nameInvalid || undefined}
+              onChange={(e) => setCompanionName(e.target.value)}
+              onBlur={() => setNameTouched(true)}
+            />
+            <button
+              type="button"
+              className={`btn btn--tonal btn--s${nameSuggestPulse ? ' create-how__suggest--pulse' : ''}`}
+              onClick={onSuggestName}
+            >
+              {t('onboarding.name.generate')}
+            </button>
           </div>
-        ) : (
-          <>
-            <h3 id="wizard-name" className="create-who__label">
-              Nombre
-            </h3>
-            <div className="create-how__name-row">
-              <input className="create-how__name-input" type="text" maxLength={20} value={data.companionName ?? ''} onChange={(e) => setCompanionName(e.target.value)} aria-labelledby="wizard-name" />
-              <button type="button" className="create-how__suggest" onClick={onSuggestName}>
-                {t('create.suggest_name')}
-              </button>
-            </div>
-          </>
-        )}
+          {nameError ? (
+            <p className="field__error" role="alert">
+              {nameError}
+            </p>
+          ) : (
+            <p className="field__hint">{t('onboarding.name.helper')}</p>
+          )}
+        </div>
+        <label className="check">
+          <input
+            className="check__input"
+            type="checkbox"
+            checked={adultConsent}
+            onChange={(e) => setAdultConsent(e.target.checked)}
+          />
+          <span>{t('onboarding.v2.adult_consent')}</span>
+        </label>
       </section>
-      {consentBlock}
     </>
   );
 
-  const stepContent = (desktop: boolean): ReactNode => {
-    if (stepIndex === 0) return step1Body(desktop);
-    if (stepIndex === 1) return step2Body(desktop);
-    if (stepIndex === 2) return step3Body(desktop);
-    return step4Body(desktop);
+  const stepContent = (): ReactNode => {
+    switch (onboardingStep) {
+      case ONBOARDING_STEPS.gender:
+        return genderBody;
+      case ONBOARDING_STEPS.persona:
+        return personalityBody;
+      case ONBOARDING_STEPS.visualStyle:
+        return styleBody(!mobile);
+      case ONBOARDING_STEPS.intensity:
+        return presenceBody;
+      case ONBOARDING_STEPS.boundaries:
+        return boundariesBody;
+      case ONBOARDING_STEPS.interests:
+        return interestsBody;
+      case ONBOARDING_STEPS.name:
+        return nameBody;
+      default:
+        return null;
+    }
   };
+
+  useEffect(() => {
+    if (!disabledHint) {
+      setHintPhase('hidden');
+      return undefined;
+    }
+    setHintPhase('in');
+    const leave = window.setTimeout(() => setHintPhase('out'), 2000);
+    const hide = window.setTimeout(() => setHintPhase('hidden'), 2320);
+    return () => {
+      window.clearTimeout(leave);
+      window.clearTimeout(hide);
+    };
+  }, [disabledHint, onboardingStep]);
+
+  const hintToast =
+    hintPhase !== 'hidden' && disabledHint ? (
+      <p
+        id={disabledHintId}
+        className={`wizard-hint-toast wizard-hint-toast--${hintPhase}`}
+        role="status"
+      >
+        <AppIcon name="information-circle-outline" />
+        {disabledHint}
+      </p>
+    ) : null;
+
+  const footerHint =
+    onboardingStep === ONBOARDING_STEPS.interests && data.interests.length >= 3 ? (
+      <p className="creation-shell-footer__counter" data-testid="interests-counter-done">
+        <AppIcon name="checkmark-circle" />
+        {tWeb('create.interests_done', { count: data.interests.length })}
+      </p>
+    ) : null;
 
   if (mobile) {
     return (
       <div className="create-mobile" data-testid="create-wizard">
+        {hintToast}
         <header className="create-mobile__header">
           <span data-testid="create-wizard-step">
-            {t('create.step2')} · {wizardStepDisplay}/{WIZARD_STEP_COUNT}
+            {t('onboarding.v2.step_hint', {
+              step: wizardGroup,
+              total: 4,
+              seconds: [15, 15, 20, 10][wizardGroup - 1],
+            })}
           </span>
         </header>
         <main className="create-mobile__main">
-          <div className="create-who">{stepIndex === 3 ? <form id="create-wizard-form" className="create-how" onSubmit={(e) => void onSubmit(e)}>{stepContent(false)}</form> : stepContent(false)}</div>
+          {showBuildingPreview ? (
+            <CreationPreviewCrumbsStrip
+              data={data}
+              currentStep={onboardingStep}
+              onNavigateToStep={navigateToStep}
+            />
+          ) : null}
+          <div className="create-who">{stepContent()}</div>
         </main>
         <footer className="create-mobile__footer">
-          {missingText ? (
-            <p id={missingId} className="create-mobile__missing" role="status">
-              {missingText}
-            </p>
+          {footerHint}
+          {showBack ? (
+            <button type="button" className="create-mobile__back" onClick={onBack}>
+              {tWeb('create.back')}
+            </button>
           ) : null}
-          <button type="button" className="create-mobile__back" onClick={onBack}>
-            {stepIndex > 0 ? t('create.back') : 'Atrás'}
+          <button
+            type="button"
+            className="create-mobile__continue"
+            disabled={!canProceed || !loaded || submitting}
+            aria-describedby={hintPhase !== 'hidden' && disabledHint ? disabledHintId : undefined}
+            onClick={() => void onContinue()}
+          >
+            {ctaLabel}
           </button>
-          {stepIndex < 3 ? (
-            <button type="button" className="create-mobile__continue" disabled={!canAdvance || !loaded} aria-describedby={missingText ? missingId : undefined} onClick={() => void onContinue()}>
-              {t('create.continue')}
-            </button>
-          ) : (
-            <button type="submit" form="create-wizard-form" className="create-mobile__continue" disabled={!canSubmit || !loaded || submitting}>
-              {t('create.cta_create', { name: displayName || '…' })}
-            </button>
-          )}
         </footer>
       </div>
     );
   }
 
-  const submitMissing =
-    !displayName || !adultConsent || !legalConsent
-      ? t('create.missing', { items: !displayName ? 'nombre y consentimiento' : 'consentimiento' })
-      : '';
-
   return (
     <div data-testid="create-wizard">
+      {hintToast}
       <DesktopShell
         header={
-          <CreationShellHeader step={wizardStepDisplay as 1 | 2 | 3 | 4} onConfirmLeave={onConfirmLeave} />
-        }
-        preview={
-          <CreationPreview
-            data={data}
-            tagTimeline={tagTimeline}
-            companionName={stepIndex === 3 ? displayName : undefined}
-            greeting={stepIndex === 3 ? greeting : null}
-            showGreetingPreview={stepIndex === 3}
+          <CreationShellHeader
+            step={wizardGroup}
+            progress={progress}
+            showBack={showBack}
+            onBack={onBack}
+            onConfirmLeave={onConfirmLeave}
+            crumbs={
+              <WizardChoicePills
+                data={data}
+                currentStep={onboardingStep}
+                onNavigateToStep={navigateToStep}
+              />
+            }
           />
         }
         footer={
-          <div className="creation-shell-footer">
-            <div className="creation-shell-footer__start">
-              {stepIndex > 0 ? (
-                <button type="button" className="btn btn--secondary btn--l" onClick={onBack}>
-                  {t('create.back')}
-                </button>
-              ) : null}
-            </div>
-            <div className="creation-shell-footer__center">
-              {stepIndex < 3 && missingText ? (
-                <p id={missingId} className="creation-shell-footer__hint" role="status">
-                  <AppIcon name="information-circle-outline" />
-                  {missingText}
-                </p>
-              ) : stepIndex === 3 && !canSubmit ? (
-                <p id={missingId} className="creation-shell-footer__hint" role="status">
-                  <AppIcon name="information-circle-outline" />
-                  {submitMissing}
-                </p>
-              ) : stepIndex === 2 && data.interests.length >= 3 ? (
-                <p className="creation-shell-footer__counter" data-testid="interests-counter-done">
-                  <AppIcon name="checkmark-circle" />
-                  {t('create.interests_done', { count: data.interests.length })}
-                </p>
-              ) : null}
-            </div>
-            <div className="creation-shell-footer__actions">
-              {stepIndex < 3 ? (
-                <button type="button" className="btn btn--primary btn--l creation-shell-footer__primary" disabled={!canAdvance || !loaded} aria-describedby={missingText ? missingId : undefined} onClick={() => void onContinue()}>
-                  {t('create.continue')}
-                </button>
-              ) : (
-                <button type="submit" form="create-wizard-form" className="btn btn--primary btn--l creation-shell-footer__primary" disabled={!canSubmit || !loaded || submitting} aria-describedby={!canSubmit ? missingId : undefined}>
-                  {t('create.cta_create', { name: displayName || '…' })}
-                </button>
-              )}
-            </div>
+          <div className="creation-shell-footer creation-shell-footer--cta">
+            {footerHint}
+            <button
+              type="button"
+              className="btn btn--primary btn--l creation-shell-footer__primary"
+              disabled={!canProceed || !loaded || submitting}
+              aria-describedby={hintPhase !== 'hidden' && disabledHint ? disabledHintId : undefined}
+              onClick={() => void onContinue()}
+            >
+              {ctaLabel}
+            </button>
           </div>
         }
       >
-        {stepIndex === 3 ? (
-          <form
-            id="create-wizard-form"
-            key={stepIndex}
-            className="create-how create-who create-wizard-step-panel"
-            data-create-wizard-main
-            data-testid="wizard-step-panel"
-            onSubmit={(e) => void onSubmit(e)}
-          >
-            {stepContent(true)}
-          </form>
-        ) : (
-          <div key={stepIndex} className="create-who create-wizard-step-panel" data-create-wizard-main data-testid="wizard-step-panel">
-            {stepContent(true)}
-          </div>
-        )}
+        <div
+          key={onboardingStep}
+          className="create-who create-wizard-step-panel"
+          data-create-wizard-main
+          data-testid="wizard-step-panel"
+        >
+          {stepContent()}
+        </div>
       </DesktopShell>
     </div>
   );

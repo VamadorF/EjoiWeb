@@ -73,8 +73,8 @@ button {
 }
 
 :focus-visible {
-  outline: calc(var(--border-focus-ring) * 1px) solid var(--c-focus);
-  outline-offset: 2px;
+  outline: var(--border-focus-ring) solid var(--c-focus);
+  outline-offset: 3px;
 }
 
 .create-who__continue:not(:disabled) {
@@ -98,6 +98,18 @@ button {
     color: var(--c-on-brand);
     box-shadow: var(--state-hover-shadow);
   }
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .app-icon {

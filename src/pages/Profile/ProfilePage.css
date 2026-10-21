@@ -1,0 +1,47 @@
+.profile-page__card-wrap {
+  max-width: 420px;
+  margin: 0 auto var(--space-4);
+}
+
+.profile-page__attributes {
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+.profile-page__subtabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.profile-page__subtab {
+  min-height: 40px;
+  border-radius: var(--radius-control);
+  border: 1px solid var(--c-line);
+  background: var(--c-surface-2);
+  font: var(--font-button);
+  color: var(--c-ink2);
+}
+
+.profile-page__subtab--active {
+  border-color: transparent;
+  background: var(--c-brand-gradient);
+  color: var(--c-on-brand);
+}
+
+.profile-page__attr-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.profile-page__attr-row {
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--c-line);
+  font: var(--font-body);
+}
+
+.profile-page__banner {
+  margin-bottom: var(--space-3);
+}

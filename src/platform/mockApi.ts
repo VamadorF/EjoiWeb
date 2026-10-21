@@ -8,6 +8,12 @@ import {
   buildQuickReplies,
   catalogInterestsFromSelection,
 } from './mockGreeting';
+import {
+  creationElapsedMs as elapsedCreatingMs,
+  creationStepsForElapsed,
+  isCreationBackendReady,
+} from './mocks/creation';
+import { mockReviewPortraitUrl, resetReviewMockGenerations } from './mocks/review';
 
 export type MockRequestConfig = {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
@@ -33,8 +39,6 @@ export function setMockDemoLoggedIn(): void {
   if (typeof sessionStorage === 'undefined') return;
   sessionStorage.setItem(MOCK_DEMO_SESSION_KEY, '1');
 }
-
-const MOCK_PORTRAIT_PATH = '/portraits/realista-femenino.webp';
 
 type OnboardingDraftBody = {
   schemaVersion: number;
@@ -64,15 +68,35 @@ type MockChatMessage = {
   meta?: Record<string, unknown>;
 };
 
-const CREATION_READY_MS = 3000;
-const CREATION_STEP_GREETING_MS = 1000;
-const CREATION_STEP_PORTRAIT_MS = 2000;
-
 type CreationRow = {
   state: 'none' | 'creating' | 'ready' | 'error';
   creatingSince: number;
   companion?: MockCompanionProfile;
 };
+
+function demoSharedMoments() {
+  const now = new Date();
+  const happenedAt = new Date(
+    now.getFullYear() - 1,
+    now.getMonth(),
+    now.getDate(),
+  ).toISOString();
+  return [
+    {
+      id: 'fm-demo',
+      userId: MOCK_USER_ID,
+      companionId: 'c1',
+      conversationId: null,
+      type: 'FIRST_MEETING' as const,
+      title: 'Primer encuentro',
+      description: 'Demo',
+      happenedAt,
+      importance: 5,
+      sourceMessageId: null,
+      createdAt: happenedAt,
+    },
+  ];
+}
 
 function defaultMockCompanion(): MockCompanionProfile {
   return {
@@ -162,17 +186,7 @@ function patchCompanionProfile(
 }
 
 function creationElapsedMs(creation: CreationRow): number {
-  if (creation.state !== 'creating' || creation.creatingSince <= 0) return 0;
-  return Date.now() - creation.creatingSince;
-}
-
-function creationStepsForElapsed(elapsedMs: number) {
-  return {
-    personality: true,
-    interests: true,
-    greeting: elapsedMs >= CREATION_STEP_GREETING_MS,
-    portrait: elapsedMs >= CREATION_STEP_PORTRAIT_MS,
-  };
+  return elapsedCreatingMs(creation.creatingSince, creation.state);
 }
 
 function buildTemplateFirstMessage(companion: MockCompanionProfile) {
@@ -204,7 +218,7 @@ function seedChatFirstMessage(userId: string, companion: MockCompanionProfile) {
 
 function syncCreationReady(userId: string, creation: CreationRow) {
   if (creation.state !== 'creating' || creation.creatingSince <= 0) return;
-  if (creationElapsedMs(creation) < CREATION_READY_MS) return;
+  if (!isCreationBackendReady(creationElapsedMs(creation))) return;
   creation.state = 'ready';
   seedChatFirstMessage(userId, getMockCompanion(userId));
 }
@@ -222,13 +236,7 @@ export function resetMockApiStoresForTests(): void {
   draftStore.clear();
   creationStore.clear();
   chatStore.clear();
-}
-
-function portraitUrl(): string {
-  if (typeof window !== 'undefined') {
-    return new URL(MOCK_PORTRAIT_PATH, window.location.origin).href;
-  }
-  return MOCK_PORTRAIT_PATH;
+  resetReviewMockGenerations();
 }
 
 function fakeAccessToken(userId: string): string {
@@ -309,8 +317,9 @@ export function handleMockApiRequest<T>(
   const path = normalizeApiPath(absoluteOrRelativeUrl);
 
   if (path.endsWith('/image/generate') && method === 'POST') {
+    const origin = typeof window !== 'undefined' ? window.location.origin : undefined;
     return ok({
-      fileUrl: portraitUrl(),
+      fileUrl: mockReviewPortraitUrl(origin),
       storagePath: 'mock/portrait.webp',
     } as T);
   }
@@ -398,6 +407,7 @@ export function handleMockApiRequest<T>(
     return ok({
       ...companion,
       avatarUrl: portraitUrlForCompanion(companion),
+      sharedMoments: demoSharedMoments(),
     } as T);
   }
 
@@ -441,7 +451,7 @@ export function handleMockApiRequest<T>(
   }
 
   if (path.includes('/subscription/me')) {
-    return ok({ messagesRemaining: 54, planLabel: 'basic' } as T);
+    return ok({ messagesRemaining: 54, planLabel: 'Plan básico' } as T);
   }
 
   if (path.includes('/campaign/founder-count')) {
@@ -457,6 +467,22 @@ export function handleMockApiRequest<T>(
   }
 
   if (path.includes('/users/me/consents') && method === 'POST') {
+    return ok({} as T);
+  }
+
+  if (path.includes('/users/me/name') && method === 'PATCH') {
+    const payload = (config.body ?? {}) as { name?: string };
+    const name = typeof payload.name === 'string' ? payload.name.trim() : '';
+    if (!name) {
+      return { data: { message: 'Invalid name' } as T, status: 400, statusText: 'Bad Request' };
+    }
+    return ok({ name } as T);
+  }
+
+  if (path.endsWith('/auth/account') && method === 'DELETE') {
+    creation.state = 'none';
+    creation.companion = undefined;
+    chatStore.delete(userId);
     return ok({} as T);
   }
 

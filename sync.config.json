@@ -21,9 +21,28 @@
     "src/features/companion/api/image.api.ts",
     "src/features/chat/types.ts",
     "src/features/chat/api/chat.api.ts",
-    "src/features/chat/utils/mergeChatPages.ts"
+    "src/features/chat/utils/mergeChatPages.ts",
+    "src/shared/utils/genderedText.ts",
+    "src/shared/utils/ethnicityLabel.ts",
+    "src/shared/utils/validators.ts",
+    "src/shared/utils/companionTextGenerator.ts",
+    "src/features/onboarding/utils/wizardPreviewCrumbs.ts",
+    "src/features/companion/constants/avatarVariants.ts",
+    "src/features/memories/adapters/memories.adapter.ts",
+    "src/features/memories/api/memories.api.ts",
+    "src/features/presence/types.ts",
+    "src/features/presence/utils/derivePresence.ts",
+    "src/features/presence/utils/formatLastSeen.ts",
+    "src/features/chat/utils/inferReaction.ts",
+    "src/features/chat/utils/reactionEmojiCatalog.ts",
+    "src/features/chat/utils/formatMessageDate.ts",
+    "src/features/chat/utils/buildChatListItems.ts",
+    "src/features/chat/api/tts.api.ts",
+    "src/features/proactivity/api/proactivity.api.ts",
+    "src/features/proactivity/adapters/proactivity.adapter.ts"
   ],
   "shims": {
+    "@/shared/i18n": "src/app-shared/shared/i18n/index.ts",
     "@/shared/services/http/client": "src/platform/http.ts",
     "@/shared/services/storage/secure": "src/platform/secure.ts",
     "@/shared/services/storage/keyValue": "src/platform/keyValue.ts",
@@ -43,24 +62,34 @@
     { "from": "public/logos/cropped/eJoi_logo-invertido.png", "to": "public/logos/invertido.png" },
     { "from": "public/logos/cropped/eJoi_logo-invertido@2x.png", "to": "public/logos/invertido@2x.png" },
     {
-      "from": "public/IMG/arquetipos/Anfitriona.jpg",
+      "from": "public/IMG/arquetipos/La Musa.jpg",
       "to": "public/portraits/realista-femenino.webp",
-      "crop": { "left": 257, "top": 0, "size": 560 }
+      "crop": { "left": 200, "top": 0, "size": 512 }
     },
     {
-      "from": "public/IMG/arquetipos/Protector.png",
+      "from": "public/IMG/arquetipos/Ejecutivo.png",
       "to": "public/portraits/realista-masculino.webp",
-      "crop": { "left": 230, "top": 0, "size": 560 }
+      "crop": { "left": 200, "top": 0, "size": 512 }
     },
     {
-      "from": "public/IMG/anime/Anime_anfitriona.png",
+      "from": "public/IMG/arquetipos/Intelectual.png",
+      "to": "public/portraits/realista-neutro.webp",
+      "crop": { "left": 200, "top": 0, "size": 512 }
+    },
+    {
+      "from": "public/IMG/anime/Anime_musa.png",
       "to": "public/portraits/ilustrado-femenino.webp",
-      "crop": { "left": 384, "top": 0, "size": 928 }
+      "crop": { "left": 300, "top": 0, "size": 800 }
     },
     {
-      "from": "public/IMG/anime/Anime_Protector.jpg",
+      "from": "public/IMG/anime/anime_ejecutivo.png",
       "to": "public/portraits/ilustrado-masculino.webp",
-      "crop": { "left": 42, "top": 0, "size": 700 }
+      "crop": { "left": 120, "top": 0, "size": 512 }
+    },
+    {
+      "from": "public/IMG/anime/Anime_intelectual.png",
+      "to": "public/portraits/ilustrado-neutro.webp",
+      "crop": { "left": 300, "top": 0, "size": 800 }
     }
   ]
 }

@@ -14,9 +14,12 @@ export function colorVarName(key: string): string {
 }
 
 function colorBlock(mode: 'light' | 'dark', colors: UxV2ColorMode): string {
-  const lines = Object.entries(colors).map(
-    ([key, value]) => `  ${colorVarName(key)}: ${value};`,
-  );
+  const lines = [
+    `  color-scheme: ${mode};`,
+    ...Object.entries(colors).map(
+      ([key, value]) => `  ${colorVarName(key)}: ${value};`,
+    ),
+  ];
   return `:root[data-theme="${mode}"] {\n${lines.join('\n')}\n}`;
 }
 
@@ -62,8 +65,8 @@ function layoutMediaQueries(): string {
     max-height: var(--shell-preview-strip-h);
     min-height: var(--shell-preview-strip-h);
     border-left: none;
-    border-bottom: calc(var(--border-card) * 1px) solid var(--c-line);
-    padding: 0 calc(var(--radius-card) * 1px);
+    border-bottom: var(--border-card) solid var(--c-line);
+    padding: 0 var(--radius-card);
     overflow: hidden;
   }
   .creation-preview {
@@ -116,13 +119,15 @@ function layoutMediaQueries(): string {
   .desktop-shell__preview {
     display: none;
   }
-  .chat-shell {
+  .chat-shell,
+  .home-shell {
     grid-template-columns: 1fr;
     grid-template-rows: auto minmax(0, 1fr);
     padding: 0 16px;
   }
   .chat-shell__menu,
-  .chat-shell__profile {
+  .chat-shell__profile,
+  .home-shell__menu {
     display: none;
   }
   .chat-shell__menu--drawer-open,
@@ -132,6 +137,16 @@ function layoutMediaQueries(): string {
     inset: 0;
     z-index: 40;
     max-width: min(320px, 90vw);
+    margin: 0;
+    border-radius: 0;
+    box-shadow: var(--state-hover-shadow);
+  }
+  .home-shell__menu--drawer-open {
+    display: flex;
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 40;
+    width: min(var(--chat-menu-w), 90vw);
     margin: 0;
     border-radius: 0;
     box-shadow: var(--state-hover-shadow);
@@ -207,7 +222,7 @@ export function buildCssVarsText(): string {
     '  --shell-footer-h: 88px;',
     '  --shell-preview-w: 360px;',
     '  --shell-preview-strip-h: 72px;',
-    '  --chat-menu-w: 264px;',
+    '  --chat-menu-w: 320px;',
     '  --chat-read-min: 680px;',
     '  --chat-read-max: 720px;',
     '  --chat-profile-w: 320px;',
@@ -215,6 +230,15 @@ export function buildCssVarsText(): string {
     '  --state-hover-bg: color-mix(in srgb, var(--c-ink) 6%, var(--c-surface));',
     '  --state-hover-border: var(--c-line-strong);',
     '  --state-hover-shadow: 0 2px 8px color-mix(in srgb, var(--c-ink) 10%, transparent);',
+    '  --bg-brand-gradient: linear-gradient(135deg, var(--c-sel-fill), var(--c-lav-tint));',
+    '  --presence-online: var(--c-ok);',
+    '  --presence-typing: var(--c-lav-ink);',
+    '  --presence-listening: var(--c-brand);',
+    '  --presence-thinking: var(--c-lav);',
+    '  --presence-recording: var(--c-warn);',
+    '  --presence-away: var(--c-ink2);',
+    '  --presence-offline: var(--c-err);',
+    '  --presence-reconnecting: var(--c-warn);',
   ].join('\n');
 
   return [
