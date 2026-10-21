@@ -232,4 +232,77 @@ test.describe('Teclado desktop (SCRUM-113)', () => {
     expect(box?.height).toBeGreaterThanOrEqual(44);
     expect(box?.width).toBeGreaterThanOrEqual(44);
   });
+
+  test('perfil completo se abre con teclado', async ({ page }) => {
+    await page.route('**/api/**', async (route) => {
+      const path = new URL(route.request().url()).pathname.replace(/^\/api/, '');
+      if (path.includes('/auth/refresh')) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ accessToken: 'e2e-keyboard-profile' }),
+        });
+        return;
+      }
+      if (path.includes('/companion/me/creation')) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            state: 'ready',
+            profile: { id: 'c1', name: 'Luna', visualStyle: 'realista' },
+            firstMessage: { id: 'm1', content: 'Hola' },
+          }),
+        });
+        return;
+      }
+      if (
+        path.includes('/companion/me/profile') ||
+        (path.includes('/companion/me') && route.request().method() === 'GET')
+      ) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            id: 'c1',
+            name: 'Luna',
+            visualStyle: 'realista',
+            persona: 'Amigable y empática',
+            intensity: 'balanced',
+            interests: ['Música'],
+            boundaries: ['Política'],
+            gender: 'femenino',
+          }),
+        });
+        return;
+      }
+      if (path.includes('/chat/')) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ messages: [], hasMore: false }),
+        });
+        return;
+      }
+      if (path.includes('/subscription/me')) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ remainingMessages: 12, planLabel: 'basic' }),
+        });
+        return;
+      }
+      await route.fulfill({ status: 200, contentType: 'application/json', body: '{}' });
+    });
+
+    await page.goto('/chat');
+    await page.getByTestId('chat-profile-card').waitFor();
+    await expect(page.getByText('Política')).toBeHidden();
+
+    const summary = page.getByTestId('chat-profile-more').locator('summary');
+    await summary.focus();
+    await page.keyboard.press('Enter');
+    await expect(page.getByText('Política')).toBeVisible();
+    await expect(page.getByText(/Realista/)).toBeVisible();
+  });
 });

@@ -50,6 +50,26 @@
   justify-content: center;
 }
 
+.chat-profile-panel__more {
+  width: 100%;
+  margin: 0;
+}
+
+.chat-profile-panel__more-summary {
+  cursor: pointer;
+  font: var(--font-button);
+  color: var(--c-brand-text);
+  list-style: none;
+}
+
+.chat-profile-panel__more-summary::-webkit-details-marker {
+  display: none;
+}
+
+.chat-profile-panel__more[open] .chat-profile-panel__more-summary {
+  margin-bottom: var(--space-3);
+}
+
 .chat-profile-panel__edit {
   width: 100%;
   margin-top: auto;

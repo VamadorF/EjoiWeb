@@ -113,6 +113,8 @@ export function ProfilePanel({
     appearanceParts.push(hairKey ? t(hairKey) : view.hairColor);
   }
 
+  const hasProfileMore = view.boundaries.length > 0 || appearanceParts.length > 0;
+
   return (
     <div className="chat-profile-panel" data-testid="chat-profile-card">
       {profileLoading ? (
@@ -182,24 +184,28 @@ export function ProfilePanel({
             </section>
           ) : null}
 
-          {view.boundaries.length > 0 ? (
-            <section className="chat-profile-panel__section">
-              <h3 className="label chat-profile-panel__label">{t('profile.avoids')}</h3>
-              <ul className="chat-profile-panel__pills">
-                {view.boundaries.map((boundary) => (
-                  <li key={boundary}>
-                    <span className="pill">{boundary}</span>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ) : null}
-
-          {appearanceParts.length > 0 ? (
-            <section className="chat-profile-panel__section">
-              <h3 className="label chat-profile-panel__label">{t('chat.profile_appearance')}</h3>
-              <p className="chat-profile-panel__text">{appearanceParts.join(' · ')}</p>
-            </section>
+          {hasProfileMore ? (
+            <details className="chat-profile-panel__more" data-testid="chat-profile-more">
+              <summary className="chat-profile-panel__more-summary">{t('chat.profile_more')}</summary>
+              {view.boundaries.length > 0 ? (
+                <section className="chat-profile-panel__section">
+                  <h3 className="label chat-profile-panel__label">{t('profile.avoids')}</h3>
+                  <ul className="chat-profile-panel__pills">
+                    {view.boundaries.map((boundary) => (
+                      <li key={boundary}>
+                        <span className="pill">{boundary}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              ) : null}
+              {appearanceParts.length > 0 ? (
+                <section className="chat-profile-panel__section">
+                  <h3 className="label chat-profile-panel__label">{t('chat.profile_appearance')}</h3>
+                  <p className="chat-profile-panel__text">{appearanceParts.join(' · ')}</p>
+                </section>
+              ) : null}
+            </details>
           ) : null}
 
           {onRetryPortrait ? (

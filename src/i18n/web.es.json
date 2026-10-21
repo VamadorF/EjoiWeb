@@ -109,6 +109,7 @@
     "profile_appearance": "Apariencia",
     "profile_age": "{{count}} años",
     "profile_load_error": "No pudimos cargar el perfil.",
+    "profile_more": "Ver perfil completo",
     "load_older": "Ver mensajes anteriores"
   },
   "profile": {
@@ -117,6 +118,7 @@
   "menu": {
     "chat": "Conversación",
     "edit": "Editar eJoi",
+    "settings": "Ajustes",
     "logout": "Cerrar sesión"
   },
   "theme": {

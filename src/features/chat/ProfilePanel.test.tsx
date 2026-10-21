@@ -34,6 +34,35 @@ describe('ProfilePanel', () => {
     expect(screen.getByText('Amigable y empática')).toBeTruthy();
     expect(screen.getByText('Equilibrada')).toBeTruthy();
     expect(screen.queryByTestId('chat-quota')).toBeNull();
+    const more = screen.getByTestId('chat-profile-more') as HTMLDetailsElement;
+    expect(more.open).toBe(false);
     expect(screen.getByRole('link', { name: 'Editar eJoi' }).getAttribute('href')).toBe('/chat/editar');
+  });
+
+  it('despliega límites y apariencia en Ver perfil completo', () => {
+    render(
+      <MemoryRouter>
+        <ProfilePanel
+          profile={{
+            id: 'c1',
+            name: 'Luna',
+            persona: 'Amigable y empática',
+            intensity: 'balanced',
+            interests: ['Música'],
+            boundaries: ['Política'],
+            visualStyle: 'realista',
+            gender: 'femenino',
+          }}
+          showOnline
+        />
+      </MemoryRouter>,
+    );
+
+    const more = screen.getByTestId('chat-profile-more') as HTMLDetailsElement;
+    expect(more.open).toBe(false);
+    screen.getByText('Ver perfil completo').click();
+    expect(more.open).toBe(true);
+    expect(screen.getByText('Política')).toBeTruthy();
+    expect(screen.getByText(/Realista/)).toBeTruthy();
   });
 });
