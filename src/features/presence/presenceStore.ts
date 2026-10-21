@@ -54,7 +54,21 @@ export function getLastInteractionAt(): number {
   return state.lastInteractionAt;
 }
 
+/**
+ * useSyncExternalStore exige el mismo objeto mientras el store no cambie; si no,
+ * React re-renderiza en bucle ("Maximum update depth exceeded").
+ */
+const snapshotCache = new Map<PresenceTarget, { source: StoreState; snapshot: PresenceSnapshot }>();
+
 export function getPresenceSnapshot(target: PresenceTarget): PresenceSnapshot {
+  const cached = snapshotCache.get(target);
+  if (cached?.source === state) return cached.snapshot;
+  const snapshot = computePresenceSnapshot(target);
+  snapshotCache.set(target, { source: state, snapshot });
+  return snapshot;
+}
+
+function computePresenceSnapshot(target: PresenceTarget): PresenceSnapshot {
   const slice = target === 'me' ? state.me : state.companion;
   return derivePresence(target, {
     signals: slice.signals,

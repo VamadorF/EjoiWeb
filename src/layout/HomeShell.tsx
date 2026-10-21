@@ -240,7 +240,7 @@ const homeQueryClient = new QueryClient({
   defaultOptions: { queries: { retry: false } },
 });
 
-export default function HomeRouteLayout() {
+function HomeRouteContent() {
   const location = useLocation();
   const activeTab = tabFromPath(location.pathname);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -249,21 +249,27 @@ export default function HomeRouteLayout() {
   const closeMenu = useCallback(() => setMenuOpen(false), []);
 
   return (
+    <ChatSessionProvider>
+      <HomeShellFrame
+        activeTab={activeTab}
+        menuOpen={menuOpen}
+        onCloseMenu={closeMenu}
+        menu={<SideMenu activeTab={activeTab} drawerMode={menuOpen} onCloseDrawer={closeMenu} />}
+        header={
+          <HomeShellHeader menuOpen={menuOpen} onMenuToggle={() => setMenuOpen((open) => !open)} />
+        }
+        banner={<AnniversaryBanner sharedMoments={profileData?.sharedMoments} />}
+      >
+        <Outlet />
+      </HomeShellFrame>
+    </ChatSessionProvider>
+  );
+}
+
+export default function HomeRouteLayout() {
+  return (
     <QueryClientProvider client={homeQueryClient}>
-      <ChatSessionProvider>
-        <HomeShellFrame
-          activeTab={activeTab}
-          menuOpen={menuOpen}
-          onCloseMenu={closeMenu}
-          menu={<SideMenu activeTab={activeTab} drawerMode={menuOpen} onCloseDrawer={closeMenu} />}
-          header={
-            <HomeShellHeader menuOpen={menuOpen} onMenuToggle={() => setMenuOpen((open) => !open)} />
-          }
-          banner={<AnniversaryBanner sharedMoments={profileData?.sharedMoments} />}
-        >
-          <Outlet />
-        </HomeShellFrame>
-      </ChatSessionProvider>
+      <HomeRouteContent />
     </QueryClientProvider>
   );
 }
