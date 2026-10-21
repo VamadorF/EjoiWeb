@@ -104,9 +104,15 @@ async function fillWizardThroughStep3(page) {
 
 async function fillHowAndCreate(page, { demoFailCreate = false } = {}) {
   if (demoFailCreate) {
-    await page.goto('/crear/paso-4?demoFail=create');
+    await page.evaluate(() => {
+      const u = new URL(window.location.href);
+      u.searchParams.set('demoFail', 'create');
+      window.history.replaceState({}, '', `${u.pathname}${u.search}`);
+    });
   }
-  await page.locator('#create-wizard-form .field__control').first().fill('Luna');
+  const nameInput = page.locator('#create-wizard-form input.field__control, #create-wizard-form input.create-how__name-input').first();
+  await nameInput.waitFor({ state: 'visible', timeout: 15_000 });
+  await nameInput.fill('Luna');
   await page.locator('.check__input').nth(0).check();
   await page.locator('.check__input').nth(1).check();
   await page.getByRole('button', { name: /Crear a Luna/ }).click();

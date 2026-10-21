@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/** Cronómetro demo: Acceso → primer mensaje visible (dato SCRUM-116). Requiere build:demo. */
+/** Cronómetro demo: Inicio → primer mensaje visible (SCRUM-116 / FLOW-WEB-06). Requiere build:demo. */
 import { spawn } from 'node:child_process';
 import { createServer } from 'node:net';
 import path from 'node:path';
@@ -42,6 +42,22 @@ async function waitForServer(baseUrl, attempts = 40) {
   throw new Error(`Preview no respondió en ${baseUrl}`);
 }
 
+async function fillWizardThroughStep3(page) {
+  await page.goto('/crear/paso-1');
+  await page.getByRole('radio', { name: 'Femenino' }).click();
+  await page.getByRole('radio', { name: 'Amigable y empática' }).click();
+  await page.getByRole('radio', { name: 'Realista' }).click();
+  await page.getByRole('button', { name: 'Continuar' }).click();
+  await page.waitForURL(/\/crear\/paso-2/, { timeout: 15_000 });
+  await page.getByRole('button', { name: 'Continuar' }).click();
+  await page.waitForURL(/\/crear\/paso-3/, { timeout: 15_000 });
+  for (const label of ['Música', 'Cine y series', 'Viajes']) {
+    await page.getByRole('button', { name: label }).click();
+  }
+  await page.getByRole('button', { name: 'Continuar' }).click();
+  await page.waitForURL(/\/crear\/paso-4/, { timeout: 15_000 });
+}
+
 async function main() {
   const port = await freePort();
   const baseUrl = `http://127.0.0.1:${port}`;
@@ -53,23 +69,13 @@ async function main() {
     const browser = await chromium.launch();
     const page = await browser.newPage({ baseURL: baseUrl, viewport: { width: 1440, height: 900 } });
 
-    await page.goto('/acceso');
+    await page.goto('/');
+    await page.getByRole('link', { name: 'Crear mi eJoi' }).first().click();
+    await page.waitForURL(/\/acceso/, { timeout: 15_000 });
     await page.getByRole('button', { name: 'Entrar en modo demo' }).click();
     await page.waitForURL(/\/(crear|chat)/, { timeout: 20_000 });
-    await page.goto('/crear/paso-1');
-    await page.getByRole('radio', { name: 'Femenino' }).click();
-    await page.getByRole('radio', { name: 'Amigable y empática' }).click();
-    await page.getByRole('radio', { name: 'Realista' }).click();
-    await page.getByRole('button', { name: 'Continuar' }).click();
-    await page.waitForURL(/\/crear\/paso-2/, { timeout: 15_000 });
-    await page.getByRole('button', { name: 'Continuar' }).click();
-    await page.waitForURL(/\/crear\/paso-3/, { timeout: 15_000 });
-    for (const label of ['Música', 'Cine y series', 'Viajes']) {
-      await page.getByRole('button', { name: label }).click();
-    }
-    await page.getByRole('button', { name: 'Continuar' }).click();
-    await page.waitForURL(/\/crear\/paso-4/, { timeout: 15_000 });
-    await page.locator('#create-wizard-form .field__control').first().fill('Luna');
+    await fillWizardThroughStep3(page);
+    await page.getByRole('textbox', { name: 'Nombre' }).fill('Luna');
     await page.locator('.check__input').nth(0).check();
     await page.locator('.check__input').nth(1).check();
     await page.getByRole('button', { name: /Crear a Luna/ }).click();
@@ -79,7 +85,13 @@ async function main() {
 
     const elapsedMs = Date.now() - started;
     await browser.close();
-    console.log(JSON.stringify({ elapsedMs, path: 'demo', viewport: '1440x900' }));
+    console.log(
+      JSON.stringify({
+        elapsedMs,
+        path: 'inicio-crear-mi-ejoi-primer-mensaje',
+        viewport: '1440x900',
+      }),
+    );
   } finally {
     preview.kill('SIGTERM');
   }
