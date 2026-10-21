@@ -62,7 +62,7 @@ test.describe('Inicio público (SCRUM-172)', () => {
     await mockGuestApi(page);
     await page.goto('/');
     await expect(page.getByTestId('page-inicio')).toBeVisible();
-    await expect(page).toHaveURL(/\:\/\/[^/]+\/?$/);
+    await expect(page).toHaveURL(/https?:\/\/[^/]+\/?$/);
   });
 
   test('con sesión redirige desde / al destino habitual', async ({ page }) => {
