@@ -39,7 +39,9 @@ import {
 import { CreationShellHeader, DesktopShell } from '~/layout/DesktopShell';
 import { OptionGroup } from '~/layout/OptionGroup';
 import { useDesktopShortcuts } from '~/layout/useDesktopShortcuts';
+import { useThemePreference } from '~/theme/theme';
 
+import CrystalizedBall from './CrystalizedBall';
 import { useIsMobileLayout } from './useIsMobileLayout';
 
 import './CreateWizardWho.css';
@@ -57,6 +59,28 @@ const STYLES: { id: VisualStyle; labelKey: 'create.style_realistic' | 'create.st
   { id: 'realista', labelKey: 'create.style_realistic' },
   { id: 'anime', labelKey: 'create.style_illustrated' },
 ];
+
+const BALL_COLOR: Record<Gender, string> = {
+  femenino: '#F20A64',
+  masculino: '#6E5CE0',
+  neutro: '#1E9A62',
+};
+
+function WizardCrystal({ color }: { color: string }) {
+  const { resolved } = useThemePreference();
+  const light = resolved === 'light';
+  return (
+    <div className={light ? 'create-wizard-glow create-wizard-glow--light' : 'create-wizard-glow'} aria-hidden>
+      <CrystalizedBall
+        color={color}
+        theme={resolved}
+        haze={light ? 0.1 : 0.2}
+        size={0.84}
+        hoverStrength={light ? 0.35 : 0.7}
+      />
+    </div>
+  );
+}
 
 function portraitGenderForCard(gender: Gender | ''): 'femenino' | 'masculino' {
   return gender === 'masculino' ? 'masculino' : 'femenino';
@@ -269,15 +293,6 @@ function CreateWizardScreen({ onboardingStep }: { onboardingStep: number }) {
 
   const genderBody = (
     <>
-      {data.gender ? (
-        <div
-          className={`create-wizard-glow create-wizard-glow--${data.gender}`}
-          aria-hidden
-        >
-          <span className="create-wizard-glow__orb" />
-          <span className="create-wizard-glow__ring" />
-        </div>
-      ) : null}
       {stepIntro(genderTitle, undefined, 'visual')}
       <section className="create-who__section" aria-labelledby="wizard-gender" data-testid="wizard-step-group">
         <h2 id="wizard-gender" className="visually-hidden">
@@ -354,15 +369,6 @@ function CreateWizardScreen({ onboardingStep }: { onboardingStep: number }) {
 
   const styleBody = (desktop: boolean) => (
     <>
-      {data.visualStyle ? (
-        <div
-          className={`create-wizard-glow create-wizard-glow--style-${data.visualStyle}`}
-          aria-hidden
-        >
-          <span className="create-wizard-glow__orb" />
-          <span className="create-wizard-glow__ring" />
-        </div>
-      ) : null}
       {stepIntro(
         data.gender ? (
           <>
@@ -655,6 +661,8 @@ function CreateWizardScreen({ onboardingStep }: { onboardingStep: number }) {
       </p>
     ) : null;
 
+  const crystal = <WizardCrystal color={data.gender ? BALL_COLOR[data.gender] : '#F20A64'} />;
+
   if (mobile) {
     return (
       <div className="create-mobile" data-testid="create-wizard">
@@ -669,14 +677,17 @@ function CreateWizardScreen({ onboardingStep }: { onboardingStep: number }) {
           </span>
         </header>
         <main className="create-mobile__main">
-          {showBuildingPreview ? (
-            <CreationPreviewCrumbsStrip
-              data={data}
-              currentStep={onboardingStep}
-              onNavigateToStep={navigateToStep}
-            />
-          ) : null}
-          <div className="create-who">{stepContent()}</div>
+          <div className="create-wizard-stage">
+            {crystal}
+            {showBuildingPreview ? (
+              <CreationPreviewCrumbsStrip
+                data={data}
+                currentStep={onboardingStep}
+                onNavigateToStep={navigateToStep}
+              />
+            ) : null}
+            <div className="create-who">{stepContent()}</div>
+          </div>
         </main>
         <footer className="create-mobile__footer">
           {footerHint}
@@ -734,13 +745,16 @@ function CreateWizardScreen({ onboardingStep }: { onboardingStep: number }) {
           </div>
         }
       >
-        <div
-          key={onboardingStep}
-          className="create-who create-wizard-step-panel"
-          data-create-wizard-main
-          data-testid="wizard-step-panel"
-        >
-          {stepContent()}
+        <div className="create-wizard-stage">
+          {crystal}
+          <div
+            key={onboardingStep}
+            className="create-who create-wizard-step-panel"
+            data-create-wizard-main
+            data-testid="wizard-step-panel"
+          >
+            {stepContent()}
+          </div>
         </div>
       </DesktopShell>
     </div>
