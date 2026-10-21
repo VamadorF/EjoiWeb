@@ -139,146 +139,82 @@
   color: var(--c-brand-text);
 }
 
-.desktop-shell__main:has([data-create-wizard-main]) {
+.desktop-shell__main:has(.create-wizard-stage) {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
   overflow-x: clip;
   overflow-y: auto;
   padding: var(--space-4) var(--gutter);
   box-sizing: border-box;
 }
 
-[data-create-wizard-main] {
+.create-wizard-stage {
   position: relative;
   isolation: isolate;
-  flex: 0 0 auto;
-  width: min(600px, 100%);
-  max-width: 600px;
-  margin-block: auto;
-  gap: var(--space-4);
-  padding: var(--space-6) var(--space-4);
+  display: flex;
+  flex: 1 0 auto;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 100%;
   overflow: visible;
 }
 
-.create-who:has(.create-wizard-glow) {
-  min-height: min(360px, 70dvh);
+.create-wizard-stage > :not(.create-wizard-glow) {
+  position: relative;
+  z-index: 1;
 }
 
 .create-wizard-glow {
   pointer-events: none;
   position: absolute;
   z-index: 0;
-  top: 22%;
+  top: min(50%, 36vh);
   left: 50%;
-  width: min(280px, 90%);
-  height: 280px;
-  transform: translateX(-50%);
-}
-
-.create-wizard-glow__orb,
-.create-wizard-glow__ring {
-  position: absolute;
-  top: 50%;
-  left: 50%;
+  width: min(720px, 100%, calc(100dvh - 280px));
+  aspect-ratio: 1;
+  height: auto;
   transform: translate(-50%, -50%);
-  border-radius: 50%;
+  opacity: 0.58;
 }
 
-.create-wizard-glow__orb {
-  width: 220px;
-  height: 220px;
-  opacity: 0.85;
-  filter: blur(2px);
+:root[data-theme='light'] .create-wizard-glow--light {
+  opacity: 0.34;
 }
 
-.create-wizard-glow__ring {
-  width: 168px;
-  height: 168px;
-  border: 2.5px solid transparent;
-  background: transparent;
+@media (hover: hover) {
+  :root[data-theme='light'] button.create-circle-opt:hover {
+    background: transparent;
+    border-color: transparent;
+    box-shadow: none;
+  }
+
+  :root[data-theme='light'] button.create-circle-opt:not(.create-circle-opt--selected):hover .create-circle-opt__ring {
+    border-color: var(--c-ink);
+  }
 }
 
-.create-wizard-glow--femenino .create-wizard-glow__orb {
-  background: var(--c-icon-tint-brand);
+:root[data-theme='light'] .create-circle-opt:not(.create-circle-opt--selected) .create-circle-opt__label,
+:root[data-theme='light'] [data-create-wizard-main] .create-step__intro p {
+  color: var(--c-ink);
 }
 
-.create-wizard-glow--femenino .create-wizard-glow__ring {
-  border-color: var(--c-sel-border);
-}
-
-.create-wizard-glow--masculino .create-wizard-glow__orb {
-  background: var(--c-icon-tint-lav);
-}
-
-.create-wizard-glow--masculino .create-wizard-glow__ring {
-  border-color: var(--c-lav-ink);
-}
-
-.create-wizard-glow--neutro .create-wizard-glow__orb {
-  background: var(--c-icon-tint-ok);
-}
-
-.create-wizard-glow--neutro .create-wizard-glow__ring {
-  border-color: var(--c-ok);
-}
-
-.create-wizard-glow--style-realista .create-wizard-glow__orb {
-  background: var(--c-sel-fill);
-}
-
-.create-wizard-glow--style-realista .create-wizard-glow__ring {
-  border-color: var(--c-sel-border);
-}
-
-.create-wizard-glow--style-anime .create-wizard-glow__orb {
-  background: var(--c-lav-tint);
-}
-
-.create-wizard-glow--style-anime .create-wizard-glow__ring {
-  border-color: var(--c-lav);
+[data-create-wizard-main] {
+  position: relative;
+  z-index: 1;
+  flex: 0 0 auto;
+  width: min(600px, 100%);
+  max-width: 600px;
+  gap: var(--space-4);
+  padding: var(--space-6) var(--space-4);
 }
 
 [data-create-wizard-main] .create-step__intro,
 [data-create-wizard-main] .create-who__section {
   position: relative;
   z-index: 1;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .create-wizard-glow__orb {
-    animation: create-wizard-glow-pulse 2.8s ease-in-out infinite;
-  }
-
-  .create-wizard-glow__ring {
-    animation: create-wizard-glow-ring 2.8s ease-in-out infinite;
-  }
-}
-
-@keyframes create-wizard-glow-pulse {
-  0%,
-  100% {
-    transform: translate(-50%, -50%) scale(1);
-    opacity: 0.75;
-  }
-
-  50% {
-    transform: translate(-50%, -50%) scale(1.06);
-    opacity: 1;
-  }
-}
-
-@keyframes create-wizard-glow-ring {
-  0%,
-  100% {
-    transform: translate(-50%, -50%) scale(1);
-    opacity: 0.55;
-  }
-
-  50% {
-    transform: translate(-50%, -50%) scale(1.04);
-    opacity: 0.9;
-  }
 }
 
 [data-create-wizard-main] .opt--personality {
