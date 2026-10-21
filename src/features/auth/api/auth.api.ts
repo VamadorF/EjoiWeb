@@ -1,5 +1,5 @@
 import type { AppleLoginRequest, GoogleLoginRequest, User } from '@/features/auth/types';
-import { httpClient } from '~/platform/http';
+import { ApiError, httpClient } from '~/platform/http';
 import * as session from '~/platform/session';
 
 import {
@@ -31,8 +31,9 @@ export type OnboardingDraftResponse = {
 };
 
 function persistWebLogin(data: RawAuthResponse): User {
-  const { accessToken, user } = fromWebAuthResponse(data);
+  const { accessToken, refreshToken, user } = fromWebAuthResponse(data);
   session.setSession(accessToken, JSON.stringify(user));
+  if (refreshToken) session.setRefreshToken(refreshToken);
   return user;
 }
 
@@ -53,10 +54,12 @@ export async function loginWithApple(data: AppleLoginRequest): Promise<User> {
 }
 
 export async function logoutWeb(): Promise<void> {
+  const refreshToken = session.getRefreshToken();
   try {
-    await httpClient.post('/auth/logout', undefined, undefined);
+    await httpClient.post('/auth/logout', refreshToken ? { refreshToken } : undefined, undefined);
   } finally {
     session.clearSession();
+    session.clearRefreshToken();
   }
 }
 
@@ -91,8 +94,22 @@ export async function getOnboardingDraft(): Promise<OnboardingDraftResponse | nu
   }
 }
 
+/**
+ * eJoi-BE aún no expone /companion/me/creation (solo existe en los mocks): ante
+ * un 404 se decide con GET /companion/me, que responde vacío si no hay compañero.
+ */
+async function getCreationState(): Promise<{ state: CreationState }> {
+  try {
+    return await getCompanionCreation();
+  } catch (err) {
+    if (!(err instanceof ApiError) || err.status !== 404) throw err;
+  }
+  const response = await httpClient.get<{ id?: string } | null>('/companion/me');
+  return { state: response.data?.id ? 'ready' : 'none' };
+}
+
 export async function resolvePostLoginPath(): Promise<string> {
-  const creation = await getCompanionCreation();
+  const creation = await getCreationState();
   if (creation.state === 'creating' || creation.state === 'error') {
     return '/crear/creando';
   }

@@ -33,6 +33,37 @@ export function clearSession(): void {
   userDataJson = null;
 }
 
+/**
+ * Refresh token en localStorage (compartido entre pestañas). Se lee siempre del
+ * storage, nunca de memoria: el backend lo rota en cada refresh y revoca la
+ * sesión si recibe uno ya usado.
+ */
+const REFRESH_TOKEN_KEY = 'ejoi_refresh_token';
+
+export function getRefreshToken(): string | null {
+  try {
+    return localStorage.getItem(REFRESH_TOKEN_KEY);
+  } catch {
+    return null;
+  }
+}
+
+export function setRefreshToken(token: string): void {
+  try {
+    localStorage.setItem(REFRESH_TOKEN_KEY, token);
+  } catch {
+    /* quota / private mode */
+  }
+}
+
+export function clearRefreshToken(): void {
+  try {
+    localStorage.removeItem(REFRESH_TOKEN_KEY);
+  } catch {
+    /* noop */
+  }
+}
+
 export function getUserDataJson(): string | null {
   return userDataJson;
 }
@@ -44,6 +75,8 @@ export function setUserDataJson(json: string | null): void {
 type RefreshResponse = {
   access_token?: string;
   accessToken?: string;
+  refresh_token?: string;
+  refreshToken?: string;
 };
 
 let inFlightRefresh: Promise<string> | null = null;
@@ -98,6 +131,7 @@ async function doRefresh(startedGeneration: number): Promise<string> {
     }
   }
 
+  const storedRefreshToken = getRefreshToken();
   const response = await fetch(`${API_URL}/auth/refresh`, {
     method: 'POST',
     credentials: 'include',
@@ -106,10 +140,12 @@ async function doRefresh(startedGeneration: number): Promise<string> {
       'X-Client': 'web',
       'X-Requested-With': 'ejoi-web',
     },
+    body: storedRefreshToken ? JSON.stringify({ refreshToken: storedRefreshToken }) : undefined,
   });
 
   if (!response.ok) {
     clearSession();
+    clearRefreshToken();
     throw new Error(`Refresh failed: ${response.status}`);
   }
 
@@ -119,6 +155,9 @@ async function doRefresh(startedGeneration: number): Promise<string> {
     clearSession();
     throw new Error('Refresh response missing access token');
   }
+
+  const rotatedRefreshToken = data.refreshToken ?? data.refresh_token;
+  if (rotatedRefreshToken) setRefreshToken(rotatedRefreshToken);
 
   accessToken = token;
   refreshGeneration = startedGeneration + 1;

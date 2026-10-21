@@ -47,8 +47,12 @@ export function toProviderAuthDto(payload: AuthProviderRequest): AuthProviderReq
   };
 }
 
-/** Respuesta web (C1): access token en cuerpo; refresh en cookie HttpOnly. */
-export function fromWebAuthResponse(data: RawAuthResponse): { accessToken: string; user: User } {
+/** Respuesta web: access token y refresh token en el cuerpo, igual que en la app móvil. */
+export function fromWebAuthResponse(data: RawAuthResponse): {
+  accessToken: string;
+  refreshToken?: string;
+  user: User;
+} {
   const payload = data.data ?? data;
   const accessToken = payload.accessToken ?? payload.access_token ?? payload.token;
   if (!accessToken) {
@@ -57,5 +61,9 @@ export function fromWebAuthResponse(data: RawAuthResponse): { accessToken: strin
   if (!payload.user) {
     throw new Error('El backend no devolvió información del usuario');
   }
-  return { accessToken, user: normalizeAuthUser(payload.user) };
+  return {
+    accessToken,
+    refreshToken: payload.refreshToken ?? payload.refresh_token,
+    user: normalizeAuthUser(payload.user),
+  };
 }
