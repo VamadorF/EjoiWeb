@@ -15,6 +15,9 @@
     "control_title": "Tú tienes el control"
   },
   "access": {
+    "title": "Entra para crear tu eJoi",
+    "subtitle": "Tu cuenta guarda sus conversaciones y lo que elegiste.",
+    "back_home": "Volver al inicio",
     "step": "Paso 1 de 3",
     "sign_in": "Iniciar sesión",
     "account_prompt": "¿Ya tienes cuenta?",

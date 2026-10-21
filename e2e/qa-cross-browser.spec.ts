@@ -126,7 +126,7 @@ test.describe('QA cross-browser SCRUM-116', () => {
     await installIntegrationMock(page, { readyAfterMs: 200 });
     const started = Date.now();
     await page.goto('/acceso');
-    await expect(page.locator('.access-brand')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Entra para crear tu eJoi' })).toBeVisible();
     await loginWithTestSession(page);
     await page.reload();
     await page.waitForURL('**/crear/quien', { timeout: 15_000 });

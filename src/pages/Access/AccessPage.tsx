@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation, useNavigate } from 'react-router';
+import { Link, useLocation, useNavigate } from 'react-router';
 
 import { fromWebAuthResponse, type RawAuthResponse } from '~/features/auth/authWeb.adapter';
 import { CAMPAIGN_LANDING_URL, isOAuthConfigured, MOCK_API } from '~/platform/env';
@@ -12,7 +12,6 @@ import { Logo } from '~/components/Logo';
 import { DesktopShell } from '~/layout/DesktopShell';
 import {
   finishLoginAfterProvider,
-  getFounderCount,
   loginWithApple,
   loginWithGoogle,
   previewReferralCode,
@@ -31,18 +30,6 @@ import './AccessPage.css';
 
 const LEGAL_TERMS_URL = `${CAMPAIGN_LANDING_URL}/terminos`;
 const LEGAL_PRIVACY_URL = `${CAMPAIGN_LANDING_URL}/privacidad`;
-
-const ACCESS_PORTRAITS = {
-  left: '/portraits/ilustrado-femenino.webp',
-  center: '/portraits/realista-femenino.webp',
-  right: '/portraits/realista-masculino.webp',
-} as const;
-
-const VALUE_PILLS = [
-  { key: 'pill_safe', icon: 'shield-checkmark-outline', tone: 'brand' },
-  { key: 'pill_support', icon: 'heart-outline', tone: 'lav' },
-  { key: 'pill_habits', icon: 'trending-up-outline', tone: 'ok' },
-] as const;
 
 function profileFromIdToken(idToken: string) {
   const payload = decodeJwtPayload(idToken);
@@ -69,7 +56,6 @@ export default function AccessPage() {
   const [inviteCode, setInviteCode] = useState(getPendingReferralCode() ?? '');
   const [inviteMessage, setInviteMessage] = useState<'ok' | 'invalid' | null>(null);
   const [inviterName, setInviterName] = useState<string | null>(null);
-  const [founderCount, setFounderCount] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -88,16 +74,6 @@ export default function AccessPage() {
       setReturning(true);
     }
   }, [location.state]);
-
-  useEffect(() => {
-    void getFounderCount()
-      .then((data) => {
-        if (data.claimed > 0) setFounderCount(data.claimed);
-      })
-      .catch(() => {
-        /* DP-46 */
-      });
-  }, []);
 
   const runAfterLogin = useCallback(async () => {
     if (MOCK_API) setMockDemoLoggedIn();
@@ -176,11 +152,6 @@ export default function AccessPage() {
     }
   };
 
-  const focusProviders = () => {
-    setReturning(true);
-    providersRef.current?.focus();
-  };
-
   const toggleInvite = () => {
     setShowInvite(true);
     requestAnimationFrame(() => inviteInputRef.current?.focus());
@@ -211,57 +182,16 @@ export default function AccessPage() {
 
   return (
     <div className="access-page" data-testid="page-acceso">
-      <DesktopShell header={<Logo height={28} />}>
-        <div className="access-layout">
-          <section className="access-brand" aria-labelledby="access-brand-heading">
-            <div className="access-brand__portraits" aria-hidden>
-              <img
-                className="avatar access-brand__portrait access-brand__portrait--side"
-                src={ACCESS_PORTRAITS.left}
-                alt=""
-                width={96}
-                height={96}
-                decoding="async"
-              />
-              <img
-                className="avatar avatar--132 access-brand__portrait access-brand__portrait--center"
-                src={ACCESS_PORTRAITS.center}
-                alt=""
-                width={132}
-                height={132}
-                decoding="async"
-              />
-              <img
-                className="avatar access-brand__portrait access-brand__portrait--side"
-                src={ACCESS_PORTRAITS.right}
-                alt=""
-                width={96}
-                height={96}
-                decoding="async"
-              />
-            </div>
-            <h1 id="access-brand-heading" className="access-brand__tagline">
-              {t('auth.login.value_tagline')}
-            </h1>
-            <ul className="access-brand__pills">
-              {VALUE_PILLS.map(({ key, icon, tone }) => (
-                <li key={key}>
-                  <span className={`pill access-brand__pill access-brand__pill--${tone}`}>
-                    <AppIcon name={icon} className="access-brand__pill-icon" />
-                    {t(`auth.login.${key}`)}
-                  </span>
-                </li>
-              ))}
-            </ul>
-            {founderCount !== null ? (
-              <p className="access-brand__social">
-                {t('web:access.social_proof', { count: founderCount })}
-              </p>
-            ) : null}
-          </section>
-
-          <section className="access-auth" aria-labelledby="access-auth-title">
-            <div className="access-auth__card card" aria-busy={busy || undefined}>
+      <DesktopShell
+        header={
+          <Link to="/" className="btn btn--text access-page__back">
+            {t('web:access.back_home')}
+          </Link>
+        }
+      >
+        <div className="access-auth">
+          <section className="access-auth__card card" aria-labelledby="access-auth-title">
+            <div className="access-auth__card-inner" aria-busy={busy || undefined}>
               {MOCK_API ? (
                 <p className="banner--info" role="status">
                   <AppIcon name="sparkles-outline" />
@@ -275,33 +205,13 @@ export default function AccessPage() {
                 </p>
               ) : null}
 
-              <p className="label">{t('web:access.step')}</p>
-              <div
-                className="access-auth__progress"
-                role="progressbar"
-                aria-valuemin={1}
-                aria-valuemax={3}
-                aria-valuenow={1}
-                aria-label={t('web:access.step')}
-              >
-                <span className="access-auth__progress-seg access-auth__progress-seg--done" />
-                <span className="access-auth__progress-seg" />
-                <span className="access-auth__progress-seg" />
-              </div>
+              <Logo height={32} className="access-auth__logo" />
 
-              <h2 id="access-auth-title" className="access-auth__title">
-                {returning ? (
-                  t('web:access.returning_title')
-                ) : (
-                  <>
-                    {t('auth.login.headline_prefix')}
-                    <span className="access-auth__highlight">{t('auth.login.headline_highlight')}</span>
-                    {t('auth.login.headline_suffix')}
-                  </>
-                )}
-              </h2>
+              <h1 id="access-auth-title" className="access-auth__title">
+                {returning ? t('web:access.returning_title') : t('web:access.title')}
+              </h1>
               {!returning ? (
-                <p className="access-auth__subtitle">{t('auth.login.subtitle')}</p>
+                <p className="access-auth__subtitle">{t('web:access.subtitle')}</p>
               ) : null}
 
               <div
@@ -339,28 +249,16 @@ export default function AccessPage() {
                 ) : null}
               </div>
 
-              <p className="access-auth__account-line">
-                {t('web:access.account_prompt')}{' '}
-                <button
-                  type="button"
-                  className="btn btn--text access-auth__account-btn"
-                  onClick={focusProviders}
-                  disabled={busy}
-                >
-                  {t('web:access.sign_in')}
-                </button>
-                <span className="access-auth__account-sep" aria-hidden>
-                  {' · '}
-                </span>
-                <button
-                  type="button"
-                  className="btn btn--text access-auth__account-btn"
-                  onClick={toggleInvite}
-                  disabled={busy}
-                >
-                  {t('web:access.have_code')}
-                </button>
-              </p>
+              <hr className="access-auth__sep" />
+
+              <button
+                type="button"
+                className="btn btn--text access-auth__code-btn"
+                onClick={toggleInvite}
+                disabled={busy}
+              >
+                {t('web:access.have_code')}
+              </button>
 
               {showInvite ? (
                 <div className="field">

@@ -152,9 +152,13 @@ test.describe('Teclado desktop (SCRUM-113)', () => {
     await expect(page.locator('#main-content')).toBeFocused();
   });
 
-  test('línea de cuenta accesible por teclado', async ({ page }) => {
+  test('acceso: returning y código por teclado', async ({ page }) => {
     await page.route('**/api/**', async (route) => {
       const path = new URL(route.request().url()).pathname.replace(/^\/api/, '');
+      if (path.includes('/auth/refresh')) {
+        await route.fulfill({ status: 401, contentType: 'application/json', body: '{}' });
+        return;
+      }
       if (path.includes('/campaign/founder-count')) {
         await route.fulfill({
           status: 200,
@@ -163,11 +167,9 @@ test.describe('Teclado desktop (SCRUM-113)', () => {
         });
         return;
       }
-      await route.abort();
+      await route.fulfill({ status: 200, contentType: 'application/json', body: '{}' });
     });
-    await page.goto('/acceso');
-    await expect(page.getByTestId('page-acceso')).toBeVisible();
-
+    await page.goto('/');
     const signIn = page.getByRole('button', { name: 'Iniciar sesión' });
     await signIn.focus();
     await expect(signIn).toBeFocused();
@@ -175,6 +177,7 @@ test.describe('Teclado desktop (SCRUM-113)', () => {
     await expect(page.getByRole('heading', { name: 'Qué bueno verte de nuevo' })).toBeVisible();
 
     await page.goto('/acceso');
+    await expect(page.getByTestId('page-acceso')).toBeVisible();
     const codeBtn = page.getByRole('button', { name: 'Tengo un código' });
     await codeBtn.focus();
     await expect(codeBtn).toBeFocused();

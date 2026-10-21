@@ -12,7 +12,7 @@ html.access-route .desktop-shell__preview {
 
 html.access-route .desktop-shell__main {
   padding: 0;
-  overflow: hidden;
+  overflow: auto;
 }
 
 .access-page {
@@ -20,144 +20,40 @@ html.access-route .desktop-shell__main {
   min-height: 0;
 }
 
-.access-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 0;
-  height: 100%;
-  min-height: 0;
-}
-
-.access-brand {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: var(--space-6);
-  padding: 64px;
-  background: linear-gradient(180deg, var(--c-sel-fill), var(--c-lav-tint));
-  min-height: 0;
-  overflow: auto;
-}
-
-:root[data-theme='dark'] .access-brand {
-  background: linear-gradient(180deg, var(--c-surface2), var(--c-lav-tint));
-}
-
-.access-brand__tagline {
-  margin: 0;
-  font: var(--font-title1);
-  letter-spacing: var(--ls-title1);
-  color: var(--c-ink);
-}
-
-.access-brand__portraits {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 0;
-}
-
-.access-brand__portrait--side {
-  width: 96px;
-  height: 96px;
-  border: 4px solid var(--c-surface);
-  z-index: 1;
-}
-
-.access-brand__portrait--center {
-  z-index: 2;
-  margin: 0 calc(-1 * var(--space-2));
-}
-
-.access-brand__portrait--side:first-child {
-  margin-inline-end: calc(-1 * var(--space-2));
-}
-
-.access-brand__portrait--side:last-child {
+.access-page__back {
   margin-inline-start: calc(-1 * var(--space-2));
-}
-
-.access-brand__pills {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
-
-.access-brand__pill {
-  gap: var(--space-2);
-}
-
-.access-brand__pill-icon {
-  display: inline-flex;
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
-}
-
-.access-brand__pill--brand .access-brand__pill-icon {
-  color: var(--c-brand-text);
-}
-
-.access-brand__pill--lav .access-brand__pill-icon {
-  color: var(--c-lav-ink);
-}
-
-.access-brand__pill--ok .access-brand__pill-icon {
-  color: var(--c-ok);
-}
-
-.access-brand__social {
-  margin: 0;
-  font: var(--font-secondary);
-  font-weight: 600;
-  color: var(--c-brand-text);
 }
 
 .access-auth {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 0;
+  min-height: 100%;
   padding: var(--space-6) var(--gutter);
-  overflow: auto;
 }
 
 .access-auth__card {
+  width: 100%;
+  max-width: 420px;
+  margin: 0;
+}
+
+.access-auth__card-inner {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-  width: 100%;
-  max-width: 400px;
+  padding: 40px;
 }
 
-.access-auth__progress {
-  display: flex;
-  gap: var(--space-2);
-  height: 6px;
-}
-
-.access-auth__progress-seg {
-  flex: 1;
-  border-radius: 999px;
-  background: var(--c-line);
-}
-
-.access-auth__progress-seg--done {
-  background: var(--c-brand);
+.access-auth__logo {
+  align-self: flex-start;
 }
 
 .access-auth__title {
   margin: 0;
-  font: var(--font-title1);
-  letter-spacing: var(--ls-title1);
+  font: var(--font-title2);
+  letter-spacing: var(--ls-title2, normal);
   color: var(--c-ink);
-}
-
-.access-auth__highlight {
-  color: var(--c-brand-text);
 }
 
 .access-auth__subtitle {
@@ -184,22 +80,14 @@ html.access-route .desktop-shell__main {
   width: 100%;
 }
 
-.access-auth__account-line {
+.access-auth__sep {
   margin: 0;
-  font: var(--font-caption);
-  color: var(--c-ink2);
-  text-align: center;
+  border: none;
+  border-top: 1px solid var(--c-line);
 }
 
-.access-auth__account-btn {
-  display: inline;
-  min-height: auto;
-  padding: 0;
-  vertical-align: baseline;
-}
-
-.access-auth__account-sep {
-  color: var(--c-ink2);
+.access-auth__code-btn {
+  align-self: center;
 }
 
 .access-auth__legal {
@@ -215,14 +103,4 @@ html.access-route .desktop-shell__main {
 
 .field__help--err {
   color: var(--c-err);
-}
-
-@media (max-width: 960px) {
-  .access-layout {
-    grid-template-columns: 1fr;
-  }
-
-  .access-brand {
-    padding: var(--space-8) var(--gutter);
-  }
 }
