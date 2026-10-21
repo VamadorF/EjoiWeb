@@ -39,6 +39,7 @@ import {
 import { CreationShellHeader, DesktopShell } from '~/layout/DesktopShell';
 import { OptionGroup } from '~/layout/OptionGroup';
 import { useDesktopShortcuts } from '~/layout/useDesktopShortcuts';
+import { CRYSTAL_BALL_GENDER_COLORS } from '~/theme/crystalBallColors';
 import { useThemePreference } from '~/theme/theme';
 
 import CrystalizedBall from './CrystalizedBall';
@@ -60,11 +61,7 @@ const STYLES: { id: VisualStyle; labelKey: 'create.style_realistic' | 'create.st
   { id: 'anime', labelKey: 'create.style_illustrated' },
 ];
 
-const BALL_COLOR: Record<Gender, string> = {
-  femenino: '#F20A64',
-  masculino: '#6E5CE0',
-  neutro: '#1E9A62',
-};
+const BALL_COLOR: Record<Gender, string> = CRYSTAL_BALL_GENDER_COLORS;
 
 function WizardCrystal({ color }: { color: string }) {
   const { resolved } = useThemePreference();
@@ -661,7 +658,7 @@ function CreateWizardScreen({ onboardingStep }: { onboardingStep: number }) {
       </p>
     ) : null;
 
-  const crystal = <WizardCrystal color={data.gender ? BALL_COLOR[data.gender] : '#F20A64'} />;
+  const crystal = <WizardCrystal color={data.gender ? BALL_COLOR[data.gender] : BALL_COLOR.femenino} />;
 
   if (mobile) {
     return (

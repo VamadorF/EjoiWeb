@@ -19,9 +19,10 @@ describe('App shell', () => {
         </Suspense>
       </WebSessionProvider>,
     );
-    expect(await screen.findByTestId('shell-header')).toBeTruthy();
+    // La ruta es lazy: con la suite en paralelo cargarla tarda más que el 1 s por defecto.
+    expect(await screen.findByTestId('shell-header', {}, { timeout: 5000 })).toBeTruthy();
     expect(screen.getByTestId('shell-footer')).toBeTruthy();
     expect(screen.queryByTestId('shell-preview')).toBeNull();
     vi.unstubAllGlobals();
-  });
+  }, 10_000);
 });
