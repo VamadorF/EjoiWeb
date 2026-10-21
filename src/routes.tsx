@@ -1,19 +1,22 @@
 import { lazy } from 'react';
-import { createBrowserRouter, Navigate, Outlet, type RouteObject } from 'react-router';
+import { Navigate, createBrowserRouter, Outlet, type RouteObject } from 'react-router';
 
 import { SessionRouting } from '~/features/auth/useWebSession';
 
+const HomePage = lazy(() => import('~/pages/Home/HomePage'));
 const AccessPage = lazy(() => import('~/pages/Access/AccessPage'));
-const CreateWhoPage = lazy(() => import('~/pages/CreateMobile/CreateWhoEntry'));
-const CreateHowPage = lazy(() => import('~/pages/CreateMobile/CreateHowEntry'));
+const CreateCrearRedirect = lazy(() => import('~/pages/CreateWizard/CreateCrearRedirect'));
+const CreateWizardPage = lazy(() => import('~/pages/CreateWizard/CreateWizardPage'));
 const ChatPage = lazy(() => import('~/pages/ChatPage'));
 const ChatEditPage = lazy(() => import('~/pages/ChatEditPage'));
 
 export const routeConfig: RouteObject[] = [
-  { path: '/', element: <Navigate to="/acceso" replace /> },
+  { path: '/', element: <HomePage /> },
   { path: '/acceso', element: <AccessPage /> },
-  { path: '/crear/quien', element: <CreateWhoPage /> },
-  { path: '/crear/como', element: <CreateHowPage /> },
+  { path: '/crear', element: <CreateCrearRedirect /> },
+  { path: '/crear/:wizardStep', element: <CreateWizardPage /> },
+  { path: '/crear/quien', element: <Navigate to="/crear/paso-1" replace /> },
+  { path: '/crear/como', element: <Navigate to="/crear/paso-4" replace /> },
   { path: '/chat', element: <ChatPage /> },
   { path: '/chat/editar', element: <ChatEditPage /> },
 ];

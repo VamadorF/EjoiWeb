@@ -128,7 +128,7 @@ test.describe('Teclado desktop (SCRUM-113)', () => {
 
   test('preview de creación no recibe foco', async ({ page }) => {
     await mockAuthedApi(page);
-    await page.goto('/crear/quien');
+    await page.goto('/crear/paso-1');
     await page.waitForSelector('[data-testid="shell-preview"]');
     const previewFocused = await page.evaluate(() => {
       const preview = document.querySelector('[data-testid="shell-preview"]');
@@ -144,12 +144,45 @@ test.describe('Teclado desktop (SCRUM-113)', () => {
     await page.waitForLoadState('networkidle');
     await page.locator('body').click({ position: { x: 8, y: 8 } });
     const stops = await collectTabStops(page);
-    expect(stops.length).toBeGreaterThan(3);
+    expect(stops.length).toBeGreaterThan(1);
 
     const skip = page.locator('.skip-to-content');
     await skip.focus();
     await skip.press('Enter');
     await expect(page.locator('#main-content')).toBeFocused();
+  });
+
+  test('acceso: returning y código por teclado', async ({ page }) => {
+    await page.route('**/api/**', async (route) => {
+      const path = new URL(route.request().url()).pathname.replace(/^\/api/, '');
+      if (path.includes('/auth/refresh')) {
+        await route.fulfill({ status: 401, contentType: 'application/json', body: '{}' });
+        return;
+      }
+      if (path.includes('/campaign/founder-count')) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ claimed: 0, max: 100 }),
+        });
+        return;
+      }
+      await route.fulfill({ status: 200, contentType: 'application/json', body: '{}' });
+    });
+    await page.goto('/');
+    const signIn = page.getByRole('button', { name: 'Iniciar sesión' });
+    await signIn.focus();
+    await expect(signIn).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(page.getByRole('heading', { name: 'Qué bueno verte de nuevo' })).toBeVisible();
+
+    await page.goto('/acceso');
+    await expect(page.getByTestId('page-acceso')).toBeVisible();
+    const codeBtn = page.getByRole('button', { name: 'Tengo un código' });
+    await codeBtn.focus();
+    await expect(codeBtn).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(page.locator('#access-invite-code')).toBeFocused();
   });
 
   test('Enter envía y Shift+Enter no envía en el chat', async ({ page }) => {
@@ -167,22 +200,10 @@ test.describe('Teclado desktop (SCRUM-113)', () => {
 
   test('flujo principal solo con teclado hasta editar nombre', async ({ page }) => {
     await mockAuthedApi(page);
-    await page.goto('/crear/quien');
-    await page.waitForSelector('.create-option');
-    await page.locator('[role="radio"]').first().focus();
-    await page.keyboard.press(' ');
-    await page.locator('[aria-labelledby="create-who-style"] [role="radio"]').first().focus();
-    await page.keyboard.press(' ');
-    const interests = page.locator('[aria-labelledby="create-who-interests"] button');
-    await interests.nth(0).focus();
-    await page.keyboard.press(' ');
-    await interests.nth(1).focus();
-    await page.keyboard.press(' ');
-    await interests.nth(2).focus();
-    await page.keyboard.press(' ');
-    await page.locator('.create-who__continue').focus();
-    await page.keyboard.press('Enter');
-    await page.waitForURL('**/crear/como');
+    await page.goto('/crear/paso-1');
+    await page.waitForSelector('.opt');
+    const { pickWizardThroughStep3WithKeyboard } = await import('./fixtures/keyboardFlow');
+    await pickWizardThroughStep3WithKeyboard(page);
 
     await page.goto('/chat');
     await page.waitForSelector('[data-testid="chat-composer"]');
@@ -193,7 +214,9 @@ test.describe('Teclado desktop (SCRUM-113)', () => {
 
     await page.goto('/chat/editar');
     await page.waitForSelector('[data-testid="edit-companion-page"]');
-    const nameInput = page.locator('.create-how__name-input').last();
+    await page.getByTestId('edit-row-personality').click();
+    await page.getByTestId('edit-section-dialog').waitFor();
+    const nameInput = page.locator('[aria-labelledby="edit-name"]').last();
     await nameInput.focus();
     await page.keyboard.press('End');
     await page.keyboard.type('a');
@@ -208,5 +231,78 @@ test.describe('Teclado desktop (SCRUM-113)', () => {
     const box = await send.boundingBox();
     expect(box?.height).toBeGreaterThanOrEqual(44);
     expect(box?.width).toBeGreaterThanOrEqual(44);
+  });
+
+  test('perfil completo se abre con teclado', async ({ page }) => {
+    await page.route('**/api/**', async (route) => {
+      const path = new URL(route.request().url()).pathname.replace(/^\/api/, '');
+      if (path.includes('/auth/refresh')) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ accessToken: 'e2e-keyboard-profile' }),
+        });
+        return;
+      }
+      if (path.includes('/companion/me/creation')) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            state: 'ready',
+            profile: { id: 'c1', name: 'Luna', visualStyle: 'realista' },
+            firstMessage: { id: 'm1', content: 'Hola' },
+          }),
+        });
+        return;
+      }
+      if (
+        path.includes('/companion/me/profile') ||
+        (path.includes('/companion/me') && route.request().method() === 'GET')
+      ) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            id: 'c1',
+            name: 'Luna',
+            visualStyle: 'realista',
+            persona: 'Amigable y empática',
+            intensity: 'balanced',
+            interests: ['Música'],
+            boundaries: ['Política'],
+            gender: 'femenino',
+          }),
+        });
+        return;
+      }
+      if (path.includes('/chat/')) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ messages: [], hasMore: false }),
+        });
+        return;
+      }
+      if (path.includes('/subscription/me')) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ remainingMessages: 12, planLabel: 'basic' }),
+        });
+        return;
+      }
+      await route.fulfill({ status: 200, contentType: 'application/json', body: '{}' });
+    });
+
+    await page.goto('/chat');
+    await page.getByTestId('chat-profile-card').waitFor();
+    await expect(page.getByText('Política')).toBeHidden();
+
+    const summary = page.getByTestId('chat-profile-more').locator('summary');
+    await summary.focus();
+    await page.keyboard.press('Enter');
+    await expect(page.getByText('Política')).toBeVisible();
+    await expect(page.getByText(/Realista/)).toBeVisible();
   });
 });

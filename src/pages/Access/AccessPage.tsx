@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router';
+import { Link, useLocation, useNavigate } from 'react-router';
 
 import { fromWebAuthResponse, type RawAuthResponse } from '~/features/auth/authWeb.adapter';
 import { CAMPAIGN_LANDING_URL, isOAuthConfigured, MOCK_API } from '~/platform/env';
@@ -12,7 +12,6 @@ import { Logo } from '~/components/Logo';
 import { DesktopShell } from '~/layout/DesktopShell';
 import {
   finishLoginAfterProvider,
-  getFounderCount,
   loginWithApple,
   loginWithGoogle,
   previewReferralCode,
@@ -45,6 +44,7 @@ function profileFromIdToken(idToken: string) {
 export default function AccessPage() {
   const { t } = useTranslation(['translation', 'web']);
   const navigate = useNavigate();
+  const location = useLocation();
   const { markAuthenticated } = useWebSession();
   const providersRef = useRef<HTMLDivElement>(null);
   const googleHostRef = useRef<HTMLDivElement>(null);
@@ -56,7 +56,6 @@ export default function AccessPage() {
   const [inviteCode, setInviteCode] = useState(getPendingReferralCode() ?? '');
   const [inviteMessage, setInviteMessage] = useState<'ok' | 'invalid' | null>(null);
   const [inviterName, setInviterName] = useState<string | null>(null);
-  const [founderCount, setFounderCount] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -71,14 +70,10 @@ export default function AccessPage() {
   }, []);
 
   useEffect(() => {
-    void getFounderCount()
-      .then((data) => {
-        if (data.claimed > 0) setFounderCount(data.claimed);
-      })
-      .catch(() => {
-        /* DP-46 */
-      });
-  }, []);
+    if ((location.state as { returning?: boolean } | null)?.returning) {
+      setReturning(true);
+    }
+  }, [location.state]);
 
   const runAfterLogin = useCallback(async () => {
     if (MOCK_API) setMockDemoLoggedIn();
@@ -157,11 +152,6 @@ export default function AccessPage() {
     }
   };
 
-  const focusProviders = () => {
-    setReturning(true);
-    providersRef.current?.focus();
-  };
-
   const toggleInvite = () => {
     setShowInvite(true);
     requestAnimationFrame(() => inviteInputRef.current?.focus());
@@ -192,41 +182,16 @@ export default function AccessPage() {
 
   return (
     <div className="access-page" data-testid="page-acceso">
-      <DesktopShell header={<Logo height={28} />}>
-        <div className="access-layout">
-          <section className="access-brand" aria-labelledby="access-brand-heading">
-            <h1 id="access-brand-heading" className="access-brand__tagline">
-              {t('auth.login.value_tagline')}
-            </h1>
-            <ul className="access-brand__seals">
-              <li>
-                <span className="access-brand__seal-icon access-brand__seal-icon--lav" aria-hidden>
-                  <AppIcon name="chatbubbles-outline" />
-                </span>
-                {t('auth.login.value_seal_1')}
-              </li>
-              <li>
-                <span className="access-brand__seal-icon access-brand__seal-icon--brand" aria-hidden>
-                  <AppIcon name="shield-checkmark-outline" />
-                </span>
-                {t('auth.login.value_seal_2')}
-              </li>
-              <li>
-                <span className="access-brand__seal-icon access-brand__seal-icon--ok" aria-hidden>
-                  <AppIcon name="time-outline" />
-                </span>
-                {t('auth.login.value_seal_3')}
-              </li>
-            </ul>
-            {founderCount !== null ? (
-              <p className="access-brand__social">
-                {t('web:access.social_proof', { count: founderCount })}
-              </p>
-            ) : null}
-          </section>
-
-          <section className="access-auth" aria-labelledby="access-auth-title">
-            <div className="access-auth__card card" aria-busy={busy || undefined}>
+      <DesktopShell
+        header={
+          <Link to="/" className="btn btn--text access-page__back">
+            {t('web:access.back_home')}
+          </Link>
+        }
+      >
+        <div className="access-auth">
+          <section className="access-auth__card card" aria-labelledby="access-auth-title">
+            <div className="access-auth__card-inner" aria-busy={busy || undefined}>
               {MOCK_API ? (
                 <p className="banner--info" role="status">
                   <AppIcon name="sparkles-outline" />
@@ -240,33 +205,13 @@ export default function AccessPage() {
                 </p>
               ) : null}
 
-              <p className="label">{t('web:access.step')}</p>
-              <div
-                className="access-auth__progress"
-                role="progressbar"
-                aria-valuemin={1}
-                aria-valuemax={3}
-                aria-valuenow={1}
-                aria-label={t('web:access.step')}
-              >
-                <span className="access-auth__progress-seg access-auth__progress-seg--done" />
-                <span className="access-auth__progress-seg" />
-                <span className="access-auth__progress-seg" />
-              </div>
+              <Logo height={32} className="access-auth__logo" />
 
-              <h2 id="access-auth-title" className="access-auth__title">
-                {returning ? (
-                  t('web:access.returning_title')
-                ) : (
-                  <>
-                    {t('auth.login.headline_prefix')}
-                    <span className="access-auth__highlight">{t('auth.login.headline_highlight')}</span>
-                    {t('auth.login.headline_suffix')}
-                  </>
-                )}
-              </h2>
+              <h1 id="access-auth-title" className="access-auth__title">
+                {returning ? t('web:access.returning_title') : t('web:access.title')}
+              </h1>
               {!returning ? (
-                <p className="access-auth__subtitle">{t('auth.login.subtitle')}</p>
+                <p className="access-auth__subtitle">{t('web:access.subtitle')}</p>
               ) : null}
 
               <div
@@ -306,24 +251,14 @@ export default function AccessPage() {
 
               <hr className="access-auth__sep" />
 
-              <div className="access-auth__text-actions">
-                <button
-                  type="button"
-                  className="btn btn--text btn--l access-auth__text-btn"
-                  onClick={toggleInvite}
-                  disabled={busy}
-                >
-                  {t('web:access.have_code')}
-                </button>
-                <button
-                  type="button"
-                  className="btn btn--text btn--l access-auth__text-btn"
-                  onClick={focusProviders}
-                  disabled={busy}
-                >
-                  {t('web:access.sign_in')}
-                </button>
-              </div>
+              <button
+                type="button"
+                className="btn btn--text access-auth__code-btn"
+                onClick={toggleInvite}
+                disabled={busy}
+              >
+                {t('web:access.have_code')}
+              </button>
 
               {showInvite ? (
                 <div className="field">

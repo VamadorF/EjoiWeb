@@ -1,11 +1,16 @@
 import { useTranslation } from 'react-i18next';
 
+import { AppIcon } from '~/components/AppIcon';
+
 import type { Message } from '@/features/chat/types';
+
+import { splitInterestHighlights } from './highlightInterests';
 
 export type ChatBubble = {
   id: string;
   role: 'user' | 'assistant';
   text: string;
+  basedOnInterests?: string[];
   pending?: boolean;
   failed?: boolean;
   onRetry?: () => void;
@@ -14,10 +19,12 @@ export type ChatBubble = {
 export type MessageListProps = {
   messages: ChatBubble[];
   loading?: boolean;
+  showFirstMessageNote?: boolean;
 };
 
-export function MessageList({ messages, loading }: MessageListProps) {
+export function MessageList({ messages, loading, showFirstMessageNote }: MessageListProps) {
   const { t } = useTranslation('web');
+  let firstAssistantSeen = false;
 
   if (loading) {
     return (
@@ -30,24 +37,57 @@ export function MessageList({ messages, loading }: MessageListProps) {
 
   return (
     <ul className="chat-messages" data-testid="chat-messages">
-      {messages.map((msg) => (
-        <li
-          key={msg.id}
-          className={`chat-messages__bubble chat-messages__bubble--${msg.role}${
-            msg.pending ? ' chat-messages__bubble--pending' : ''
-          }${msg.failed ? ' chat-messages__bubble--failed' : ''}`}
-        >
-          <p>{msg.text}</p>
-          {msg.pending ? (
-            <span className="chat-messages__pending-label">{t('chat.pending')}</span>
-          ) : null}
-          {msg.failed && msg.onRetry ? (
-            <button type="button" className="chat-messages__retry" onClick={msg.onRetry}>
-              {t('chat.retry')}
-            </button>
-          ) : null}
-        </li>
-      ))}
+      {messages.map((msg) => {
+        const isAssistant = msg.role === 'assistant';
+        const showNote = showFirstMessageNote && isAssistant && !firstAssistantSeen;
+        if (isAssistant) firstAssistantSeen = true;
+
+        const bubbleClass = isAssistant ? 'bubble--ai' : 'bubble--user';
+
+        const body =
+          showNote && msg.basedOnInterests?.length
+            ? splitInterestHighlights(msg.text, msg.basedOnInterests)
+            : [{ text: msg.text }];
+
+        return (
+          <li key={msg.id} className="chat-messages__item">
+            <div
+              className={`${bubbleClass}${msg.pending ? ' chat-messages__bubble--pending' : ''}${
+                msg.failed ? ' chat-messages__bubble--failed' : ''
+              }`}
+            >
+              <p>
+                {body.map((part, index) =>
+                  part.highlight ? (
+                    <strong key={index} className="bubble__hl">
+                      {part.text}
+                    </strong>
+                  ) : (
+                    <span key={index}>{part.text}</span>
+                  ),
+                )}
+              </p>
+              {msg.pending ? (
+                <span className="chat-messages__pending-label">
+                  <AppIcon name="time-outline" className="chat-messages__pending-icon" />
+                  {t('chat.pending')}
+                </span>
+              ) : null}
+              {msg.failed && msg.onRetry ? (
+                <button type="button" className="btn btn--text chat-messages__retry" onClick={msg.onRetry}>
+                  {t('chat.retry')}
+                </button>
+              ) : null}
+            </div>
+            {showNote ? (
+              <p className="chat-messages__based-on">
+                <AppIcon name="sparkles-outline" className="chat-messages__based-on-icon" />
+                {t('chat.based_on')}
+              </p>
+            ) : null}
+          </li>
+        );
+      })}
     </ul>
   );
 }
@@ -57,5 +97,6 @@ export function firstMessageToBubble(message: Message): ChatBubble {
     id: message.id,
     role: message.role === 'assistant' ? 'assistant' : 'user',
     text: message.message,
+    basedOnInterests: message.meta?.basedOnInterests,
   };
 }

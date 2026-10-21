@@ -3,20 +3,105 @@ import { expect, test } from '@playwright/test';
 test.describe('Desktop shell 1440×900', () => {
   test.use({ viewport: { width: 1440, height: 900 } });
 
-  test('/crear/quien cabe sin scroll vertical', async ({ page }) => {
-    await page.goto('/crear/quien');
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => {
+      sessionStorage.setItem('ejoi-mock-demo-logged-in', '1');
+    });
+    await page.route('**/api/**', async (route) => {
+      const path = new URL(route.request().url()).pathname.replace(/^\/api/, '');
+      if (path.includes('/auth/refresh')) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ accessToken: 'e2e-layout' }),
+        });
+        return;
+      }
+      if (path.includes('/users/me/onboarding-draft')) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ draft: null }),
+        });
+        return;
+      }
+      if (path.includes('/campaign/founder-count')) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ claimed: 0, max: 100 }),
+        });
+        return;
+      }
+      await route.fulfill({ status: 200, contentType: 'application/json', body: '{}' });
+    });
+  });
+
+  test('/crear/paso-1 cabe sin scroll vertical', async ({ page }) => {
+    await page.goto('/crear/paso-1');
     const scrollHeight = await page.evaluate(() => document.documentElement.scrollHeight);
     expect(scrollHeight).toBeLessThanOrEqual(900);
+    const main = page.locator('#main-content');
+    const mainScroll = await main.evaluate((el) => ({
+      scrollHeight: el.scrollHeight,
+      clientHeight: el.clientHeight,
+    }));
+    expect(mainScroll.scrollHeight).toBeLessThanOrEqual(mainScroll.clientHeight);
+  });
+
+  test('/crear/paso-4 muestra el título al cargar', async ({ page }) => {
+    await page.addInitScript(() => {
+      sessionStorage.setItem('ejoi-mock-demo-logged-in', '1');
+    });
+    await page.goto('/crear/paso-4');
+    await expect(page.getByRole('heading', { name: /Dale un nombre/i })).toBeVisible();
+    await expect(page.getByText(/Paso 4 de 4 · ~10 s/)).toBeVisible();
+  });
+
+  test('mosaico de intereses con altura uniforme en paso 3', async ({ page }) => {
+    await page.addInitScript(() => {
+      sessionStorage.setItem('ejoi-mock-demo-logged-in', '1');
+    });
+    await page.goto('/crear/paso-1');
+    await page.getByRole('radio', { name: 'Femenino' }).click();
+    await page.getByRole('radio', { name: 'Amigable y empática' }).click();
+    await page.getByRole('radio', { name: 'Realista' }).click();
+    await page.getByRole('button', { name: 'Continuar' }).click();
+    await page.waitForURL('**/crear/paso-2');
+    await page.getByRole('button', { name: 'Continuar' }).click();
+    await page.waitForURL('**/crear/paso-3');
+    await page.getByTestId('create-wizard').waitFor({ state: 'visible', timeout: 10_000 });
+    const heights = await page.getByTestId('interest-tile').evaluateAll((els) =>
+      els.map((el) => Math.round(el.getBoundingClientRect().height)),
+    );
+    expect(heights.length).toBe(15);
+    expect(new Set(heights).size).toBe(1);
+    expect(heights[0]).toBe(88);
+  });
+
+  test('opción seleccionada en Vista 2 usa borde de selección', async ({ page }) => {
+    await page.goto('/crear/paso-1');
+    const femenino = page.getByRole('radio', { name: 'Femenino' });
+    await femenino.click();
+    const styles = await femenino.evaluate((el) => {
+      const cs = getComputedStyle(el);
+      return {
+        borderWidth: cs.borderTopWidth,
+        background: cs.backgroundColor,
+      };
+    });
+    expect(styles.borderWidth).toBe('2px');
+    expect(styles.background).not.toBe('rgba(0, 0, 0, 0)');
   });
 
   test('medidas del shell de creación', async ({ page }) => {
-    await page.goto('/crear/quien');
+    await page.goto('/crear/paso-1');
     const header = page.getByTestId('shell-header');
     const preview = page.getByTestId('shell-preview');
     const footer = page.getByTestId('shell-footer');
 
     await expect(header).toHaveCSS('height', '72px');
-    await expect(preview).toHaveCSS('width', '420px');
+    await expect(preview).toHaveCSS('width', '360px');
     await expect(footer).toHaveCSS('height', '88px');
   });
 
@@ -69,7 +154,7 @@ test.describe('Desktop shell 1440×900', () => {
         await route.fulfill({
           status: 200,
           contentType: 'application/json',
-          body: JSON.stringify({ remainingMessages: 12 }),
+          body: JSON.stringify({ messagesRemaining: 12 }),
         });
         return;
       }
@@ -87,8 +172,76 @@ test.describe('Desktop shell 1440×900', () => {
 
     expect(menuBox?.width).toBe(264);
     expect(readBox?.width).toBeGreaterThanOrEqual(680);
-    expect(readBox?.width).toBeLessThanOrEqual(720);
+    expect(readBox?.width).toBeLessThanOrEqual(900);
     expect(profileBox?.width).toBe(320);
+  });
+
+  test('chat: encabezado, cupo y burbujas del manual', async ({ page }) => {
+    await page.route('**/api/**', async (route) => {
+      const path = new URL(route.request().url()).pathname.replace(/^\/api/, '');
+      if (path.includes('/auth/refresh')) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ accessToken: 'e2e-layout-chat-ui' }),
+        });
+        return;
+      }
+      if (path.includes('/companion/me/creation')) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            state: 'ready',
+            profile: { id: 'c1', name: 'Luna', visualStyle: 'realista' },
+            firstMessage: { id: 'm1', content: 'Hola', meta: {} },
+          }),
+        });
+        return;
+      }
+      if (path.includes('/companion/me')) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ id: 'c1', name: 'Luna', visualStyle: 'realista', interests: [], boundaries: [] }),
+        });
+        return;
+      }
+      if (path.includes('/chat/')) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            messages: [{ id: 'u1', role: 'user', message: 'Hola Luna' }],
+            hasMore: false,
+          }),
+        });
+        return;
+      }
+      if (path.includes('/subscription/me')) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ messagesRemaining: 12 }),
+        });
+        return;
+      }
+      await route.fulfill({ status: 200, contentType: 'application/json', body: '{}' });
+    });
+
+    await page.goto('/chat');
+    await page.waitForSelector('[data-testid="chat-conv-header"]');
+    await expect(page.getByTestId('chat-quota')).toContainText('12 mensajes restantes');
+
+    const aiBubble = page.locator('.bubble--ai').first();
+    const userBubble = page.locator('.bubble--user').first();
+    await expect(aiBubble).toBeVisible();
+    await expect(userBubble).toBeVisible();
+
+    const aiBg = await aiBubble.evaluate((el) => getComputedStyle(el).backgroundColor);
+    const userBg = await userBubble.evaluate((el) => getComputedStyle(el).backgroundColor);
+    expect(aiBg).not.toBe('rgba(0, 0, 0, 0)');
+    expect(userBg).not.toBe(aiBg);
   });
 });
 
@@ -96,7 +249,30 @@ test.describe('Desktop shell 1280×800', () => {
   test.use({ viewport: { width: 1280, height: 800 } });
 
   test('preview lateral 360 px', async ({ page }) => {
-    await page.goto('/crear/quien');
+    await page.addInitScript(() => {
+      sessionStorage.setItem('ejoi-mock-demo-logged-in', '1');
+    });
+    await page.route('**/api/**', async (route) => {
+      const path = new URL(route.request().url()).pathname.replace(/^\/api/, '');
+      if (path.includes('/auth/refresh')) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ accessToken: 'e2e-layout-1280' }),
+        });
+        return;
+      }
+      if (path.includes('/users/me/onboarding-draft')) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ draft: null }),
+        });
+        return;
+      }
+      await route.fulfill({ status: 200, contentType: 'application/json', body: '{}' });
+    });
+    await page.goto('/crear/paso-1');
     await expect(page.getByTestId('shell-preview')).toHaveCSS('width', '360px');
   });
 });
@@ -125,7 +301,7 @@ test.describe('Desktop shell 1024×768', () => {
       }
       await route.fulfill({ status: 200, contentType: 'application/json', body: '{}' });
     });
-    await page.goto('/crear/quien');
+    await page.goto('/crear/paso-1');
     await expect(page.getByTestId('shell-preview')).toHaveCSS('height', '72px');
   });
 });

@@ -26,9 +26,16 @@ export default defineConfig({
   webServer: process.env.PLAYWRIGHT_BASE_URL
     ? undefined
     : {
+        // .env.local suele tener VITE_MOCK_API=true; e2e necesita fetch real + page.route.
         command: 'npm run build && npm run preview -- --host 127.0.0.1 --port 4173',
         url: 'http://127.0.0.1:4173',
         reuseExistingServer: !process.env.CI,
         timeout: 120_000,
+        env: {
+          ...process.env,
+          VITE_MOCK_API: 'false',
+          VITE_ENABLE_ETHNICITY: 'false',
+          VITE_ENABLE_AGE: 'false',
+        },
       },
 });

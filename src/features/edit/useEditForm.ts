@@ -10,8 +10,10 @@ import {
 
 import {
   buildConversationalPatchBody,
+  buildConversationalSectionPatchBody,
   hasConversationalChanges,
   profileToEditForm,
+  type EditConversationalSection,
   type EditFormSnapshot,
 } from './editPatch';
 
@@ -26,6 +28,10 @@ export type UseEditFormResult = {
   saveError: string | null;
   conversationalDirty: boolean;
   saveConversational: () => Promise<boolean>;
+  saveConversationalSection: (
+    section: EditConversationalSection,
+    draft: EditFormSnapshot,
+  ) => Promise<boolean>;
   reload: () => Promise<void>;
   syncFromProfile: (profile: CompanionProfile) => void;
 };
@@ -92,6 +98,33 @@ export function useEditForm(queryClient: QueryClient): UseEditFormResult {
     }
   }, [baseline, conversationalDirty, queryClient, values]);
 
+  const saveConversationalSection = useCallback(
+    async (section: EditConversationalSection, draft: EditFormSnapshot): Promise<boolean> => {
+      if (!baseline) return false;
+      const body = buildConversationalSectionPatchBody(baseline, draft, section);
+      if (Object.keys(body).length === 0) return true;
+
+      setSaving(true);
+      setSaveError(null);
+      try {
+        await httpClient.patch('/companion/me', body);
+        await invalidateCompanionProfile(queryClient);
+        const refreshed = await fetchCompanionProfile();
+        const form = profileToEditForm(refreshed);
+        setProfile(refreshed);
+        setBaseline(form);
+        setValues(form);
+        return true;
+      } catch {
+        setSaveError('save');
+        return false;
+      } finally {
+        setSaving(false);
+      }
+    },
+    [baseline, queryClient],
+  );
+
   return {
     loaded,
     loadError,
@@ -103,6 +136,7 @@ export function useEditForm(queryClient: QueryClient): UseEditFormResult {
     saveError,
     conversationalDirty,
     saveConversational,
+    saveConversationalSection,
     reload,
     syncFromProfile,
   };

@@ -82,8 +82,8 @@ test.describe('Tema claro/oscuro (SCRUM-112)', () => {
   test('seis pantallas respetan claro y oscuro', async ({ page }) => {
     const screens: { id: string; path: string; setup?: () => Promise<void> }[] = [
       { id: 'acceso', path: '/acceso' },
-      { id: 'quien', path: '/crear/quien' },
-      { id: 'como', path: '/crear/como' },
+      { id: 'quien', path: '/crear/paso-1' },
+      { id: 'como', path: '/crear/paso-4' },
       {
         id: 'chat-creating',
         path: '/chat',
@@ -133,12 +133,36 @@ test.describe('Tema claro/oscuro (SCRUM-112)', () => {
   });
 
   test('sin saltos de layout al cambiar tema', async ({ page }) => {
-    await page.goto('/crear/quien');
-    await page.waitForSelector('[data-testid="shell-header"]');
+    await page.route('**/api/**', async (route) => {
+      const path = new URL(route.request().url()).pathname.replace(/^\/api/, '');
+      if (path.includes('/auth/refresh')) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ accessToken: 'e2e-theme-layout' }),
+        });
+        return;
+      }
+      if (path.includes('/users/me/onboarding-draft')) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ draft: null }),
+        });
+        return;
+      }
+      await route.fulfill({ status: 200, contentType: 'application/json', body: '{}' });
+    });
+
+    await page.goto('/crear/paso-1');
+    await page.getByTestId('shell-footer').waitFor();
     const headerBefore = await page.getByTestId('shell-header').boundingBox();
     const footerBefore = await page.getByTestId('shell-footer').boundingBox();
 
     await applyTheme(page, 'dark');
+    await page.waitForFunction(
+      () => !document.documentElement.classList.contains('theme-transition'),
+    );
     const headerAfter = await page.getByTestId('shell-header').boundingBox();
     const footerAfter = await page.getByTestId('shell-footer').boundingBox();
 
@@ -153,9 +177,29 @@ test.describe('Tema claro/oscuro (SCRUM-112)', () => {
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   });
 
+  test('tema se cambia desde Ajustes en el chat', async ({ page }) => {
+    await mockApi(page, {
+      state: 'ready',
+      profile: { name: 'Luna', visualStyle: 'realista' },
+      firstMessage: { id: 'm1', content: 'Hola' },
+    });
+    await page.goto('/chat');
+    await page.getByTestId('chat-read').waitFor();
+
+    const settings = page.getByTestId('chat-settings-open');
+    await settings.click();
+    const dialog = page.getByTestId('chat-settings-dialog');
+    await expect(dialog).toBeVisible();
+    await dialog.getByRole('radio', { name: 'Oscuro' }).click();
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+    await dialog.getByRole('button', { name: 'Cancelar' }).click();
+    await expect(dialog).toBeHidden();
+    await expect(settings).toBeFocused();
+  });
+
   test('hover y foco distinguibles en ambos temas', async ({ page }) => {
     for (const theme of ['light', 'dark'] as const) {
-      await page.goto('/acceso');
+      await page.goto('/');
       await applyTheme(page, theme);
       const btn = page.getByRole('button', { name: 'Iniciar sesión' });
       await btn.hover();

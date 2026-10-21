@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildConversationalPatchBody, profileToEditForm } from './editPatch';
+import { buildAppearancePatchBody, buildConversationalPatchBody, profileToEditForm } from './editPatch';
 
 describe('editPatch', () => {
   const profile = {
@@ -29,5 +29,12 @@ describe('editPatch', () => {
   it('sin cambios conversacionales el cuerpo queda vacío', () => {
     const baseline = profileToEditForm(profile);
     expect(buildConversationalPatchBody(baseline, baseline)).toEqual({});
+  });
+
+  it('PATCH de apariencia incluye hairColor', () => {
+    const baseline = profileToEditForm({ ...profile, hairColor: 'Negro' });
+    const current = { ...baseline, hairColor: 'Rubio' };
+    const body = buildAppearancePatchBody(baseline, current);
+    expect(body.hairColor).toBe('Rubio');
   });
 });

@@ -228,6 +228,17 @@
   border-style: dashed;
 }
 
+:root[data-theme='dark'] .chip:not([aria-checked='true']):not([aria-pressed='true']),
+:root[data-theme='dark'] .opt:not([aria-checked='true']):not([aria-pressed='true']) {
+  border-width: 1.5px;
+  border-color: var(--c-line-strong);
+}
+
+:root[data-theme='dark'] .stepper .btn--secondary {
+  border-width: 1.5px;
+  border-color: var(--c-line-strong);
+}
+
 .seg {
   display: flex;
   align-items: center;
@@ -447,6 +458,11 @@
   border-radius: 16px 16px 16px 4px;
   background: var(--c-surface);
   color: var(--c-ink);
+}
+
+.bubble__hl {
+  font-weight: 700;
+  color: var(--c-brand-text);
 }
 
 .bubble--user {

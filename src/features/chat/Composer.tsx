@@ -1,7 +1,12 @@
-import { useState, type FormEvent, type KeyboardEvent } from 'react';
+import { useCallback, useState, type FormEvent, type KeyboardEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { MESSAGE_MAX_LENGTH } from '@/features/chat/constants';
+
+import { AppIcon } from '~/components/AppIcon';
+
+const COUNTER_FROM = 760;
+const MAX_INPUT_ROWS = 5;
 
 export type ComposerProps = {
   disabled?: boolean;
@@ -12,6 +17,16 @@ export type ComposerProps = {
 export function Composer({ disabled, onSend, hint }: ComposerProps) {
   const { t } = useTranslation('web');
   const [text, setText] = useState('');
+
+  const resizeInput = useCallback((element: HTMLTextAreaElement) => {
+    element.rows = 1;
+    const style = window.getComputedStyle(element);
+    const lineHeight = Number.parseFloat(style.lineHeight) || 24;
+    const padding =
+      Number.parseFloat(style.paddingTop) + Number.parseFloat(style.paddingBottom);
+    const rows = Math.ceil((element.scrollHeight - padding) / lineHeight);
+    element.rows = Math.min(MAX_INPUT_ROWS, Math.max(1, rows));
+  }, []);
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -36,13 +51,29 @@ export function Composer({ disabled, onSend, hint }: ComposerProps) {
           value={text}
           maxLength={MESSAGE_MAX_LENGTH}
           disabled={disabled}
-          rows={2}
-          aria-label={t('chat.can_write')}
-          onChange={(e) => setText(e.target.value)}
+          rows={1}
+          placeholder={t('chat.placeholder')}
+          aria-label={t('chat.placeholder')}
+          onChange={(e) => {
+            setText(e.target.value);
+            resizeInput(e.target);
+          }}
           onKeyDown={onTextKeyDown}
         />
-        <button type="submit" className="chat-composer__send" disabled={disabled || !text.trim()}>
-          Enviar
+        {text.length >= COUNTER_FROM ? (
+          <span className="chat-composer__counter" aria-live="polite">
+            {text.length}/{MESSAGE_MAX_LENGTH}
+          </span>
+        ) : null}
+        <button
+          type="submit"
+          className={`btn btn--icon chat-composer__send${
+            text.trim() ? ' chat-composer__send--ready' : ' chat-composer__send--empty'
+          }`}
+          disabled={disabled || !text.trim()}
+          aria-label={t('chat.send_label')}
+        >
+          <AppIcon name="send" />
         </button>
       </div>
     </form>

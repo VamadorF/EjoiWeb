@@ -15,6 +15,7 @@ Cliente web de escritorio de eJoi. Usa el mismo backend que la app móvil (`eJoi
 | `npm run build:demo` | Build modo demo (`VITE_MOCK_API=true`) en `dist-demo/` |
 | `npm run preview` | Vista previa del build |
 | `npm run shots` | Capturas Playwright 1440/1280/1024 × claro/oscuro (requiere `build:demo`) |
+| `node scripts/demo-timing.mjs` | Cronómetro demo Inicio → primer mensaje (requiere `build:demo`) |
 | `npm run typecheck` | Solo TypeScript |
 | `npm run lint` | ESLint |
 | `npm run test` | Vitest (una pasada) |
@@ -54,11 +55,34 @@ Para capturas locales sin backend:
 
 ```powershell
 npm run build:demo
-npm run shots -- vista-2 chat-listo
+npm run shots -- paso-1 chat-listo
 # salida: docs/screens/<pantalla>-<claro|oscuro>-<ancho>.png
 ```
 
 La hoja de componentes base vive en `src/theme/ui.css` (tokens en `src/theme/cssVars.ts`). `npm test` incluye `cssGuard.test.ts`, que falla si hay variables CSS inventadas o colores literales fuera de `src/theme/`.
+
+## Revisión visual
+
+Regenerar las 60 capturas de referencia (10 pantallas × claro/oscuro × 1440/1280/1024):
+
+```powershell
+cd C:\ejoi\EjoiWeb
+npm run build:demo
+npm run shots
+# docs/screens/<pantalla>-<claro|oscuro>-<ancho>.png
+```
+
+Antes de commitear capturas nuevas, abrir cada PNG en claro y oscuro y comprobar:
+
+- nada pegado al borde del viewport;
+- nada cortado (texto, avatares, botones);
+- la selección se distingue por borde, fondo y check;
+- un solo botón primario destacado por pantalla;
+- texto secundario más tenue que el principal;
+- sin azul de enlace del navegador ni botones grises por defecto;
+- en tema oscuro, sin sombras de elevación.
+
+Los estilos computados se validan en e2e con `e2e/visual-tokens.spec.ts` (claro y oscuro).
 
 ```powershell
 # .env.local
@@ -68,6 +92,31 @@ npm run dev
 npm run build
 npm run preview
 ```
+
+## Flujo (Épica 11 / SCRUM-104)
+
+Sin sesión, la web presenta el valor en **`/`** antes de pedir cuenta. La creación es un asistente único de **4 pasos** (mismo orden que el móvil v2); etnia y edad quedan en **Editar → Apariencia** con flags apagadas por defecto.
+
+```mermaid
+flowchart LR
+  H["/ Inicio"] --> A["/acceso"]
+  A --> P1["/crear/paso-1"]
+  P1 --> P2["/crear/paso-2"]
+  P2 --> P3["/crear/paso-3"]
+  P3 --> P4["/crear/paso-4"]
+  P4 --> C["/chat"]
+  C --> E["/chat/editar"]
+```
+
+| Pantalla | Ruta | Notas |
+| --- | --- | --- |
+| Inicio | `/` | Hero + ejemplo de conversación; CTAs a acceso |
+| Acceso | `/acceso` | Tarjeta centrada; demo en mock |
+| Pasos 1–4 | `/crear/paso-N` | Una pregunta principal por pantalla |
+| Chat | `/chat` | Perfil resumido; tema en Ajustes |
+| Editar | `/chat/editar` | Apariencia (etnia/edad si flags activas) |
+
+Galería revisable: `docs/screens/index.html` (`npm run build:demo` + `npm run shots`). Medición técnica para SCRUM-116: `node scripts/demo-timing.mjs` (desde **Crear mi eJoi** en `/` hasta el primer mensaje visible).
 
 ## QA e2e (SCRUM-116)
 

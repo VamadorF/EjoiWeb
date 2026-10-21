@@ -3,11 +3,10 @@ import { useTranslation } from 'react-i18next';
 
 import type { OnboardingData } from '@/features/onboarding/types';
 
+import { hairColorLabelKey } from '~/theme/hairSwatches';
 import { ENABLE_AGE, ENABLE_ETHNICITY } from '~/platform/env';
 
 import type { CompanionProfile } from './useProfile';
-import type { SubscriptionMe } from './useQuota';
-
 import './ProfilePanel.css';
 
 const GENDER_LABELS: Record<string, string> = {
@@ -31,13 +30,11 @@ const INTENSITY_KEYS: Record<string, 'create.presence_soft' | 'create.presence_b
 export type ProfilePanelDraft = Pick<
   OnboardingData,
   'companionName' | 'persona' | 'intensity' | 'interests' | 'boundaries' | 'visualStyle' | 'gender' | 'ethnicity' | 'age'
->;
+> & { hairColor?: string };
 
 export type ProfilePanelProps = {
   profile?: CompanionProfile | null;
   draft?: ProfilePanelDraft | null;
-  subscription?: SubscriptionMe | null;
-  quotaLoading?: boolean;
   profileLoading?: boolean;
   profileError?: boolean;
   onRetryProfile?: () => void;
@@ -46,6 +43,7 @@ export type ProfilePanelProps = {
   portraitPendingLabel?: string | null;
   onRetryPortrait?: () => void;
   showOnline?: boolean;
+  unsaved?: boolean;
 };
 
 function mergeProfileView(
@@ -60,6 +58,7 @@ function mergeProfileView(
   visualStyle?: string;
   gender?: string;
   ethnicity?: string;
+  hairColor?: string;
   age?: number;
 } {
   return {
@@ -71,6 +70,7 @@ function mergeProfileView(
     visualStyle: profile?.visualStyle ?? draft?.visualStyle,
     gender: profile?.gender ?? draft?.gender,
     ethnicity: profile?.ethnicity?.trim() || draft?.ethnicity?.trim(),
+    hairColor: profile?.hairColor?.trim() || draft?.hairColor?.trim(),
     age: profile?.age ?? draft?.age,
   };
 }
@@ -78,8 +78,6 @@ function mergeProfileView(
 export function ProfilePanel({
   profile,
   draft,
-  subscription,
-  quotaLoading,
   profileLoading,
   profileError,
   onRetryProfile,
@@ -88,10 +86,15 @@ export function ProfilePanel({
   portraitPendingLabel,
   onRetryPortrait,
   showOnline,
+  unsaved,
 }: ProfilePanelProps) {
   const { t } = useTranslation('web');
   const view = mergeProfileView(profile, draft);
   const intensityKey = view.intensity ? INTENSITY_KEYS[view.intensity] : undefined;
+  const traitPills: string[] = [];
+  if (view.persona?.trim()) traitPills.push(view.persona.trim());
+  if (intensityKey) traitPills.push(t(intensityKey));
+
   const appearanceParts: string[] = [];
   if (view.visualStyle) {
     appearanceParts.push(STYLE_LABELS[view.visualStyle] ?? view.visualStyle);
@@ -105,10 +108,12 @@ export function ProfilePanel({
   if (ENABLE_ETHNICITY && view.ethnicity) {
     appearanceParts.push(view.ethnicity);
   }
+  if (view.hairColor) {
+    const hairKey = hairColorLabelKey(view.hairColor);
+    appearanceParts.push(hairKey ? t(hairKey) : view.hairColor);
+  }
 
-  const quotaExhausted =
-    subscription != null &&
-    (subscription.isFreeTierExhausted || subscription.messagesRemaining <= 0);
+  const hasProfileMore = view.boundaries.length > 0 || appearanceParts.length > 0;
 
   return (
     <div className="chat-profile-panel" data-testid="chat-profile-card">
@@ -138,7 +143,9 @@ export function ProfilePanel({
               <img
                 src={portraitUrl}
                 alt=""
-                className={`chat-profile-card__portrait${portraitBlur ? ' chat-profile-card__portrait--blur' : ''}`}
+                className={`avatar avatar--132 chat-profile-card__portrait${
+                  portraitBlur ? ' avatar--blur' : ''
+                }`}
               />
               {portraitBlur && portraitPendingLabel ? (
                 <span className="chat-profile-card__portrait-label">{portraitPendingLabel}</span>
@@ -147,53 +154,58 @@ export function ProfilePanel({
           ) : null}
 
           <h2 className="chat-profile-panel__name">{view.name}</h2>
-          {showOnline ? <p className="chat-page__online">{t('chat.online')}</p> : null}
-
-          {view.persona ? (
-            <section className="chat-profile-panel__section">
-              <h3 className="chat-profile-panel__label">{t('chat.profile_personality')}</h3>
-              <p className="chat-profile-panel__text">{view.persona}</p>
-            </section>
+          {unsaved ? (
+            <span className="pill" data-testid="chat-profile-unsaved">
+              {t('edit.unsaved')}
+            </span>
           ) : null}
+          {showOnline ? <p className="chat-profile-panel__online">{t('chat.online')}</p> : null}
 
-          {intensityKey ? (
-            <section className="chat-profile-panel__section">
-              <h3 className="chat-profile-panel__label">{t('chat.profile_presence')}</h3>
-              <p className="chat-profile-panel__text">{t(intensityKey)}</p>
-            </section>
+          {traitPills.length > 0 ? (
+            <ul className="chat-profile-panel__pills chat-profile-panel__traits">
+              {traitPills.map((label) => (
+                <li key={label}>
+                  <span className="pill">{label}</span>
+                </li>
+              ))}
+            </ul>
           ) : null}
 
           {view.interests.length > 0 ? (
             <section className="chat-profile-panel__section">
-              <h3 className="chat-profile-panel__label">{t('chat.profile_interests')}</h3>
-              <ul className="chat-page__choices">
+              <h3 className="label chat-profile-panel__label">{t('chat.profile_interests')}</h3>
+              <ul className="chat-profile-panel__pills">
                 {view.interests.map((interest) => (
-                  <li key={interest} className="chat-page__choice">
-                    {interest}
+                  <li key={interest}>
+                    <span className="pill">{interest}</span>
                   </li>
                 ))}
               </ul>
             </section>
           ) : null}
 
-          {view.boundaries.length > 0 ? (
-            <section className="chat-profile-panel__section">
-              <h3 className="chat-profile-panel__label">{t('chat.profile_boundaries')}</h3>
-              <ul className="chat-page__choices">
-                {view.boundaries.map((boundary) => (
-                  <li key={boundary} className="chat-page__choice">
-                    {boundary}
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ) : null}
-
-          {appearanceParts.length > 0 ? (
-            <section className="chat-profile-panel__section">
-              <h3 className="chat-profile-panel__label">{t('chat.profile_appearance')}</h3>
-              <p className="chat-profile-panel__text">{appearanceParts.join(' · ')}</p>
-            </section>
+          {hasProfileMore ? (
+            <details className="chat-profile-panel__more" data-testid="chat-profile-more">
+              <summary className="chat-profile-panel__more-summary">{t('chat.profile_more')}</summary>
+              {view.boundaries.length > 0 ? (
+                <section className="chat-profile-panel__section">
+                  <h3 className="label chat-profile-panel__label">{t('profile.avoids')}</h3>
+                  <ul className="chat-profile-panel__pills">
+                    {view.boundaries.map((boundary) => (
+                      <li key={boundary}>
+                        <span className="pill">{boundary}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              ) : null}
+              {appearanceParts.length > 0 ? (
+                <section className="chat-profile-panel__section">
+                  <h3 className="label chat-profile-panel__label">{t('chat.profile_appearance')}</h3>
+                  <p className="chat-profile-panel__text">{appearanceParts.join(' · ')}</p>
+                </section>
+              ) : null}
+            </details>
           ) : null}
 
           {onRetryPortrait ? (
@@ -202,22 +214,9 @@ export function ProfilePanel({
             </button>
           ) : null}
 
-          <Link to="/chat/editar" className="chat-profile-panel__edit">
+          <Link to="/chat/editar" className="btn btn--secondary btn--m chat-profile-panel__edit">
             {t('menu.edit')}
           </Link>
-
-          {!quotaLoading && subscription != null ? (
-            <p
-              className={
-                quotaExhausted ? 'chat-profile-panel__quota chat-profile-panel__quota--out' : 'chat-profile-panel__quota'
-              }
-              data-testid="chat-quota"
-            >
-              {quotaExhausted
-                ? t('chat.quota_out')
-                : t('chat.quota_left', { count: subscription.messagesRemaining })}
-            </p>
-          ) : null}
         </>
       ) : null}
     </div>

@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 
 import type { OnboardingData } from '@/features/onboarding/types';
 
-import { stylePortraitSrc } from './portraits';
+import { stylePortraitSrc, stylePortraitSrcForCard } from './portraits';
 import { buildPreviewTags, type PreviewTag } from './whoValidation';
 
 import './CreationPreview.css';
@@ -37,14 +37,42 @@ function buildComoPreviewTags(data: OnboardingData, tagTimeline: string[]): Prev
   return [...base, ...como.filter((t) => !seen.has(t.id))];
 }
 
+function PreviewEmptyState() {
+  const { t } = useTranslation('web');
+  return (
+    <div className="creation-preview__empty" data-testid="creation-preview-empty">
+      <div className="creation-preview__empty-portraits" aria-hidden="true">
+        <img
+          className="creation-preview__empty-portrait"
+          src={stylePortraitSrcForCard('realista', 'femenino')}
+          alt=""
+        />
+        <img
+          className="creation-preview__empty-portrait"
+          src={stylePortraitSrcForCard('anime', 'femenino')}
+          alt=""
+        />
+      </div>
+      <p className="creation-preview__empty-text">{t('wizard.preview_empty')}</p>
+    </div>
+  );
+}
+
 export type CreationPreviewProps = {
   data: OnboardingData;
   tagTimeline: string[];
   companionName?: string;
   greeting?: string | null;
+  showGreetingPreview?: boolean;
 };
 
-export function CreationPreview({ data, tagTimeline, companionName, greeting }: CreationPreviewProps) {
+export function CreationPreview({
+  data,
+  tagTimeline,
+  companionName,
+  greeting,
+  showGreetingPreview = false,
+}: CreationPreviewProps) {
   const { t } = useTranslation('web');
   const portraitSrc = stylePortraitSrc(data.visualStyle, data.gender);
   const tags = buildComoPreviewTags(data, tagTimeline);
@@ -52,40 +80,51 @@ export function CreationPreview({ data, tagTimeline, companionName, greeting }: 
   const displayName = companionName?.trim() || data.companionName?.trim();
 
   return (
-    <div className="creation-preview" aria-hidden="true">
-      <h2 className="creation-preview__title">{t('create.preview_title')}</h2>
-      {displayName ? <p className="creation-preview__name">{displayName}</p> : null}
-      <div className="creation-preview__portrait-wrap">
+    <article className="creation-preview-shell card" data-testid="creation-preview-card">
+      <h2 className="creation-preview-shell__title">{t('create.preview_title')}</h2>
+      <div className="creation-preview" aria-hidden="true">
         {portraitSrc ? (
-          <img
-            className="creation-preview__portrait"
-            src={portraitSrc}
-            alt=""
-            data-testid="creation-portrait"
-          />
-        ) : (
-          <div className="creation-preview__portrait creation-preview__portrait--abstract" data-testid="creation-portrait">
-            e
-          </div>
-        )}
-      </div>
-      {tags.length > 0 ? (
-        <ul className="creation-preview__tags">
-          {tags.map((tag) => (
-            <li
-              key={tag.id}
+          <>
+            <div className="creation-preview__portrait-wrap">
+              <img
+                className="avatar avatar--168 creation-preview__portrait"
+                src={portraitSrc}
+                alt=""
+                data-testid="creation-portrait"
+              />
+            </div>
+            <p
               className={
-                tag.id === lastTagId
-                  ? 'creation-preview__tag creation-preview__tag--latest'
-                  : 'creation-preview__tag'
+                displayName
+                  ? 'creation-preview__name'
+                  : 'creation-preview__name creation-preview__name--placeholder'
               }
             >
-              {tag.label}
-            </li>
-          ))}
-        </ul>
-      ) : null}
-      {greeting ? <p className="creation-preview__greeting">{greeting}</p> : null}
-    </div>
+              {displayName || t('create.no_name')}
+            </p>
+            {tags.length > 0 ? (
+              <ul className="creation-preview__tags">
+                {tags.map((tag) => (
+                  <li
+                    key={tag.id}
+                    className={tag.id === lastTagId ? 'pill pill--last' : 'pill'}
+                  >
+                    {tag.label}
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </>
+        ) : (
+          <PreviewEmptyState />
+        )}
+        {showGreetingPreview ? (
+          <div className="creation-preview__card" data-testid="creation-preview-greeting">
+            <p className="label creation-preview__card-label">{t('create.preview_card')}</p>
+            {greeting ? <p className="bubble--ai creation-preview__greeting">{greeting}</p> : null}
+          </div>
+        ) : null}
+      </div>
+    </article>
   );
 }

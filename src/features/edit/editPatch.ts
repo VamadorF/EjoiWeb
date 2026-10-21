@@ -5,15 +5,19 @@ import type { CompanionIntensity, Gender, VisualStyle } from '@/features/onboard
 import { ageToDob } from '@/shared/utils/ageToDob';
 import { COMPANION_MAX_AGE, COMPANION_MIN_AGE } from '@/features/onboarding/constants/onboardingSteps';
 
+import { DEFAULT_HAIR_COLOR } from '~/theme/hairSwatches';
 import { ENABLE_AGE, ENABLE_ETHNICITY } from '~/platform/env';
 
 import type { CompanionProfile } from '~/features/chat/useProfile';
+
+export type EditConversationalSection = 'personality' | 'presence' | 'interests' | 'boundaries' | 'voice';
 
 export type EditFormSnapshot = {
   companionName: string;
   visualStyle: VisualStyle;
   gender: Gender;
   ethnicity?: string;
+  hairColor?: string;
   age: number;
   persona: string;
   intensity: CompanionIntensity;
@@ -36,6 +40,7 @@ export function profileToEditForm(profile: CompanionProfile): EditFormSnapshot {
     gender:
       profile.gender === 'masculino' || profile.gender === 'neutro' ? profile.gender : 'femenino',
     ethnicity: profile.ethnicity?.trim() || undefined,
+    hairColor: profile.hairColor?.trim() || DEFAULT_HAIR_COLOR,
     age,
     persona: profile.persona?.trim() ?? '',
     intensity:
@@ -51,6 +56,7 @@ export function hasAppearanceChanges(baseline: EditFormSnapshot, current: EditFo
   if (baseline.gender !== current.gender) return true;
   if (ENABLE_ETHNICITY && (baseline.ethnicity ?? '') !== (current.ethnicity ?? '')) return true;
   if (ENABLE_AGE && baseline.age !== current.age) return true;
+  if ((baseline.hairColor ?? '') !== (current.hairColor ?? '')) return true;
   return false;
 }
 
@@ -124,6 +130,7 @@ export function buildAppearancePatchBody(
   if (ENABLE_AGE && baseline.age !== current.age) {
     partial.dob = ageToDob(current.age);
   }
+
   if (avatar) {
     partial.avatarUrl = avatar.fileUrl;
     if (avatar.storagePath) {
@@ -131,7 +138,30 @@ export function buildAppearancePatchBody(
     }
   }
 
-  return toPatchCompanionDto(partial);
+  const body: Record<string, unknown> = { ...toPatchCompanionDto(partial) };
+  if ((baseline.hairColor ?? '') !== (current.hairColor ?? '')) {
+    body.hairColor = (current.hairColor ?? '').trim();
+  }
+
+  return body;
+}
+
+/** PATCH de una sección conversacional (sin regenerar retrato). */
+export function buildConversationalSectionPatchBody(
+  baseline: EditFormSnapshot,
+  current: EditFormSnapshot,
+  section: EditConversationalSection,
+): Record<string, unknown> {
+  const full = buildConversationalPatchBody(baseline, current);
+  const allowed: Record<EditConversationalSection, string[]> = {
+    personality: ['name', 'persona'],
+    presence: ['intensity', 'intensityRule'],
+    interests: ['interests'],
+    boundaries: ['boundaries'],
+    voice: ['voiceKey'],
+  };
+  const keys = new Set(allowed[section]);
+  return Object.fromEntries(Object.entries(full).filter(([key]) => keys.has(key)));
 }
 
 export function editFormToOnboardingData(form: EditFormSnapshot) {
@@ -161,6 +191,7 @@ export function toProfilePanelDraft(form: EditFormSnapshot) {
     visualStyle: form.visualStyle,
     gender: form.gender,
     ethnicity: form.ethnicity,
+    hairColor: form.hairColor,
     age: form.age,
   };
 }

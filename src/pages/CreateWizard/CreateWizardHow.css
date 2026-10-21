@@ -1,0 +1,123 @@
+.create-how {
+  gap: var(--space-5);
+}
+
+.create-how__row {
+  display: grid;
+  gap: var(--space-6);
+  min-width: 0;
+}
+
+.create-how__row--split {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: start;
+}
+
+.opt--personality {
+  min-height: 72px;
+}
+
+.opt--personality .opt__icon-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--c-icon-tint-brand);
+  color: var(--c-brand-text);
+}
+
+.opt--personality .opt__icon-wrap + span {
+  font-weight: 600;
+  font-size: 16px;
+  letter-spacing: 0.2px;
+}
+
+.create-how__name-row {
+  display: flex;
+  gap: var(--space-2);
+  align-items: stretch;
+}
+
+.create-how__name-row .field__control {
+  flex: 1;
+  min-width: 0;
+}
+
+.create-how__chip-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.create-how__chip-row .option-grid,
+.create-how__chip-row [role='group'] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.create-how__other-inline {
+  max-width: 100%;
+}
+
+.create-how__other-row {
+  display: flex;
+  gap: var(--space-2);
+  align-items: stretch;
+}
+
+.create-how__other-row .field__control {
+  flex: 1;
+  min-width: 0;
+}
+
+.create-how__consent-hint {
+  margin: 0 0 var(--space-2);
+  font: var(--font-secondary);
+  color: var(--c-ink2);
+}
+
+.create-how__legal-link {
+  color: var(--c-brand-text);
+  text-decoration: underline;
+}
+
+.opt--presence {
+  align-items: flex-start;
+  min-height: 88px;
+  text-align: left;
+}
+
+.opt--presence__icon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  color: var(--c-brand-text);
+}
+
+.opt--presence__title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 700;
+  width: 100%;
+}
+
+.opt--presence__pill {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: none;
+}
+
+.opt--presence__desc {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  font: var(--font-secondary);
+  color: var(--c-ink2);
+  width: 100%;
+}

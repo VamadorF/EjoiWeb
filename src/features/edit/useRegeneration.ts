@@ -49,13 +49,15 @@ export function useRegeneration(options: {
     setErrorMessage(null);
   }, []);
 
-  const generatePortrait = useCallback(async () => {
-    if (!options.baseline || !options.values || !appearanceDirty) return;
+  const generatePortrait = useCallback(async (snapshot?: EditFormSnapshot) => {
+    const current = snapshot ?? options.values;
+    if (!options.baseline || !current) return;
+    if (!hasAppearanceChanges(options.baseline, current)) return;
     setPhase('generating');
     setErrorMessage(null);
     setPendingPortrait(null);
     try {
-      const onboardingData = editFormToOnboardingData(options.values);
+      const onboardingData = editFormToOnboardingData(current);
       const prompt = generateCompanionImagePrompt(onboardingData, 'avatar');
       const image = await generateCompanionImage(buildCompanionAvatarImageRequest(prompt));
       setPendingPortrait({ fileUrl: image.fileUrl, storagePath: image.storagePath });
@@ -64,11 +66,12 @@ export function useRegeneration(options: {
       setPhase('error');
       setErrorMessage('regen');
     }
-  }, [appearanceDirty, options.baseline, options.values]);
+  }, [options.baseline, options.values]);
 
-  const applyRegeneration = useCallback(async (): Promise<boolean> => {
-    if (!options.baseline || !options.values || !pendingPortrait) return false;
-    const body = buildAppearancePatchBody(options.baseline, options.values, pendingPortrait);
+  const applyRegeneration = useCallback(async (snapshot?: EditFormSnapshot): Promise<boolean> => {
+    const current = snapshot ?? options.values;
+    if (!options.baseline || !current || !pendingPortrait) return false;
+    const body = buildAppearancePatchBody(options.baseline, current, pendingPortrait);
     if (Object.keys(body).length === 0) return false;
 
     setApplying(true);

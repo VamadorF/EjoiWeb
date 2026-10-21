@@ -80,8 +80,8 @@ async function mockAuthedApi(page: Page) {
 
 const screens = [
   { name: 'acceso', path: '/acceso' },
-  { name: 'quien', path: '/crear/quien' },
-  { name: 'como', path: '/crear/como' },
+  { name: 'quien', path: '/crear/paso-1' },
+  { name: 'como', path: '/crear/paso-4' },
   { name: 'chat-ready', path: '/chat' },
   { name: 'editar', path: '/chat/editar' },
 ];

@@ -13,36 +13,35 @@ import {
   PERSONALITY_OPTION_ICONS,
   PERSONALITY_OPTIONS,
 } from '@/features/onboarding/data/personalityOptions';
-import type { CompanionIntensity, Gender, VisualStyle } from '@/features/onboarding/types';
+import type { CompanionIntensity, VisualStyle } from '@/features/onboarding/types';
 import { COMPANION_MAX_AGE, COMPANION_MIN_AGE } from '@/features/onboarding/constants/onboardingSteps';
 
 import { AppIcon } from '~/components/AppIcon';
 import { ProfilePanel } from '~/features/chat/ProfilePanel';
 import { SideMenu } from '~/features/chat/SideMenu';
+import { EditSummaryRow } from '~/features/edit/EditSummaryRow';
+import { hasAppearanceChanges, type EditFormSnapshot } from '~/features/edit/editPatch';
+import {
+  appearanceSummaryRows,
+  conversationSummaryRows,
+  summaryRowValue,
+  type EditSectionId,
+} from '~/features/edit/editSections';
 import { toProfilePanelDraft } from '~/features/edit/editPatch';
 import { useEditForm } from '~/features/edit/useEditForm';
 import { useRegeneration } from '~/features/edit/useRegeneration';
+import { useSectionDialog } from '~/features/edit/useSectionDialog';
 import { EDIT_VOICE_OPTIONS } from '~/features/edit/voiceOptions';
-import { stylePortraitSrcForCard } from '~/features/creation/portraits';
+import { stylePortraitSrcForCard, visualStyleSelectorOptions } from '~/features/creation/portraits';
 import { ChatShell } from '~/layout/ChatShell';
 import { OptionGroup } from '~/layout/OptionGroup';
 import { useDesktopShortcuts } from '~/layout/useDesktopShortcuts';
 import { ENABLE_AGE, ENABLE_ETHNICITY } from '~/platform/env';
+import { HAIR_COLOR_OPTIONS } from '~/theme/hairSwatches';
 
-import '../CreateWho/CreateWhoPage.css';
-import '../CreateHow/CreateHowPage.css';
+import '../CreateWizard/CreateWizardHow.css';
+import '../CreateWizard/CreateWizardWho.css';
 import './EditCompanionPage.css';
-
-const GENDERS: { id: Gender; label: string }[] = [
-  { id: 'femenino', label: 'Femenino' },
-  { id: 'masculino', label: 'Masculino' },
-  { id: 'neutro', label: 'Neutro' },
-];
-
-const STYLES: { id: VisualStyle; labelKey: 'create.style_realistic' | 'create.style_illustrated' }[] = [
-  { id: 'realista', labelKey: 'create.style_realistic' },
-  { id: 'anime', labelKey: 'create.style_illustrated' },
-];
 
 const ETHNICITY_LABELS: Record<(typeof ETHNICITY_IDS)[number], string> = {
   latina: 'Latina',
@@ -73,6 +72,9 @@ function EditCompanionContent() {
   const { t } = useTranslation('web');
   const otherBoundaryId = useId();
   const [otherBoundary, setOtherBoundary] = useState('');
+  const [showOtherBoundary, setShowOtherBoundary] = useState(false);
+  const [activeSection, setActiveSection] = useState<EditSectionId | null>(null);
+  const [draft, setDraft] = useState<EditFormSnapshot | null>(null);
 
   const {
     loaded,
@@ -80,59 +82,55 @@ function EditCompanionContent() {
     profile,
     baseline,
     values,
-    setValues,
     saving,
     saveError,
-    conversationalDirty,
-    saveConversational,
+    saveConversationalSection,
     reload,
     syncFromProfile,
   } = useEditForm(editQueryClient);
 
+  const regenSource = activeSection === 'appearance' && draft ? draft : values;
   const regen = useRegeneration({
     queryClient: editQueryClient,
     baseline,
-    values,
+    values: regenSource,
     profile,
     onApplied: syncFromProfile,
   });
 
-  const patchValues = useCallback(
-    (patch: Partial<NonNullable<typeof values>>) => {
-      setValues((prev) => (prev ? { ...prev, ...patch } : prev));
+  const clearSection = useCallback(() => {
+    setActiveSection(null);
+    setDraft(null);
+    setShowOtherBoundary(false);
+    setOtherBoundary('');
+    regen.resetRegeneration();
+  }, [regen]);
+
+  const { dialogRef, open, close } = useSectionDialog(clearSection);
+
+  const styleOptions = useMemo(() => visualStyleSelectorOptions(), []);
+  const basicLimitsText = useMemo(
+    () => t('create.basic_limits', { limits: BASIC_BOUNDARIES.join(', ') }),
+    [t],
+  );
+
+  const openSection = (section: EditSectionId, trigger: HTMLButtonElement) => {
+    if (!values) return;
+    setActiveSection(section);
+    setDraft({ ...values });
+    regen.resetRegeneration();
+    open(trigger);
+  };
+
+  const patchDraft = useCallback(
+    (patch: Partial<NonNullable<typeof draft>>) => {
+      setDraft((prev) => (prev ? { ...prev, ...patch } : prev));
       if (regen.phase !== 'generating') {
         regen.resetRegeneration();
       }
     },
-    [regen, setValues],
+    [regen],
   );
-
-  const toggleInterest = (interest: string) => {
-    if (!values) return;
-    const removing = values.interests.includes(interest);
-    patchValues({
-      interests: removing
-        ? values.interests.filter((i) => i !== interest)
-        : [...values.interests, interest],
-    });
-  };
-
-  const toggleBoundary = (boundary: string) => {
-    if (!values) return;
-    const removing = values.boundaries.includes(boundary);
-    patchValues({
-      boundaries: removing
-        ? values.boundaries.filter((b) => b !== boundary)
-        : [...values.boundaries, boundary],
-    });
-  };
-
-  const onAddOtherBoundary = () => {
-    const trimmed = otherBoundary.trim();
-    if (!trimmed || trimmed.length > 60 || !values) return;
-    if (!values.boundaries.includes(trimmed)) toggleBoundary(trimmed);
-    setOtherBoundary('');
-  };
 
   const profileDraft = useMemo(
     () => (values ? toProfilePanelDraft(values) : null),
@@ -144,11 +142,58 @@ function EditCompanionContent() {
       ? regen.pendingPortrait.fileUrl
       : profile?.avatarUrl ?? null;
 
+  const appearanceDirty =
+    baseline != null && draft != null && hasAppearanceChanges(baseline, draft);
+  const comparePhase = regen.phase === 'compare';
+
   useDesktopShortcuts({
     escapeTo: '/chat',
-    canContinue: conversationalDirty && !saving,
-    onEnterContinue: () => void saveConversational(),
+    escapeEnabled: !activeSection,
   });
+
+  const onSaveSection = async () => {
+    if (!draft || !activeSection || activeSection === 'appearance') return;
+    const ok = await saveConversationalSection(activeSection, draft);
+    if (ok) close();
+  };
+
+  const onSaveAppearance = async () => {
+    if (!draft || !baseline || !appearanceDirty) return;
+    if (comparePhase) {
+      const ok = await regen.applyRegeneration(draft);
+      if (ok) close();
+      return;
+    }
+    await regen.generatePortrait(draft);
+  };
+
+  const dialogTitleKey = (() => {
+    switch (activeSection) {
+      case 'appearance':
+        return 'edit.group_appearance';
+      case 'personality':
+        return 'edit.personality';
+      case 'presence':
+        return 'edit.presence';
+      case 'interests':
+        return 'edit.interests';
+      case 'boundaries':
+        return 'edit.boundaries';
+      case 'voice':
+        return 'edit.voice';
+      default:
+        return 'edit.title';
+    }
+  })();
+
+  const sectionCanSave =
+    draft &&
+    activeSection &&
+    activeSection !== 'appearance' &&
+    baseline &&
+    JSON.stringify(
+      buildSectionSlice(baseline, activeSection),
+    ) !== JSON.stringify(buildSectionSlice(draft, activeSection));
 
   return (
     <ChatShell
@@ -163,323 +208,509 @@ function EditCompanionContent() {
           portraitUrl={previewPortrait}
           portraitBlur={regen.phase === 'generating'}
           portraitPendingLabel={regen.phase === 'generating' ? t('edit.regen_generating') : null}
+          unsaved={regen.appearanceDirty}
         />
       }
     >
-      <div className="edit-companion create-who" data-testid="edit-companion-page">
+      <div className="edit-companion" data-testid="edit-companion-page">
         <header className="edit-companion__header">
-          <h1>{t('edit.title')}</h1>
-          <Link to="/chat">{t('edit.back_chat')}</Link>
+          <Link to="/chat" className="btn btn--text btn--m">
+            <AppIcon name="arrow-back-outline" />
+            {t('edit.back_to_chat')}
+          </Link>
+          <h1 className="edit-companion__title">{t('edit.title')}</h1>
         </header>
 
         {loaded && values ? (
-          <>
-            <section className="create-who__section" aria-labelledby="edit-appearance">
-              <h2 id="edit-appearance" className="create-who__label">
-                {t('edit.section_appearance')}
+          <div className="edit-companion__scroll">
+            <p className="banner--info edit-companion__banner" role="note">
+              <AppIcon name="information-circle-outline" />
+              {t('edit.advanced_banner')}
+            </p>
+
+            <section className="card edit-companion__card" aria-labelledby="edit-group-appearance">
+              <h2 id="edit-group-appearance" className="edit-companion__card-title">
+                {t('edit.group_appearance')}
               </h2>
-              <p className="create-how__basic-limits" role="note">
-                {regen.appearanceDirty ? t('edit.regen_needed') : t('edit.appearance_hint')}
+              <div className="edit-companion__rows">
+                {appearanceSummaryRows().map((row) => (
+                  <EditSummaryRow
+                    key={row.id}
+                    testId={row.testId}
+                    label={t(row.labelKey)}
+                    value={summaryRowValue(row.id, values, t)}
+                    onOpen={(trigger) => openSection('appearance', trigger)}
+                  />
+                ))}
+              </div>
+            </section>
+
+            <section className="card edit-companion__card" aria-labelledby="edit-group-conversation">
+              <h2 id="edit-group-conversation" className="edit-companion__card-title">
+                {t('edit.group_conversation')}
+              </h2>
+              <div className="edit-companion__rows">
+                {conversationSummaryRows.map((row) => (
+                  <EditSummaryRow
+                    key={row.id}
+                    testId={row.testId}
+                    label={t(row.labelKey)}
+                    value={summaryRowValue(row.id, values, t)}
+                    onOpen={(trigger) => openSection(row.section, trigger)}
+                  />
+                ))}
+              </div>
+            </section>
+
+            {saveError ? (
+              <p className="banner--error" role="alert">
+                {t('edit.save_error')}
               </p>
+            ) : null}
+          </div>
+        ) : null}
 
-              <h3 id="edit-style" className="create-who__label">
-                {t('edit.style')}
-              </h3>
-              <OptionGroup mode="radio" aria-labelledby="edit-style" cols={3}>
-                {STYLES.map(({ id, labelKey }) => (
-                  <button
-                    key={id}
-                    type="button"
-                    role="radio"
-                    aria-checked={values.visualStyle === id}
-                    className={
-                      values.visualStyle === id ? 'create-option create-option--selected' : 'create-option'
-                    }
-                    onClick={() => patchValues({ visualStyle: id })}
+        <dialog
+          ref={dialogRef}
+          className="edit-section-dialog"
+          data-testid="edit-section-dialog"
+        >
+          {draft && activeSection ? (
+            <>
+              <h2 className="edit-section-dialog__title">{t(dialogTitleKey)}</h2>
+              <div className="edit-section-dialog__body">
+                {activeSection === 'appearance' ? (
+                  <>
+                    <div className="edit-companion__sub">
+                      <h3 id="edit-style" className="edit-companion__sub-title">
+                        {t('edit.style')}
+                      </h3>
+                      <OptionGroup
+                        mode="radio"
+                        aria-labelledby="edit-style"
+                        layout="inline"
+                        className="create-who__style-grid"
+                      >
+                        {styleOptions.map(({ id, labelKey }) => (
+                          <button
+                            key={id}
+                            type="button"
+                            role="radio"
+                            aria-checked={draft.visualStyle === id}
+                            className="opt opt--style"
+                            onClick={() => patchDraft({ visualStyle: id as VisualStyle })}
+                          >
+                            <img
+                              className="opt__thumb"
+                              src={stylePortraitSrcForCard(
+                                id,
+                                draft.gender === 'masculino' ? 'masculino' : 'femenino',
+                              )}
+                              alt=""
+                            />
+                            <span>{t(labelKey)}</span>
+                          </button>
+                        ))}
+                      </OptionGroup>
+                    </div>
+
+                    {ENABLE_AGE ? (
+                      <div className="edit-companion__sub">
+                        <h3 id="edit-age" className="edit-companion__sub-title">
+                          {t('edit.age')}
+                        </h3>
+                        <div className="create-who__age-row">
+                          <div className="stepper" aria-labelledby="edit-age">
+                            <button
+                              type="button"
+                              className="btn btn--icon btn--secondary"
+                              aria-label="Reducir edad"
+                              disabled={draft.age <= COMPANION_MIN_AGE}
+                              onClick={() =>
+                                patchDraft({ age: Math.max(COMPANION_MIN_AGE, draft.age - 1) })
+                              }
+                            >
+                              <AppIcon name="remove-outline" />
+                            </button>
+                            <span className="stepper__value" aria-live="polite">
+                              {draft.age}
+                            </span>
+                            <button
+                              type="button"
+                              className="btn btn--icon btn--secondary"
+                              aria-label="Aumentar edad"
+                              disabled={draft.age >= COMPANION_MAX_AGE}
+                              onClick={() =>
+                                patchDraft({ age: Math.min(COMPANION_MAX_AGE, draft.age + 1) })
+                              }
+                            >
+                              <AppIcon name="add-outline" />
+                            </button>
+                          </div>
+                          <span className="create-who__age-unit">{t('create.age_unit')}</span>
+                        </div>
+                      </div>
+                    ) : null}
+
+                    {ENABLE_ETHNICITY ? (
+                      <div className="edit-companion__sub">
+                        <h3 id="edit-ethnicity" className="edit-companion__sub-title">
+                          {t('edit.ethnicity')}
+                        </h3>
+                        <OptionGroup
+                          mode="radio"
+                          aria-labelledby="edit-ethnicity"
+                          layout="inline"
+                          className="create-who__chip-wrap"
+                        >
+                          <button
+                            type="button"
+                            role="radio"
+                            aria-checked={!draft.ethnicity}
+                            className="chip"
+                            onClick={() => patchDraft({ ethnicity: undefined })}
+                          >
+                            {t('edit.no_preference')}
+                          </button>
+                          {ETHNICITY_IDS.map((id) => (
+                            <button
+                              key={id}
+                              type="button"
+                              role="radio"
+                              aria-checked={draft.ethnicity === ETHNICITY_LABELS[id]}
+                              className="chip"
+                              onClick={() => patchDraft({ ethnicity: ETHNICITY_LABELS[id] })}
+                            >
+                              {ETHNICITY_LABELS[id]}
+                            </button>
+                          ))}
+                        </OptionGroup>
+                      </div>
+                    ) : null}
+
+                    <div className="edit-companion__sub">
+                      <h3 id="edit-hair" className="edit-companion__sub-title">
+                        {t('edit.hair')}
+                      </h3>
+                      <OptionGroup mode="radio" aria-labelledby="edit-hair" layout="inline" className="edit-hair-swatches">
+                        {HAIR_COLOR_OPTIONS.map(({ value, labelKey, swatch }) => {
+                          const selected = draft.hairColor === value;
+                          return (
+                            <button
+                              key={value}
+                              type="button"
+                              role="radio"
+                              aria-checked={selected}
+                              className={`edit-hair-swatch${selected ? ' edit-hair-swatch--selected' : ''}`}
+                              onClick={() => patchDraft({ hairColor: value })}
+                            >
+                              <span
+                                className="edit-hair-swatch__circle"
+                                style={{ backgroundColor: swatch }}
+                              >
+                                {selected ? <AppIcon name="checkmark" /> : null}
+                              </span>
+                              <span className="edit-hair-swatch__label">{t(labelKey)}</span>
+                            </button>
+                          );
+                        })}
+                      </OptionGroup>
+                      {draft.hairColor ? (
+                        <p className="edit-hair-swatch__chosen">
+                          {t(
+                            HAIR_COLOR_OPTIONS.find((o) => o.value === draft.hairColor)?.labelKey ??
+                              'edit.hair',
+                          )}
+                        </p>
+                      ) : null}
+                    </div>
+
+                    {appearanceDirty ? (
+                      <>
+                        {comparePhase && regen.pendingPortrait && profile?.avatarUrl ? (
+                          <div className="edit-companion__regen-compare">
+                            <figure className="edit-companion__regen-figure">
+                              <img
+                                src={profile.avatarUrl}
+                                alt=""
+                                className="avatar edit-companion__regen-avatar"
+                              />
+                              <span className="label">{t('edit.current')}</span>
+                            </figure>
+                            <figure className="edit-companion__regen-figure">
+                              <img
+                                src={regen.pendingPortrait.fileUrl}
+                                alt=""
+                                className="avatar edit-companion__regen-avatar"
+                              />
+                              <span className="label">{t('edit.new')}</span>
+                            </figure>
+                          </div>
+                        ) : null}
+                        {regen.phase === 'error' ? (
+                          <p className="banner--error" role="alert">
+                            {t('edit.regen_error')}
+                          </p>
+                        ) : null}
+                      </>
+                    ) : null}
+                  </>
+                ) : null}
+
+                {activeSection === 'personality' ? (
+                  <>
+                    <div className="edit-companion__sub">
+                      <OptionGroup mode="radio" aria-labelledby="edit-personality-grid" cols={4}>
+                        {PERSONALITY_OPTIONS.map((option) => (
+                          <button
+                            key={option}
+                            type="button"
+                            role="radio"
+                            aria-checked={draft.persona === option}
+                            className="opt opt--personality"
+                            onClick={() => patchDraft({ persona: option })}
+                          >
+                            <span className="opt__icon-wrap">
+                              <AppIcon name={PERSONALITY_OPTION_ICONS[option]} />
+                            </span>
+                            <span>{option}</span>
+                          </button>
+                        ))}
+                      </OptionGroup>
+                      <span id="edit-personality-grid" className="visually-hidden">
+                        {t('edit.personality')}
+                      </span>
+                    </div>
+                    <div className="field">
+                      <span id="edit-name" className="field__label">
+                        {t('edit.name')}
+                      </span>
+                      <input
+                        className="field__control"
+                        type="text"
+                        maxLength={20}
+                        value={draft.companionName}
+                        onChange={(e) => patchDraft({ companionName: e.target.value })}
+                        aria-labelledby="edit-name"
+                      />
+                    </div>
+                  </>
+                ) : null}
+
+                {activeSection === 'presence' ? (
+                  <OptionGroup
+                    mode="radio"
+                    aria-labelledby="edit-presence"
+                    layout="inline"
+                    className="seg"
                   >
-                    <img
-                      className="create-option__thumb"
-                      src={stylePortraitSrcForCard(id, 'femenino')}
-                      alt=""
-                    />
-                    <span>{t(labelKey)}</span>
-                  </button>
-                ))}
-              </OptionGroup>
-
-              <h3 id="edit-gender" className="create-who__label">
-                {t('edit.gender')}
-              </h3>
-              <OptionGroup mode="radio" aria-labelledby="edit-gender" cols={3}>
-                {GENDERS.map(({ id, label }) => (
-                  <button
-                    key={id}
-                    type="button"
-                    role="radio"
-                    aria-checked={values.gender === id}
-                    className={values.gender === id ? 'create-option create-option--selected' : 'create-option'}
-                    onClick={() => patchValues({ gender: id })}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </OptionGroup>
-
-              {ENABLE_ETHNICITY ? (
-                <>
-                  <h3 id="edit-ethnicity" className="create-who__label">
-                    {t('edit.ethnicity')}
-                  </h3>
-                  <OptionGroup mode="radio" aria-labelledby="edit-ethnicity" cols={4}>
-                    <button
-                      type="button"
-                      role="radio"
-                      aria-checked={!values.ethnicity}
-                      className={!values.ethnicity ? 'create-option create-option--selected' : 'create-option'}
-                      onClick={() => patchValues({ ethnicity: undefined })}
-                    >
-                      Sin preferencia
-                    </button>
-                    {ETHNICITY_IDS.map((id) => (
+                    {PRESENCE.map(({ id, labelKey }) => (
                       <button
                         key={id}
                         type="button"
                         role="radio"
-                        aria-checked={values.ethnicity === ETHNICITY_LABELS[id]}
-                        className={
-                          values.ethnicity === ETHNICITY_LABELS[id]
-                            ? 'create-option create-option--selected'
-                            : 'create-option'
-                        }
-                        onClick={() => patchValues({ ethnicity: ETHNICITY_LABELS[id] })}
+                        aria-checked={draft.intensity === id}
+                        className="seg__item"
+                        onClick={() => patchDraft({ intensity: id })}
                       >
-                        {ETHNICITY_LABELS[id]}
+                        {t(labelKey)}
                       </button>
                     ))}
+                    <span id="edit-presence" className="visually-hidden">
+                      {t('edit.presence')}
+                    </span>
                   </OptionGroup>
-                </>
-              ) : null}
+                ) : null}
 
-              {ENABLE_AGE ? (
-                <>
-                  <h3 id="edit-age" className="create-who__label">
-                    {t('edit.age')}
-                  </h3>
-                  <input
-                    className="create-who__age"
-                    type="number"
-                    min={COMPANION_MIN_AGE}
-                    max={COMPANION_MAX_AGE}
-                    value={values.age}
-                    onChange={(e) => patchValues({ age: Number(e.target.value) })}
-                    aria-labelledby="edit-age"
-                  />
-                </>
-              ) : null}
+                {activeSection === 'interests' ? (
+                  <OptionGroup mode="toggle" aria-labelledby="edit-interests" cols={6}>
+                    {INTEREST_OPTIONS.map((interest) => {
+                      const selected = draft.interests.includes(interest);
+                      return (
+                        <button
+                          key={interest}
+                          type="button"
+                          aria-pressed={selected}
+                          className="chip"
+                          onClick={() => {
+                            const removing = draft.interests.includes(interest);
+                            patchDraft({
+                              interests: removing
+                                ? draft.interests.filter((i) => i !== interest)
+                                : [...draft.interests, interest],
+                            });
+                          }}
+                        >
+                          <AppIcon name={INTEREST_OPTION_ICONS[interest]} />
+                          <span>{interest}</span>
+                        </button>
+                      );
+                    })}
+                    <span id="edit-interests" className="visually-hidden">
+                      {t('edit.interests')}
+                    </span>
+                  </OptionGroup>
+                ) : null}
 
-              {regen.appearanceDirty ? (
-                <div className="edit-companion__regen">
-                  {regen.phase === 'compare' && regen.pendingPortrait && profile?.avatarUrl ? (
-                    <div className="edit-companion__regen-compare">
-                      <figure>
-                        <img src={profile.avatarUrl} alt="" />
-                        <figcaption>{t('edit.regen_current')}</figcaption>
-                      </figure>
-                      <figure>
-                        <img src={regen.pendingPortrait.fileUrl} alt="" />
-                        <figcaption>{t('edit.regen_new')}</figcaption>
-                      </figure>
+                {activeSection === 'boundaries' ? (
+                  <>
+                    <div className="create-how__chip-row">
+                      <OptionGroup mode="toggle" aria-labelledby="edit-boundaries" layout="inline">
+                        {OPTIONAL_BOUNDARIES.map((option) => {
+                          const selected = draft.boundaries.includes(option);
+                          return (
+                            <button
+                              key={option}
+                              type="button"
+                              aria-pressed={selected}
+                              className="chip"
+                              onClick={() => {
+                                const removing = draft.boundaries.includes(option);
+                                patchDraft({
+                                  boundaries: removing
+                                    ? draft.boundaries.filter((b) => b !== option)
+                                    : [...draft.boundaries, option],
+                                });
+                              }}
+                            >
+                              {option}
+                            </button>
+                          );
+                        })}
+                        {!showOtherBoundary ? (
+                          <button
+                            type="button"
+                            className="chip chip--add"
+                            onClick={() => setShowOtherBoundary(true)}
+                          >
+                            {t('create.avoid_other')}
+                          </button>
+                        ) : null}
+                      </OptionGroup>
+                      {showOtherBoundary ? (
+                        <div className="create-how__other-inline field">
+                          <label className="field__label" htmlFor={otherBoundaryId}>
+                            {t('create.avoid_other')}
+                          </label>
+                          <div className="create-how__other-row">
+                            <input
+                              id={otherBoundaryId}
+                              className="field__control"
+                              type="text"
+                              maxLength={60}
+                              value={otherBoundary}
+                              onChange={(e) => setOtherBoundary(e.target.value)}
+                            />
+                            <button
+                              type="button"
+                              className="btn btn--secondary btn--m"
+                              onClick={() => {
+                                const trimmed = otherBoundary.trim();
+                                if (!trimmed || trimmed.length > 60) return;
+                                if (!draft.boundaries.includes(trimmed)) {
+                                  patchDraft({ boundaries: [...draft.boundaries, trimmed] });
+                                }
+                                setOtherBoundary('');
+                                setShowOtherBoundary(false);
+                              }}
+                              aria-label={`Añadir ${t('create.avoid_other').toLowerCase()}`}
+                            >
+                              +
+                            </button>
+                          </div>
+                        </div>
+                      ) : null}
+                      <span id="edit-boundaries" className="visually-hidden">
+                        {t('edit.boundaries')}
+                      </span>
                     </div>
-                  ) : null}
-                  {regen.phase === 'error' ? (
-                    <p className="edit-companion__error" role="alert">
-                      {t('edit.regen_error')}
+                    <p className="banner--info" role="note">
+                      <AppIcon name="shield-checkmark-outline" />
+                      {basicLimitsText}
                     </p>
-                  ) : null}
-                  <div className="edit-companion__actions">
-                    {regen.phase !== 'compare' ? (
+                  </>
+                ) : null}
+
+                {activeSection === 'voice' ? (
+                  <OptionGroup mode="radio" aria-labelledby="edit-voice">
+                    {EDIT_VOICE_OPTIONS.map(({ key, label }) => (
                       <button
+                        key={key}
                         type="button"
-                        className="create-who__continue"
-                        disabled={regen.phase === 'generating'}
-                        onClick={() => void regen.generatePortrait()}
+                        role="radio"
+                        aria-checked={draft.voiceKey === key}
+                        className="chip"
+                        onClick={() => patchDraft({ voiceKey: key })}
                       >
-                        {regen.phase === 'generating' ? t('edit.regen_generating') : t('edit.regen_cta')}
+                        {label}
                       </button>
-                    ) : (
-                      <button
-                        type="button"
-                        className="create-who__continue"
-                        disabled={regen.applying}
-                        onClick={() => void regen.applyRegeneration()}
-                      >
-                        {t('edit.regen_use')}
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ) : null}
-            </section>
-
-            <section className="create-who__section" aria-labelledby="edit-personality">
-              <h2 id="edit-personality" className="create-who__label">
-                {t('edit.section_conversational')}
-              </h2>
-              <OptionGroup mode="radio" aria-labelledby="edit-personality" cols={4}>
-                {PERSONALITY_OPTIONS.map((option) => (
-                  <button
-                    key={option}
-                    type="button"
-                    role="radio"
-                    aria-checked={values.persona === option}
-                    className={
-                      values.persona === option ? 'create-option create-option--selected' : 'create-option'
-                    }
-                    onClick={() => patchValues({ persona: option })}
-                  >
-                    <AppIcon name={PERSONALITY_OPTION_ICONS[option]} />
-                    <span>{option}</span>
-                  </button>
-                ))}
-              </OptionGroup>
-
-              <h3 id="edit-presence" className="create-who__label">
-                {t('edit.presence')}
-              </h3>
-              <OptionGroup
-                mode="radio"
-                aria-labelledby="edit-presence"
-                layout="inline"
-                className="create-how__presence"
-              >
-                {PRESENCE.map(({ id, labelKey }) => (
-                  <button
-                    key={id}
-                    type="button"
-                    role="radio"
-                    aria-checked={values.intensity === id}
-                    className={
-                      values.intensity === id
-                        ? 'create-how__presence-btn create-how__presence-btn--selected'
-                        : 'create-how__presence-btn'
-                    }
-                    onClick={() => patchValues({ intensity: id })}
-                  >
-                    {t(labelKey)}
-                  </button>
-                ))}
-              </OptionGroup>
-
-              <h3 id="edit-interests" className="create-who__label">
-                {t('edit.interests')}
-              </h3>
-              <OptionGroup mode="toggle" aria-labelledby="edit-interests" cols={6}>
-                {INTEREST_OPTIONS.map((interest) => {
-                  const selected = values.interests.includes(interest);
-                  return (
-                    <button
-                      key={interest}
-                      type="button"
-                      aria-pressed={selected}
-                      className={selected ? 'create-option create-option--selected' : 'create-option'}
-                      onClick={() => toggleInterest(interest)}
-                    >
-                      <AppIcon name={INTEREST_OPTION_ICONS[interest]} />
-                      <span>{interest}</span>
-                    </button>
-                  );
-                })}
-              </OptionGroup>
-
-              <h3 id="edit-boundaries" className="create-who__label">
-                {t('edit.boundaries')}
-              </h3>
-              <p className="create-how__basic-limits" role="note">
-                {t('create.basic_limits', { limits: BASIC_BOUNDARIES.join(', ') })}
-              </p>
-              <OptionGroup mode="toggle" aria-labelledby="edit-boundaries" cols={3}>
-                {OPTIONAL_BOUNDARIES.map((option) => {
-                  const selected = values.boundaries.includes(option);
-                  return (
-                    <button
-                      key={option}
-                      type="button"
-                      aria-pressed={selected}
-                      className={selected ? 'create-option create-option--selected' : 'create-option'}
-                      onClick={() => toggleBoundary(option)}
-                    >
-                      {option}
-                    </button>
-                  );
-                })}
-              </OptionGroup>
-              <div className="create-how__other-boundary">
-                <label htmlFor={otherBoundaryId}>{t('create.avoid_other')}</label>
-                <div className="create-how__other-row">
-                  <input
-                    id={otherBoundaryId}
-                    className="create-how__other-input"
-                    type="text"
-                    maxLength={60}
-                    value={otherBoundary}
-                    onChange={(e) => setOtherBoundary(e.target.value)}
-                  />
-                  <button type="button" className="create-how__other-add" onClick={onAddOtherBoundary}>
-                    +
-                  </button>
-                </div>
+                    ))}
+                    <span id="edit-voice" className="visually-hidden">
+                      {t('edit.voice')}
+                    </span>
+                  </OptionGroup>
+                ) : null}
               </div>
 
-              <h3 id="edit-voice" className="create-who__label">
-                {t('edit.voice')}
-              </h3>
-              <select
-                className="create-how__name-input"
-                value={values.voiceKey}
-                onChange={(e) => patchValues({ voiceKey: e.target.value })}
-                aria-labelledby="edit-voice"
-              >
-                {EDIT_VOICE_OPTIONS.map(({ key, label }) => (
-                  <option key={key} value={key}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-
-              <h3 id="edit-name" className="create-who__label">
-                {t('edit.name')}
-              </h3>
-              <input
-                className="create-how__name-input"
-                type="text"
-                maxLength={20}
-                value={values.companionName}
-                onChange={(e) => patchValues({ companionName: e.target.value })}
-                aria-labelledby="edit-name"
-              />
-
-              {saveError ? (
-                <p className="edit-companion__error" role="alert">
-                  {t('edit.save_error')}
-                </p>
-              ) : null}
-
-              <div className="edit-companion__actions">
+              <div className="edit-section-dialog__actions">
+                {activeSection === 'appearance' && appearanceDirty ? (
+                  <button
+                    type="button"
+                    className="btn btn--primary btn--m"
+                    data-testid="edit-save-appearance"
+                    disabled={regen.phase === 'generating' || regen.applying}
+                    onClick={() => void onSaveAppearance()}
+                  >
+                    {comparePhase
+                      ? t('edit.regen_use')
+                      : regen.phase === 'generating'
+                        ? t('edit.regen_generating')
+                        : t('edit.save_and_generate')}
+                  </button>
+                ) : null}
+                {activeSection !== 'appearance' && sectionCanSave ? (
+                  <button
+                    type="button"
+                    className="btn btn--primary btn--m"
+                    data-testid="edit-save-section"
+                    disabled={saving}
+                    onClick={() => void onSaveSection()}
+                  >
+                    {t('edit.save')}
+                  </button>
+                ) : null}
                 <button
                   type="button"
-                  className="create-who__continue"
-                  disabled={!conversationalDirty || saving}
-                  onClick={() => void saveConversational()}
+                  className="btn btn--secondary btn--m"
+                  data-testid="edit-dialog-cancel"
+                  onClick={close}
                 >
-                  {t('edit.save')}
+                  {t('edit.cancel')}
                 </button>
               </div>
-            </section>
-          </>
-        ) : null}
+            </>
+          ) : null}
+        </dialog>
       </div>
     </ChatShell>
   );
+}
+
+function buildSectionSlice(form: EditFormSnapshot, section: EditSectionId) {
+  switch (section) {
+    case 'personality':
+      return { persona: form.persona, companionName: form.companionName };
+    case 'presence':
+      return { intensity: form.intensity };
+    case 'interests':
+      return { interests: form.interests };
+    case 'boundaries':
+      return { boundaries: form.boundaries };
+    case 'voice':
+      return { voiceKey: form.voiceKey };
+    default:
+      return {};
+  }
 }
 
 export default function EditCompanionPage() {

@@ -3,6 +3,12 @@
  * Contrato alineado con e2e/fixtures/integrationMock.ts.
  */
 
+import {
+  buildFirstMessageTemplate,
+  buildQuickReplies,
+  catalogInterestsFromSelection,
+} from './mockGreeting';
+
 export type MockRequestConfig = {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   body?: unknown;
@@ -36,13 +42,187 @@ type OnboardingDraftBody = {
   data: Record<string, unknown>;
 };
 
+type MockCompanionProfile = {
+  id: string;
+  name: string;
+  visualStyle: string;
+  gender: string;
+  persona: string;
+  intensity: string;
+  interests: string[];
+  boundaries: string[];
+  age?: number;
+  ethnicity?: string;
+  hairColor?: string;
+  voiceKey?: string;
+};
+
+type MockChatMessage = {
+  id: string;
+  content: string;
+  role: 'user' | 'assistant';
+  meta?: Record<string, unknown>;
+};
+
+const CREATION_READY_MS = 3000;
+const CREATION_STEP_GREETING_MS = 1000;
+const CREATION_STEP_PORTRAIT_MS = 2000;
+
 type CreationRow = {
   state: 'none' | 'creating' | 'ready' | 'error';
   creatingSince: number;
+  companion?: MockCompanionProfile;
 };
+
+function defaultMockCompanion(): MockCompanionProfile {
+  return {
+    id: 'c1',
+    name: 'Luna',
+    visualStyle: 'realista',
+    gender: 'femenino',
+    persona: 'Amigable y empática',
+    intensity: 'balanced',
+    interests: ['Música', 'Cine y series', 'Viajes'],
+    boundaries: [],
+  };
+}
+
+function portraitPathFor(style: string, gender: string): string {
+  const illustrated = style === 'anime';
+  const masculine = gender === 'masculino';
+  if (illustrated) {
+    return masculine ? '/portraits/ilustrado-masculino.webp' : '/portraits/ilustrado-femenino.webp';
+  }
+  return masculine ? '/portraits/realista-masculino.webp' : '/portraits/realista-femenino.webp';
+}
+
+function portraitUrlForCompanion(companion: MockCompanionProfile): string {
+  const path = portraitPathFor(companion.visualStyle, companion.gender);
+  if (typeof window !== 'undefined') {
+    return new URL(path, window.location.origin).href;
+  }
+  return path;
+}
+
+function companionFromPost(body: Record<string, unknown>): MockCompanionProfile {
+  const base = defaultMockCompanion();
+  const name = typeof body.name === 'string' ? body.name.trim() : '';
+  const visualStyle = typeof body.visualStyle === 'string' ? body.visualStyle : base.visualStyle;
+  const gender = typeof body.gender === 'string' ? body.gender : base.gender;
+  const persona = typeof body.persona === 'string' ? body.persona : base.persona;
+  const intensity = typeof body.intensity === 'string' ? body.intensity : base.intensity;
+  const interests = Array.isArray(body.interests)
+    ? body.interests.filter((item): item is string => typeof item === 'string')
+    : base.interests;
+  const boundaries = Array.isArray(body.boundaries)
+    ? body.boundaries.filter((item): item is string => typeof item === 'string')
+    : base.boundaries;
+  const age = typeof body.age === 'number' ? body.age : undefined;
+  const ethnicity = typeof body.ethnicity === 'string' ? body.ethnicity.trim() : undefined;
+  const hairColor = typeof body.hairColor === 'string' ? body.hairColor.trim() : undefined;
+  const voiceKey = typeof body.voiceKey === 'string' ? body.voiceKey.trim().toUpperCase() : undefined;
+
+  return {
+    ...base,
+    name: name || base.name,
+    visualStyle,
+    gender,
+    persona,
+    intensity,
+    interests,
+    boundaries,
+    ...(age != null ? { age } : {}),
+    ...(ethnicity ? { ethnicity } : {}),
+    ...(hairColor ? { hairColor } : {}),
+    ...(voiceKey ? { voiceKey } : {}),
+  };
+}
+
+function patchCompanionProfile(
+  current: MockCompanionProfile,
+  patch: Record<string, unknown>,
+): MockCompanionProfile {
+  const next = { ...current };
+  if (typeof patch.name === 'string') next.name = patch.name.trim() || next.name;
+  if (typeof patch.visualStyle === 'string') next.visualStyle = patch.visualStyle;
+  if (typeof patch.gender === 'string') next.gender = patch.gender;
+  if (typeof patch.persona === 'string') next.persona = patch.persona;
+  if (typeof patch.intensity === 'string') next.intensity = patch.intensity;
+  if (Array.isArray(patch.interests)) {
+    next.interests = patch.interests.filter((item): item is string => typeof item === 'string');
+  }
+  if (Array.isArray(patch.boundaries)) {
+    next.boundaries = patch.boundaries.filter((item): item is string => typeof item === 'string');
+  }
+  if (typeof patch.age === 'number') next.age = patch.age;
+  if (typeof patch.ethnicity === 'string') next.ethnicity = patch.ethnicity.trim();
+  if (typeof patch.hairColor === 'string') next.hairColor = patch.hairColor.trim();
+  if (typeof patch.voiceKey === 'string') next.voiceKey = patch.voiceKey.trim().toUpperCase();
+  return next;
+}
+
+function creationElapsedMs(creation: CreationRow): number {
+  if (creation.state !== 'creating' || creation.creatingSince <= 0) return 0;
+  return Date.now() - creation.creatingSince;
+}
+
+function creationStepsForElapsed(elapsedMs: number) {
+  return {
+    personality: true,
+    interests: true,
+    greeting: elapsedMs >= CREATION_STEP_GREETING_MS,
+    portrait: elapsedMs >= CREATION_STEP_PORTRAIT_MS,
+  };
+}
+
+function buildTemplateFirstMessage(companion: MockCompanionProfile) {
+  const basedOnInterests = catalogInterestsFromSelection(companion.interests);
+  return {
+    id: 'm1',
+    content: buildFirstMessageTemplate(companion.name, companion.interests),
+    meta: {
+      kind: 'first_message',
+      basedOnInterests,
+      basedOnPersona: null,
+      quickReplies: buildQuickReplies(companion.interests),
+      source: 'template',
+    },
+  };
+}
+
+function seedChatFirstMessage(userId: string, companion: MockCompanionProfile) {
+  const first = buildTemplateFirstMessage(companion);
+  chatStore.set(userId, [
+    {
+      id: first.id,
+      content: first.content,
+      role: 'assistant',
+      meta: first.meta,
+    },
+  ]);
+}
+
+function syncCreationReady(userId: string, creation: CreationRow) {
+  if (creation.state !== 'creating' || creation.creatingSince <= 0) return;
+  if (creationElapsedMs(creation) < CREATION_READY_MS) return;
+  creation.state = 'ready';
+  seedChatFirstMessage(userId, getMockCompanion(userId));
+}
+
+function getMockCompanion(userId: string): MockCompanionProfile {
+  const row = creationStore.get(userId);
+  return row?.companion ?? defaultMockCompanion();
+}
 
 const draftStore = new Map<string, OnboardingDraftBody | null>();
 const creationStore = new Map<string, CreationRow>();
+const chatStore = new Map<string, MockChatMessage[]>();
+
+export function resetMockApiStoresForTests(): void {
+  draftStore.clear();
+  creationStore.clear();
+  chatStore.clear();
+}
 
 function portraitUrl(): string {
   if (typeof window !== 'undefined') {
@@ -112,6 +292,15 @@ function unauthorized<T>(): MockApiResponse<T> {
   return { data: {} as T, status: 401, statusText: 'Unauthorized' };
 }
 
+function serverError<T>(): MockApiResponse<T> {
+  return { data: {} as T, status: 500, statusText: 'Internal Server Error' };
+}
+
+function shouldFailCompanionCreateOnce(): boolean {
+  if (typeof window === 'undefined') return false;
+  return new URLSearchParams(window.location.search).get('demoFail') === 'create';
+}
+
 export function handleMockApiRequest<T>(
   absoluteOrRelativeUrl: string,
   config: MockRequestConfig,
@@ -158,63 +347,93 @@ export function handleMockApiRequest<T>(
   }
 
   if (path.includes('/companion/me/creation') && method === 'GET') {
+    syncCreationReady(userId, creation);
+    const elapsed = creationElapsedMs(creation);
+    const companion = getMockCompanion(userId);
+    const profileSummary = {
+      id: companion.id,
+      name: companion.name,
+      visualStyle: companion.visualStyle,
+      avatarUrl: portraitUrlForCompanion(companion),
+    };
     const body =
       creation.state === 'ready'
         ? {
             state: 'ready',
             steps: { personality: true, interests: true, greeting: true, portrait: true },
-            profile: { id: 'c1', name: 'Luna', visualStyle: 'realista', avatarUrl: portraitUrl() },
-            firstMessage: { id: 'm1', content: 'Hola, soy Luna', meta: { quickReplies: ['Cuéntame más'] } },
+            profile: profileSummary,
+            firstMessage: buildTemplateFirstMessage(companion),
           }
         : creation.state === 'error'
           ? {
               state: 'error',
               error: { code: 'MOCK_FAIL' },
-              profile: { name: 'Luna', visualStyle: 'realista' },
+              profile: { name: companion.name, visualStyle: companion.visualStyle },
             }
           : creation.state === 'creating'
             ? {
                 state: 'creating',
-                steps: { personality: true, interests: true, greeting: false, portrait: false },
-                profile: { name: 'Luna', visualStyle: 'realista' },
+                steps: creationStepsForElapsed(elapsed),
+                profile: profileSummary,
               }
             : { state: 'none' };
     return ok(body as T);
   }
 
   if (path.endsWith('/companion/me') && method === 'POST') {
-    creation.state = 'ready';
+    creation.companion = companionFromPost((config.body ?? {}) as Record<string, unknown>);
+    if (shouldFailCompanionCreateOnce()) {
+      creation.state = 'error';
+      return serverError<T>();
+    }
+    creation.state = 'creating';
     creation.creatingSince = Date.now();
-    return ok({ id: 'c1', name: 'Luna' } as T);
+    chatStore.delete(userId);
+    const created = getMockCompanion(userId);
+    return ok({ id: created.id, name: created.name } as T);
   }
 
   if (path.includes('/companion/me/profile') || (path.endsWith('/companion/me') && method === 'GET')) {
+    const companion = getMockCompanion(userId);
     return ok({
-      id: 'c1',
-      name: 'Luna',
-      visualStyle: 'realista',
-      persona: 'Amigable y empática',
-      intensity: 'balanced',
-      interests: ['Música', 'Cine', 'Viajes'],
-      boundaries: [],
-      avatarUrl: portraitUrl(),
+      ...companion,
+      avatarUrl: portraitUrlForCompanion(companion),
     } as T);
   }
 
   if (path.endsWith('/companion/me') && method === 'PATCH') {
-    return ok({ id: 'c1', ...(config.body as object) } as T);
-  }
-
-  if (path.includes('/chat/message') && method === 'POST') {
+    const patched = patchCompanionProfile(
+      getMockCompanion(userId),
+      (config.body ?? {}) as Record<string, unknown>,
+    );
+    creation.companion = patched;
     return ok({
-      id: `mock-${Date.now()}`,
-      content: 'Gracias por tu mensaje. Estoy en modo demo sin backend.',
-      role: 'assistant',
+      ...patched,
+      avatarUrl: portraitUrlForCompanion(patched),
     } as T);
   }
 
+  if (path.includes('/chat/message') && method === 'POST') {
+    const payload = (config.body ?? {}) as { message?: string; clientMessageId?: string };
+    const userText = typeof payload.message === 'string' ? payload.message : '';
+    const userIdMsg = payload.clientMessageId ?? `user-${Date.now()}`;
+    const thread = chatStore.get(userId) ?? [];
+    thread.push({ id: userIdMsg, content: userText, role: 'user' });
+    const assistantId = `mock-${Date.now()}`;
+    const assistant = {
+      id: assistantId,
+      content: 'Cuéntame más sobre eso.',
+      role: 'assistant' as const,
+    };
+    thread.push(assistant);
+    chatStore.set(userId, thread);
+    return ok(assistant as T);
+  }
+
   if (path.includes('/chat/history') && method === 'GET') {
-    return ok({ messages: [], hasMore: false, nextCursor: null } as T);
+    syncCreationReady(userId, creation);
+    const messages = chatStore.get(userId) ?? [];
+    return ok({ messages, hasMore: false, nextCursor: null } as T);
   }
 
   if (path.includes('/chat/') && method === 'GET') {
@@ -222,7 +441,7 @@ export function handleMockApiRequest<T>(
   }
 
   if (path.includes('/subscription/me')) {
-    return ok({ remainingMessages: 12, planLabel: 'basic' } as T);
+    return ok({ messagesRemaining: 54, planLabel: 'basic' } as T);
   }
 
   if (path.includes('/campaign/founder-count')) {
@@ -242,7 +461,17 @@ export function handleMockApiRequest<T>(
   }
 
   if (path.includes('/companion/greeting-preview') && method === 'POST') {
-    return ok({ greeting: 'Hola, encantada de conocerte.' } as T);
+    const payload = (config.body ?? {}) as { name?: string; interests?: string[] };
+    const name = typeof payload.name === 'string' && payload.name.trim() ? payload.name.trim() : 'Luna';
+    const interests = Array.isArray(payload.interests)
+      ? payload.interests.filter((item): item is string => typeof item === 'string')
+      : [];
+    return ok({
+      greeting: buildFirstMessageTemplate(name, interests),
+      basedOnInterests: catalogInterestsFromSelection(interests),
+      quickReplies: buildQuickReplies(interests),
+      source: 'template',
+    } as T);
   }
 
   if (method === 'GET' || method === 'POST' || method === 'PUT' || method === 'PATCH') {
