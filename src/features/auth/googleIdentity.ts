@@ -11,7 +11,16 @@ declare global {
           }) => void;
           renderButton: (
             parent: HTMLElement,
-            options: { type?: string; size?: string; theme?: string; width?: number },
+            options: {
+              type?: string;
+              size?: string;
+              theme?: string;
+              text?: string;
+              shape?: string;
+              logo_alignment?: string;
+              locale?: string;
+              width?: number;
+            },
           ) => void;
         };
       };
@@ -41,29 +50,42 @@ function loadGoogleScript(): Promise<void> {
   return scriptPromise;
 }
 
+let credentialHandler: ((idToken: string) => void) | null = null;
+let gisInitialized = false;
+
 export async function mountGoogleButton(
   container: HTMLElement,
   onCredential: (idToken: string) => void,
+  mode: 'light' | 'dark' = 'light',
 ): Promise<void> {
   if (!GOOGLE_CLIENT_ID) return;
   await loadGoogleScript();
   const gis = window.google?.accounts?.id;
   if (!gis) return;
 
-  gis.initialize({
-    client_id: GOOGLE_CLIENT_ID,
-    callback: (response) => {
-      if (response.credential) onCredential(response.credential);
-    },
-  });
+  // GIS avisa si se llama a initialize() más de una vez: se inicializa una vez y el callback se actualiza aparte.
+  credentialHandler = onCredential;
+  if (!gisInitialized) {
+    gisInitialized = true;
+    gis.initialize({
+      client_id: GOOGLE_CLIENT_ID,
+      callback: (response) => {
+        if (response.credential) credentialHandler?.(response.credential);
+      },
+    });
+  }
 
-  // GIS acepta 200–400px de ancho y renderiza 40px de alto: se estira con transform para cubrir el host.
-  const { width, height } = container.getBoundingClientRect();
-  const renderWidth = Math.round(Math.min(400, Math.max(200, width || 320)));
-  const inner = document.createElement('div');
-  inner.style.width = `${renderWidth}px`;
-  inner.style.transformOrigin = 'top left';
-  if (width && height) inner.style.transform = `scale(${width / renderWidth}, ${height / 40})`;
-  container.replaceChildren(inner);
-  gis.renderButton(inner, { type: 'standard', size: 'large', theme: 'outline', width: renderWidth });
+  // Branding de Google: botón oficial sin deformarlo (GIS acepta 200–400px de ancho); negro en modo oscuro.
+  const renderWidth = Math.round(Math.min(400, Math.max(200, container.getBoundingClientRect().width || 320)));
+  container.replaceChildren();
+  gis.renderButton(container, {
+    type: 'standard',
+    theme: mode === 'dark' ? 'filled_black' : 'outline',
+    size: 'large',
+    text: 'continue_with',
+    shape: 'pill',
+    logo_alignment: 'left',
+    locale: 'es',
+    width: renderWidth,
+  });
 }
