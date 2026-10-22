@@ -3,6 +3,9 @@ import { getIntensityConfig } from '@/features/onboarding/data/companionIntensit
 import type { OnboardingData } from '@/features/onboarding/types';
 import { wizardPathForStep } from './wizardSteps';
 
+/** `location.state` con el que el wizard abre `/crear/revision`. */
+export type ReviewLocationState = { adultConfirmed?: boolean };
+
 export function getCompanionImagePromptKey(data: OnboardingData): string {
   return JSON.stringify({
     name: data.companionName,

@@ -24,6 +24,7 @@ import { CreationPreviewCrumbsStrip, WizardChoicePills } from '~/features/creati
 import { useGenderedTextWith } from '~/features/gender/useGenderedText';
 import { useCreationDraft } from '~/features/creation/useCreationDraft';
 import { stylePortraitSrcForCard, visualStyleSelectorOptions } from '~/features/creation/portraits';
+import type { ReviewLocationState } from '~/features/creation/reviewHelpers';
 import {
   canProceedWizardScreen,
   getV2WizardGroupIndex,
@@ -144,6 +145,8 @@ function CreateWizardScreen({ onboardingStep }: { onboardingStep: number }) {
   const [nameTouched, setNameTouched] = useState(false);
   const [nameSuggestPulse, setNameSuggestPulse] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const submittingRef = useRef(false);
+  const [saveError, setSaveError] = useState(false);
   const gendered = useGenderedTextWith(data.gender);
   const defaultsApplied = useRef(false);
 
@@ -159,6 +162,11 @@ function CreateWizardScreen({ onboardingStep }: { onboardingStep: number }) {
       navigate(wizardPathForStep(allowed), { replace: true });
     }
   }, [data, loaded, navigate, onboardingStep]);
+
+  // La pantalla no se remonta entre pasos: un error del paso anterior no aplica al nuevo.
+  useEffect(() => {
+    setSaveError(false);
+  }, [onboardingStep]);
 
   useEffect(() => {
     if (!loaded || defaultsApplied.current) return;
@@ -203,26 +211,37 @@ function CreateWizardScreen({ onboardingStep }: { onboardingStep: number }) {
   };
 
   const onContinue = async () => {
-    if (!canProceed || !loaded) return;
-    flushSave(webView);
-    if (onboardingStep === ONBOARDING_STEPS.interests) {
-      await saveWithWebView('como');
-    }
+    if (!canProceed || !loaded || submittingRef.current) return;
 
     if (onboardingStep === ONBOARDING_STEPS.name) {
+      submittingRef.current = true;
       setSubmitting(true);
+      setSaveError(false);
       try {
-        await saveWithWebView('revision');
-        flushSave('revision');
-        if (returnToRevision) {
-          navigate('/crear/revision');
-        } else {
-          navigate('/crear/revision');
+        try {
+          await saveWithWebView('revision');
+        } catch {
+          // eJoi-BE puede rechazar `revision`; basta con que el borrador tenga el nombre.
+          await saveWithWebView(webView);
         }
+        const state: ReviewLocationState = { adultConfirmed: true };
+        navigate('/crear/revision', { state });
+      } catch {
+        setSaveError(true);
       } finally {
+        submittingRef.current = false;
         setSubmitting(false);
       }
       return;
+    }
+
+    flushSave(webView);
+    if (onboardingStep === ONBOARDING_STEPS.interests) {
+      try {
+        await saveWithWebView('como');
+      } catch {
+        /* el autosave reintenta; no bloquear el avance */
+      }
     }
 
     const next = nextWizardStep(onboardingStep);
@@ -658,6 +677,12 @@ function CreateWizardScreen({ onboardingStep }: { onboardingStep: number }) {
       </p>
     ) : null;
 
+  const saveErrorNotice = saveError ? (
+    <p className="field__error" role="alert">
+      {tWeb('create.save_failed')}
+    </p>
+  ) : null;
+
   const crystal = <WizardCrystal color={data.gender ? BALL_COLOR[data.gender] : BALL_COLOR.femenino} />;
 
   if (mobile) {
@@ -688,6 +713,7 @@ function CreateWizardScreen({ onboardingStep }: { onboardingStep: number }) {
         </main>
         <footer className="create-mobile__footer">
           {footerHint}
+          {saveErrorNotice}
           {showBack ? (
             <button type="button" className="create-mobile__back" onClick={onBack}>
               {tWeb('create.back')}
@@ -730,6 +756,7 @@ function CreateWizardScreen({ onboardingStep }: { onboardingStep: number }) {
         footer={
           <div className="creation-shell-footer creation-shell-footer--cta">
             {footerHint}
+            {saveErrorNotice}
             <button
               type="button"
               className="btn btn--primary btn--l creation-shell-footer__primary"

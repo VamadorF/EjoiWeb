@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test';
 
 import {
   installIntegrationMock,
+  LEGACY_BE_DRAFT_WEB_VIEWS,
   loginWithTestSession,
   resetIntegrationMockState,
 } from './fixtures/integrationMock';
@@ -27,6 +28,20 @@ test.describe('Revisión antes de crear', () => {
     await expect(page.getByTestId('create-review-page')).toBeVisible();
     await expect(page.getByTestId('companion-card')).toBeVisible();
     await expect(page.getByTestId('review-create-cta')).toBeDisabled();
+  });
+
+  test('Crear llega a revisión aunque el BE rechace webView "revision"', async ({ page }) => {
+    await installIntegrationMock(page, { draftWebViews: LEGACY_BE_DRAFT_WEB_VIEWS });
+    await page.goto('/acceso');
+    await loginWithTestSession(page);
+    await advanceToWizardStep(page, 4);
+
+    await page.getByLabel('Nombre').fill('Luna');
+    await page.getByRole('checkbox').click();
+    await page.getByRole('button', { name: 'Crear' }).click();
+    await page.waitForURL('**/crear/revision');
+
+    await expect(page.getByTestId('create-review-page')).toBeVisible();
   });
 
   test('consentimiento y creación envían retrato', async ({ page }) => {
