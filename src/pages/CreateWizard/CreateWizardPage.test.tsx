@@ -143,6 +143,18 @@ describe('CreateWizardPage — último paso', () => {
     expect(router.state.location.pathname).toBe('/crear/paso-4/nombre');
   }, 10_000);
 
+  it('el error de guardado desaparece al volver a otro paso', async () => {
+    setup({ putFails: true });
+    const router = await renderWizard('/crear/paso-4/nombre');
+    fireEvent.click(await fillNameStep());
+    await screen.findByRole('alert');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Volver' }));
+
+    await waitFor(() => expect(router.state.location.pathname).toBe('/crear/paso-3/intereses'));
+    expect(screen.queryByRole('alert')).toBeNull();
+  }, 10_000);
+
   it('doble clic en Crear hace un solo intento de guardado "revision"', async () => {
     const { puts } = setup();
     const router = await renderWizard('/crear/paso-4/nombre');

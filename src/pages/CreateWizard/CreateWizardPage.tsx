@@ -163,6 +163,11 @@ function CreateWizardScreen({ onboardingStep }: { onboardingStep: number }) {
     }
   }, [data, loaded, navigate, onboardingStep]);
 
+  // La pantalla no se remonta entre pasos: un error del paso anterior no aplica al nuevo.
+  useEffect(() => {
+    setSaveError(false);
+  }, [onboardingStep]);
+
   useEffect(() => {
     if (!loaded || defaultsApplied.current) return;
     if (onboardingStep === ONBOARDING_STEPS.intensity && !data.intensity) {
