@@ -19,7 +19,14 @@ export type IntegrationMockOptions = {
   companionCreateFailures?: number;
   /** Retraso en ms antes de pasar de creating a ready en el poll. */
   readyAfterMs?: number;
+  /** Vistas que acepta PUT del borrador; fuera de la lista responde 400 como eJoi-BE. */
+  draftWebViews?: readonly string[];
 };
+
+/** `ONBOARDING_DRAFT_WEB_VIEWS` de eJoi-BE (fix/onboarding-draft-revision-view). */
+export const BE_DRAFT_WEB_VIEWS = ['quien', 'como', 'chat', 'revision'] as const;
+/** Contrato previo de eJoi-BE develop, sin `revision`. */
+export const LEGACY_BE_DRAFT_WEB_VIEWS = ['quien', 'como', 'chat'] as const;
 
 export type IntegrationMockHandle = {
   getDraft: () => OnboardingDraftBody | null;
@@ -51,6 +58,7 @@ export async function installIntegrationMock(
 ): Promise<IntegrationMockHandle> {
   const userId = options.userId ?? E2E_USER_ID;
   const accessToken = fakeAccessToken(userId);
+  const draftWebViews = options.draftWebViews ?? BE_DRAFT_WEB_VIEWS;
   if (!draftStore.has(userId)) draftStore.set(userId, null);
   if (!creationStore.has(userId)) {
     creationStore.set(userId, {
@@ -123,6 +131,16 @@ export async function installIntegrationMock(
 
     if (path.includes('/users/me/onboarding-draft') && method === 'PUT') {
       const nextDraft = route.request().postDataJSON() as OnboardingDraftBody;
+      const webView = nextDraft.data?.webView;
+      if (typeof webView === 'string' && !draftWebViews.includes(webView)) {
+        // Igual que eJoi-BE: ValidationPipe con IsIn(ONBOARDING_DRAFT_WEB_VIEWS).
+        await route.fulfill({
+          status: 400,
+          contentType: 'application/json',
+          body: JSON.stringify({ message: ['data.webView must be one of the following values'] }),
+        });
+        return;
+      }
       draftStore.set(userId, nextDraft);
       await route.fulfill({
         status: 200,
