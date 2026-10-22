@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Navigate, useNavigate } from 'react-router';
+import { Navigate, useLocation, useNavigate } from 'react-router';
 
 import { legalDocuments } from '@/features/auth/assets/legalDocuments';
 import { ONBOARDING_STEPS } from '@/features/onboarding/constants/onboardingSteps';
@@ -34,6 +34,7 @@ import {
   intensityLabelForCard,
   isLoginConsentComplete,
   REVISION_EDIT_PATHS,
+  type ReviewLocationState,
 } from '~/features/creation/reviewHelpers';
 import { useGenderedTextWith } from '~/features/gender/useGenderedText';
 import { startCreation } from '~/features/creation/startCreation';
@@ -59,6 +60,9 @@ type LegalDocKey = keyof typeof legalDocuments;
 export default function CreateReviewPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
+  // Se lee al montar: la confirmación +18 del wizard no debe cambiar con navegaciones internas.
+  const adultFromStateRef = useRef((location.state as ReviewLocationState | null)?.adultConfirmed === true);
   const [data, setData] = useState<OnboardingData | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [adultFromWizard, setAdultFromWizard] = useState(false);
@@ -85,7 +89,7 @@ export default function CreateReviewPage() {
         if (!active) return;
         if (draft?.data) {
           setData(mergeDraftIntoData(emptyOnboardingData(), draft.data));
-          setAdultFromWizard(draft.data.webView === 'revision');
+          setAdultFromWizard(draft.data.webView === 'revision' || adultFromStateRef.current);
         }
         setLoaded(true);
       })
