@@ -19,6 +19,7 @@ import { decodeJwtPayload, googleSubFromIdToken } from '~/features/auth/decodeJw
 import { mountGoogleButton } from '~/features/auth/googleIdentity';
 import { isAppleSignInConfigured, signInWithApple } from '~/features/auth/appleIdentity';
 import { useWebSession } from '~/features/auth/useWebSession';
+import { useThemePreference } from '~/theme/theme';
 
 import { LegalDocumentModal } from './LegalDocumentModal';
 import './WelcomePage.css';
@@ -47,6 +48,7 @@ export default function WelcomePage() {
   const location = useLocation();
   const { markAuthenticated } = useWebSession();
   const googleHostRef = useRef<HTMLDivElement>(null);
+  const { resolved: theme } = useThemePreference();
   const providersGroupId = useId();
 
   const [returning, setReturning] = useState(false);
@@ -108,10 +110,14 @@ export default function WelcomePage() {
 
   useEffect(() => {
     if (!isOAuthConfigured.google || !googleHostRef.current) return;
-    void mountGoogleButton(googleHostRef.current, (token) => {
-      void handleGoogleCredential(token);
-    });
-  }, [handleGoogleCredential]);
+    void mountGoogleButton(
+      googleHostRef.current,
+      (token) => {
+        void handleGoogleCredential(token);
+      },
+      theme,
+    );
+  }, [handleGoogleCredential, theme]);
 
   const handleMockLogin = async () => {
     setBusy(true);
@@ -206,13 +212,7 @@ export default function WelcomePage() {
           <div id={providersGroupId} className="welcome-actions__providers">
             {isOAuthConfigured.google ? (
               <div className="welcome-actions__google" data-busy={busy || undefined}>
-                <span className="btn btn--l welcome-actions__google-face" aria-hidden="true">
-                  <span className="welcome-actions__google-badge">
-                    <img src="/logos/google-g.svg" alt="" width={18} height={18} />
-                  </span>
-                  {t('auth.login.continue_google')}
-                </span>
-                {/* Botón real de GIS (id_token) invisible encima de la cara visual. */}
+                {/* Botón oficial de GIS (id_token), sin estilos propios: lo exigen las directrices de marca de Google. */}
                 <div ref={googleHostRef} className="welcome-actions__google-host" />
               </div>
             ) : null}

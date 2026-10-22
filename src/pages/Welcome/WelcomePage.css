@@ -137,35 +137,9 @@ html.welcome-route {
   width: 100%;
 }
 
+/* Botón oficial de Google: no se tocan color, tipografía ni logo; solo se centra y se bloquea al cargar. */
 .welcome-actions__google {
-  position: relative;
   width: 100%;
-  min-height: 56px;
-  border-radius: 16px;
-}
-
-.welcome-actions__google-face {
-  width: 100%;
-  min-height: 56px;
-  border-radius: 16px;
-  background: var(--c-brand);
-  color: var(--c-on-brand);
-  box-shadow: var(--elev-cta);
-  font-weight: 700;
-  pointer-events: none;
-}
-
-.welcome-actions__google:hover .welcome-actions__google-face {
-  background: var(--c-brand-pressed);
-}
-
-.welcome-actions__google:active .welcome-actions__google-face {
-  transform: scale(0.98);
-}
-
-.welcome-actions__google:focus-within {
-  outline: 2px solid var(--c-brand-text);
-  outline-offset: 3px;
 }
 
 .welcome-actions__google[data-busy] {
@@ -173,22 +147,11 @@ html.welcome-route {
   pointer-events: none;
 }
 
-.welcome-actions__google-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 999px;
-  background: var(--c-on-brand);
-}
-
 .welcome-actions__google-host {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  border-radius: 16px;
-  opacity: 0.01;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  min-height: 40px;
 }
 
 .welcome-actions__apple {
