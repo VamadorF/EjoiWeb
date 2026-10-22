@@ -76,6 +76,30 @@ describe('auth.api', () => {
     expect(session.getRefreshToken()).toBeNull();
   });
 
+  it('logoutWeb emite ejoi:session-expired', async () => {
+    const onExpired = vi.fn();
+    window.addEventListener('ejoi:session-expired', onExpired);
+    routeFetch({ '/auth/logout': () => jsonResponse({ code: 200, status: 'ok' }) });
+
+    await logoutWeb();
+
+    expect(onExpired).toHaveBeenCalledTimes(1);
+    window.removeEventListener('ejoi:session-expired', onExpired);
+  });
+
+  it('logoutWeb emite el evento y limpia tokens aunque /auth/logout falle', async () => {
+    const onExpired = vi.fn();
+    window.addEventListener('ejoi:session-expired', onExpired);
+    session.setRefreshToken('rt-1');
+    routeFetch({ '/auth/logout': () => jsonResponse({ message: 'boom' }, 500) });
+
+    await expect(logoutWeb()).rejects.toThrow();
+
+    expect(onExpired).toHaveBeenCalledTimes(1);
+    expect(session.getRefreshToken()).toBeNull();
+    window.removeEventListener('ejoi:session-expired', onExpired);
+  });
+
   describe('resolvePostLoginPath sin /companion/me/creation en el backend', () => {
     it('va al chat si el usuario ya tiene compañero', async () => {
       routeFetch({ '/companion/me': () => jsonResponse({ id: 'c1', name: 'Luna' }) });

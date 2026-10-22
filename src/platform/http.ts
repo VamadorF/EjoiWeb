@@ -1,6 +1,7 @@
 import { API_URL, MOCK_API } from './env';
 import { handleMockApiRequest } from './mockApi';
 import * as session from './session';
+import { notifySessionExpired } from './sessionEvents';
 
 export interface RequestConfig {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
@@ -34,12 +35,6 @@ export class ApiError extends Error {
 }
 
 const DEFAULT_TIMEOUT_MS = 30000;
-
-function sessionExpiredEvent() {
-  if (typeof window !== 'undefined') {
-    window.dispatchEvent(new CustomEvent('ejoi:session-expired'));
-  }
-}
 
 async function parseBody(response: Response): Promise<unknown> {
   const ct = response.headers.get('content-type') ?? '';
@@ -121,15 +116,19 @@ async function requestInternal<T>(endpoint: string, config: RequestConfig): Prom
       try {
         await session.refresh();
       } catch {
-        session.clearSession();
-        sessionExpiredEvent();
+        // doRefresh borra el refresh token solo si el backend lo rechazó; si sigue
+        // ahí fue un error de red y la sesión puede recuperarse en el próximo intento.
+        if (!session.getRefreshToken()) {
+          session.clearSession();
+          notifySessionExpired();
+        }
         throw err;
       }
       return requestOnce<T>(endpoint, { ...config, _retry: true });
     }
     if (err instanceof ApiError && err.status === 401 && config._retry) {
       session.clearSession();
-      sessionExpiredEvent();
+      notifySessionExpired();
     }
     throw err;
   }

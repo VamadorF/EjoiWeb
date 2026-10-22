@@ -105,14 +105,15 @@ function AccountPageInner() {
     setDeleting(true);
     try {
       await deleteUserAccount();
-      await logoutWeb();
-      navigate('/', { replace: true });
     } catch {
       window.alert(t('deleteAccount.error'));
-    } finally {
       setDeleting(false);
       setDeleteOpen(false);
+      return;
     }
+    // La cuenta ya no existe: un fallo de /auth/logout no debe dejar al usuario dentro.
+    await logoutWeb().catch(() => {});
+    navigate('/', { replace: true });
   };
 
   return (
