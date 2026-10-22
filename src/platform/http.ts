@@ -116,8 +116,12 @@ async function requestInternal<T>(endpoint: string, config: RequestConfig): Prom
       try {
         await session.refresh();
       } catch {
-        session.clearSession();
-        notifySessionExpired();
+        // doRefresh borra el refresh token solo si el backend lo rechazó; si sigue
+        // ahí fue un error de red y la sesión puede recuperarse en el próximo intento.
+        if (!session.getRefreshToken()) {
+          session.clearSession();
+          notifySessionExpired();
+        }
         throw err;
       }
       return requestOnce<T>(endpoint, { ...config, _retry: true });
