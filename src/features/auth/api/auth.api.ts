@@ -1,6 +1,7 @@
 import type { AppleLoginRequest, GoogleLoginRequest, User } from '@/features/auth/types';
 import { ApiError, httpClient } from '~/platform/http';
 import * as session from '~/platform/session';
+import { notifySessionExpired } from '~/platform/sessionEvents';
 
 import {
   fromWebAuthResponse,
@@ -60,6 +61,7 @@ export async function logoutWeb(): Promise<void> {
   } finally {
     session.clearSession();
     session.clearRefreshToken();
+    notifySessionExpired();
   }
 }
 
