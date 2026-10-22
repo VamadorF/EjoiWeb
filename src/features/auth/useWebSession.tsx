@@ -10,6 +10,7 @@ import {
 import { useLocation, useNavigate } from 'react-router';
 
 import * as session from '~/platform/session';
+import { SESSION_EXPIRED_EVENT } from '~/platform/sessionEvents';
 
 import { resolvePostLoginPath } from './api/auth.api';
 
@@ -52,6 +53,11 @@ export function WebSessionProvider({ children }: { children: ReactNode }) {
     setIsAuthenticated(false);
   }, []);
 
+  useEffect(() => {
+    window.addEventListener(SESSION_EXPIRED_EVENT, markLoggedOut);
+    return () => window.removeEventListener(SESSION_EXPIRED_EVENT, markLoggedOut);
+  }, [markLoggedOut]);
+
   const value = useMemo(
     () => ({ boot, isAuthenticated, markAuthenticated, markLoggedOut }),
     [boot, isAuthenticated, markAuthenticated, markLoggedOut],
@@ -84,9 +90,12 @@ export function SessionRouting() {
     }
 
     if (location.pathname === '/') {
-      void resolvePostLoginPath().then((path) => {
-        if (location.pathname !== path) navigate(path, { replace: true });
-      });
+      // Si falla, http.ts ya emitió SESSION_EXPIRED_EVENT y el provider cierra la sesión.
+      void resolvePostLoginPath()
+        .then((path) => {
+          if (location.pathname !== path) navigate(path, { replace: true });
+        })
+        .catch(() => {});
     }
   }, [boot, isAuthenticated, location.pathname, navigate]);
 
