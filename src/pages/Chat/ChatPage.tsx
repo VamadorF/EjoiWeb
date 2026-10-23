@@ -1,4 +1,4 @@
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
@@ -24,7 +24,7 @@ import {
 import { QuickReplies } from '~/features/chat/QuickReplies';
 import { useCreationStatus } from '~/features/chat/useCreationStatus';
 import { useProfile } from '~/features/chat/useProfile';
-import { isQuotaExhausted, useQuota } from '~/features/chat/useQuota';
+import { isQuotaExhausted, resolveMessagesRemaining, useQuota } from '~/features/chat/useQuota';
 import { useGenderedTextWith } from '~/features/gender/useGenderedText';
 import { presenceActions } from '~/features/presence/presenceStore';
 import { usePresenceSignals } from '~/features/presence/usePresenceSignals';
@@ -51,6 +51,12 @@ export default function ChatPage() {
   const { data: profileData } = useProfile(isReady);
   const { data: subscription } = useQuota(isReady);
   const quotaOut = isQuotaExhausted(subscription);
+  const queryClient = useQueryClient();
+  // El BE descuenta el cupo en cada envío (también rechaza con cupo agotado): refrescar como en móvil.
+  const refreshQuota = useCallback(
+    () => void queryClient.invalidateQueries({ queryKey: queryKeys.subscription.me }),
+    [queryClient],
+  );
 
   const { trigger: triggerReaction, notifyActivity } = useChatSession();
   const mePresence = usePresenceSignals('me');
@@ -128,8 +134,9 @@ export default function ChatPage() {
     } finally {
       setSending(false);
       companionPresence.setSending(false);
+      refreshQuota();
     }
-  }, [companionId, companionPresence, pending, refetchHistory]);
+  }, [companionId, companionPresence, pending, refetchHistory, refreshQuota]);
 
   const handleSend = useCallback(
     async (text: string) => {
@@ -199,6 +206,7 @@ export default function ChatPage() {
       } finally {
         setSending(false);
         companionPresence.setSending(false);
+        refreshQuota();
       }
     },
     [
@@ -212,6 +220,7 @@ export default function ChatPage() {
       profileData?.interests,
       quotaOut,
       refetchHistory,
+      refreshQuota,
       sending,
       triggerReaction,
     ],
@@ -266,7 +275,7 @@ export default function ChatPage() {
   const hasUserMessage = bubbles.some((b) => b.role === 'user');
   const quickReplies = firstMessage?.meta?.quickReplies ?? [];
   const basedOn = firstMessage?.meta?.basedOnInterests ?? [];
-  const messagesRemaining = subscription?.messagesRemaining;
+  const messagesRemaining = resolveMessagesRemaining(subscription);
   const showQuotaLow =
     isReady && !quotaOut && messagesRemaining != null && messagesRemaining <= QUOTA_LOW_THRESHOLD;
 
