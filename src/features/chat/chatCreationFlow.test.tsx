@@ -10,6 +10,7 @@ import * as creationStatus from '~/features/chat/useCreationStatus';
 import { queryKeys } from '@/shared/lib/queryKeys';
 
 const invalidateQueries = vi.fn();
+let historyPage: { messages: unknown[]; hasMore: boolean } = { messages: [], hasMore: false };
 
 vi.mock('~/features/chat/useProfile', () => ({
   useProfile: () => ({
@@ -38,7 +39,7 @@ vi.mock('@tanstack/react-query', async (importOriginal) => {
   return {
     ...actual,
     useInfiniteQuery: () => ({
-      data: { pages: [{ messages: [], hasMore: false }] },
+      data: { pages: [historyPage] },
       hasNextPage: false,
       isFetchingNextPage: false,
       fetchNextPage: vi.fn(),
@@ -66,6 +67,7 @@ describe('chat conversación', () => {
   beforeEach(() => {
     memoryStore.clear();
     invalidateQueries.mockClear();
+    historyPage = { messages: [], hasMore: false };
     vi.spyOn(pendingModule, 'clearPending').mockResolvedValue();
     vi.spyOn(pendingModule, 'savePending').mockResolvedValue();
     vi.spyOn(pendingModule, 'resolveUserIdFromSession').mockReturnValue('user-1');
@@ -96,6 +98,31 @@ describe('chat conversación', () => {
   it('muestra icebreakers cuando aún no hay mensajes del usuario', () => {
     renderChat();
     expect(screen.getByTestId('chat-icebreakers')).toBeTruthy();
+  });
+
+  it('mantiene el intro al inicio con historial existente', () => {
+    const msg = (id: string, role: string, message: string, createdAt: string) => ({
+      id,
+      companionId: 'c1',
+      role,
+      message,
+      createdAt,
+    });
+    historyPage = {
+      messages: [
+        msg('fm1', 'assistant', 'Hola desde Luna', '2026-10-23T10:00:00.000Z'),
+        msg('u1', 'user', 'Hola Luna', '2026-10-23T10:05:00.000Z'),
+        msg('a1', 'assistant', 'Cuéntame más', '2026-10-23T10:06:00.000Z'),
+      ],
+      hasMore: false,
+    };
+
+    renderChat();
+
+    const list = screen.getByTestId('chat-messages');
+    const texts = [...list.querySelectorAll('.bubble--ai p, .bubble--user p')].map((p) => p.textContent);
+    expect(texts).toEqual(['Hola desde Luna', 'Hola Luna', 'Cuéntame más']);
+    expect(within(list).getAllByText('Hola desde Luna')).toHaveLength(1);
   });
 
   it('muestra reintentar cuando hay pendiente fallido en storage', async () => {
