@@ -5,6 +5,8 @@ import type { CreationFirstMessage } from './useCreationStatus';
 
 export type BuildChatBubblesInput = {
   history: Message[];
+  /** Quedan páginas más antiguas sin cargar: el intro real llegará con ellas. */
+  hasMore?: boolean;
   firstMessage?: CreationFirstMessage;
   /** Timestamp estable (capturado al montar) para el intro cuando no hay otros mensajes. */
   introFallbackAt: string;
@@ -17,7 +19,13 @@ const timeOf = (iso?: string) => (iso ? new Date(iso).getTime() : 0);
  * Arma las burbujas en orden cronológico. El intro del historial manda (trae su `createdAt` real);
  * si aún no llegó, se inyecta el de creación justo antes del mensaje más antiguo.
  */
-export function buildChatBubbles({ history, firstMessage, introFallbackAt, pending }: BuildChatBubblesInput): ChatBubble[] {
+export function buildChatBubbles({
+  history,
+  hasMore,
+  firstMessage,
+  introFallbackAt,
+  pending,
+}: BuildChatBubblesInput): ChatBubble[] {
   const byId = new Map<string, ChatBubble>();
   let introInHistory = false;
 
@@ -33,7 +41,7 @@ export function buildChatBubbles({ history, firstMessage, introFallbackAt, pendi
 
   if (pending) byId.set(pending.id, pending);
 
-  if (firstMessage?.content && !introInHistory) {
+  if (firstMessage?.content && !introInHistory && !(hasMore && history.length > 0)) {
     const times = [...byId.values()].map((b) => timeOf(b.createdAt)).filter((t) => t > 0);
     const createdAt = times.length ? new Date(Math.min(...times) - 1).toISOString() : introFallbackAt;
     byId.set(firstMessage.id, {

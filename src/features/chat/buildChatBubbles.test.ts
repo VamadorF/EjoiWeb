@@ -63,6 +63,16 @@ describe('buildChatBubbles', () => {
     expect(intro!.createdAt).toBe(introFallbackAt);
   });
 
+  it('no inyecta el intro si quedan páginas anteriores por cargar', () => {
+    const bubbles = buildChatBubbles({
+      history: [msg('u40', 'user', 'Reciente', at('10:05'))],
+      hasMore: true,
+      firstMessage,
+      introFallbackAt,
+    });
+    expect(bubbles.map((b) => b.id)).toEqual(['u40']);
+  });
+
   it('es estable entre llamadas', () => {
     const input = { history: [msg('u1', 'user', 'Hola', at('10:05'))], firstMessage, introFallbackAt };
     expect(buildChatBubbles(input)[0]!.createdAt).toBe(buildChatBubbles(input)[0]!.createdAt);

@@ -252,8 +252,14 @@ export default function ChatPage() {
         }
       : undefined;
 
-    return buildChatBubbles({ history: historyMessages, firstMessage, introFallbackAt, pending: pendingBubble });
-  }, [firstMessage, historyMessages, introFallbackAt, pending, pendingFailed, retryPending, sending]);
+    return buildChatBubbles({
+      history: historyMessages,
+      hasMore: hasNextPage,
+      firstMessage,
+      introFallbackAt,
+      pending: pendingBubble,
+    });
+  }, [firstMessage, hasNextPage, historyMessages, introFallbackAt, pending, pendingFailed, retryPending, sending]);
 
   const hasUserMessage = bubbles.some((b) => b.role === 'user');
   const quickReplies = firstMessage?.meta?.quickReplies ?? [];
