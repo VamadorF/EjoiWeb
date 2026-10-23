@@ -80,4 +80,45 @@ describe('useCreationStatus', () => {
     expect(result.current.state).toBe('error');
     expect(result.current.status.error?.code).toBe('TIMEOUT');
   });
+
+  it('con borrador "chat" sigue esperando aunque el backend aún diga none', async () => {
+    vi.mocked(httpClient.get).mockResolvedValue({
+      data: { state: 'none', steps: {} },
+      status: 200,
+      statusText: 'OK',
+    });
+    vi.spyOn(draftApi, 'getOnboardingDraftRecord').mockResolvedValue({
+      schemaVersion: 1,
+      step: 14,
+      data: { webView: 'chat' },
+      updatedAt: new Date().toISOString(),
+    });
+
+    const { result } = renderHook(() => useCreationStatus());
+    expect(result.current.settled).toBe(false);
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(CREATION_POLL_MS);
+    });
+    expect(result.current.state).toBe('none');
+    expect(result.current.settled).toBe(false);
+    expect(result.current.isCreating).toBe(true);
+  });
+
+  it('sin borrador "chat" un none del backend es definitivo', async () => {
+    vi.mocked(httpClient.get).mockResolvedValue({
+      data: { state: 'none', steps: {} },
+      status: 200,
+      statusText: 'OK',
+    });
+    vi.spyOn(draftApi, 'getOnboardingDraftRecord').mockResolvedValue(null);
+
+    const { result } = renderHook(() => useCreationStatus());
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(0);
+    });
+    expect(result.current.state).toBe('none');
+    expect(result.current.settled).toBe(true);
+  });
 });

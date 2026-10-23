@@ -89,6 +89,14 @@ export async function fetchGreetingPreview(body: GreetingPreviewBody): Promise<G
   return response.data;
 }
 
+/**
+ * La URL firmada de GCS supera el `@MaxLength(400)` de `avatarUrl` en eJoi-BE (400 silencioso).
+ * Sin la firma sigue identificando el objeto; el BE la re-firma desde `avatarStoragePath`.
+ */
+function withoutQuery(url: string): string {
+  return url.split('?')[0];
+}
+
 export type StartCreationParams = {
   data: OnboardingData;
   step: number;
@@ -108,7 +116,7 @@ export async function startCreation(
 
   const payload = {
     ...buildCreateCompanionPayload(params.data),
-    avatarUrl: params.avatarUrl,
+    avatarUrl: withoutQuery(params.avatarUrl),
     ...(params.avatarStoragePath ? { avatarStoragePath: params.avatarStoragePath } : {}),
   };
 

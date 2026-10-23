@@ -48,6 +48,8 @@ export function useCreationStatus(retryKey = 0) {
   const [status, setStatus] = useState<CompanionCreationStatus>({ state: 'none' });
   const [pollError, setPollError] = useState<string | null>(null);
   const [awaitingFromDraft, setAwaitingFromDraft] = useState(false);
+  /** El sondeo terminó: `state` ya no es el valor inicial ni un `none` transitorio. */
+  const [settled, setSettled] = useState(false);
   const startedAtRef = useRef(Date.now());
   const noneChatUntilRef = useRef<number | null>(null);
 
@@ -56,6 +58,7 @@ export function useCreationStatus(retryKey = 0) {
     noneChatUntilRef.current = null;
     setPollError(null);
     setAwaitingFromDraft(false);
+    setSettled(false);
   }, [retryKey]);
 
   const pollOnce = useCallback(async (): Promise<'stop' | 'continue'> => {
@@ -112,7 +115,11 @@ export function useCreationStatus(retryKey = 0) {
 
     const loop = async () => {
       const action = await pollOnce();
-      if (cancelled || action === 'stop') return;
+      if (cancelled) return;
+      if (action === 'stop') {
+        setSettled(true);
+        return;
+      }
       timer = setTimeout(() => void loop(), CREATION_POLL_MS);
     };
 
@@ -131,6 +138,7 @@ export function useCreationStatus(retryKey = 0) {
     profile: status.profile,
     firstMessage: status.firstMessage,
     isCreating: status.state === 'creating' || awaitingFromDraft,
+    settled,
     pollError,
   };
 }

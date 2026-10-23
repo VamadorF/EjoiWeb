@@ -59,6 +59,7 @@ type LegalDocKey = keyof typeof legalDocuments;
 
 export default function CreateReviewPage() {
   const { t } = useTranslation();
+  const { t: tWeb } = useTranslation('web');
   const navigate = useNavigate();
   const location = useLocation();
   // Se lee al montar: la confirmación +18 del wizard no debe cambiar con navegaciones internas.
@@ -76,6 +77,7 @@ export default function CreateReviewPage() {
   const [catalogOpen, setCatalogOpen] = useState(false);
   const [catalogReason, setCatalogReasonState] = useState<AvatarCatalogReason | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+  const [createError, setCreateError] = useState(false);
   const [legalDocument, setLegalDocument] = useState<LegalDocKey | null>(null);
   const [variantTick, setVariantTick] = useState(0);
   const initialGenerationKeyRef = useRef<string | null>(null);
@@ -217,17 +219,21 @@ export default function CreateReviewPage() {
   const handleCreate = async () => {
     if (!data || !canCreate || !imageUrl) return;
     setIsCreating(true);
+    setCreateError(false);
     try {
+      // `chat`: el sondeo del chat y el re-login esperan esta vista; eJoi-BE rechaza `revision`.
       await startCreation(
         {
           data,
           step: ONBOARDING_STEPS.name,
-          webView: 'revision',
+          webView: 'chat',
           avatarUrl: imageUrl,
           avatarStoragePath: storagePath ?? undefined,
         },
         navigate,
       );
+    } catch {
+      setCreateError(true);
     } finally {
       setIsCreating(false);
     }
@@ -315,6 +321,11 @@ export default function CreateReviewPage() {
             />
             {!canCreate && !consentComplete ? (
               <p className="create-review__hint">{t('companion.create.consent_cta_hint')}</p>
+            ) : null}
+            {createError ? (
+              <p className="field__error" role="alert">
+                {tWeb('create.create_failed')}
+              </p>
             ) : null}
             <button
               type="button"

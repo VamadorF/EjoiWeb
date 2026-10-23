@@ -98,7 +98,7 @@ describe('startCreation', () => {
       {
         data,
         step: 14,
-        webView: 'revision',
+        webView: 'chat',
         avatarUrl: 'https://example.com/avatar.webp',
         avatarStoragePath: 'mock/avatar.webp',
       },
@@ -113,4 +113,32 @@ describe('startCreation', () => {
     );
     expect(navigate).toHaveBeenCalledWith('/crear/creando');
   });
+
+  it('envía el avatar sin la firma GCS para no pasar los 400 caracteres de eJoi-BE', async () => {
+    const signed =
+      'https://storage.googleapis.com/ejoi-images/avatars/u1/a.webp' +
+      '?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=sa%40p.iam.gserviceaccount.com%2F20261023%2Fauto%2Fstorage%2Fgoog4_request' +
+      '&X-Goog-Date=20261023T120000Z&X-Goog-Expires=3600&X-Goog-SignedHeaders=host' +
+      `&X-Goog-Signature=${'a'.repeat(512)}`;
+
+    await startCreation(
+      {
+        data: sampleData(),
+        step: 14,
+        webView: 'chat',
+        avatarUrl: signed,
+        avatarStoragePath: 'avatars/u1/a.webp',
+      },
+      vi.fn(),
+    );
+
+    expect(httpClient.post).toHaveBeenCalledWith(
+      '/companion/me',
+      expect.objectContaining({
+        avatarUrl: 'https://storage.googleapis.com/ejoi-images/avatars/u1/a.webp',
+        avatarStoragePath: 'avatars/u1/a.webp',
+      }),
+    );
+  });
 });
+
