@@ -119,6 +119,41 @@ describe('mockApi', () => {
     expect((profile?.data as { age?: number }).age).toBe(31);
   });
 
+  it('el historial mock conserva createdAt y orden', () => {
+    const authToken = tokenFor('user-order');
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-01-01T12:00:00Z'));
+    handleMockApiRequest('/api/companion/me', {
+      method: 'POST',
+      authToken,
+      body: { name: 'Sofía', interests: demoInterests, persona: 'Amigable', intensity: 'balanced' },
+    });
+    vi.advanceTimersByTime(4100);
+    handleMockApiRequest('/api/chat/history', { method: 'GET', authToken });
+    vi.advanceTimersByTime(1000);
+    handleMockApiRequest('/api/chat/message', {
+      method: 'POST',
+      authToken,
+      body: { message: 'Hola', clientMessageId: 'c1' },
+    });
+
+    type Row = { createdAt?: string; meta?: { kind?: string } };
+    const read = () =>
+      (handleMockApiRequest('/api/chat/history', { method: 'GET', authToken })?.data as { messages: Row[] })
+        .messages;
+    const first = read();
+    vi.advanceTimersByTime(1000);
+    const second = read();
+    vi.useRealTimers();
+
+    expect(first[0]?.meta?.kind).toBe('first_message');
+    const times = first.map((m) => new Date(m.createdAt ?? '').getTime());
+    expect(times.every((t) => Number.isFinite(t))).toBe(true);
+    expect([...times].sort((a, b) => a - b)).toEqual(times);
+    expect(new Set(times).size).toBe(times.length);
+    expect(second.map((m) => m.createdAt)).toEqual(first.map((m) => m.createdAt));
+  });
+
   it('respuesta demo neutra al enviar un mensaje', () => {
     const authToken = tokenFor('user-chat');
     const reply = handleMockApiRequest('/api/chat/message', {
