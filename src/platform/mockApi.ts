@@ -451,7 +451,15 @@ export function handleMockApiRequest<T>(
   }
 
   if (path.includes('/subscription/me')) {
-    return ok({ messagesRemaining: 54, planLabel: 'Plan básico' } as T);
+    return ok({
+      hasActiveSubscription: false,
+      messagesRemaining: 0,
+      freeMessagesLimit: 60,
+      freeMessagesUsed: 6,
+      freeMessagesRemaining: 54,
+      isFreeTierExhausted: false,
+      planLabel: 'Plan básico',
+    } as T);
   }
 
   if (path.includes('/campaign/founder-count')) {

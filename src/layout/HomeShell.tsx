@@ -20,7 +20,7 @@ import { usePresence } from '~/features/presence/usePresence';
 import { SideMenu, type HomeTabId } from '~/features/chat/SideMenu';
 import { useCreationStatus } from '~/features/chat/useCreationStatus';
 import { useProfile } from '~/features/chat/useProfile';
-import { useQuota } from '~/features/chat/useQuota';
+import { resolveMessagesRemaining, useQuota } from '~/features/chat/useQuota';
 import { stylePortraitSrc } from '~/features/creation/portraits';
 
 import { SkipToContent } from './SkipToContent';
@@ -197,7 +197,7 @@ function HomeShellHeader({
         )
       : null;
   const portraitUrl = profileData?.avatarUrl ?? profile?.avatarUrl ?? samplePortrait;
-  const messagesRemaining = subscription?.messagesRemaining;
+  const messagesRemaining = resolveMessagesRemaining(subscription);
 
   const leadingSlot = (
     <button
