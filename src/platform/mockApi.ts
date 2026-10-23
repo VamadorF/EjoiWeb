@@ -65,6 +65,7 @@ type MockChatMessage = {
   id: string;
   content: string;
   role: 'user' | 'assistant';
+  createdAt: string;
   meta?: Record<string, unknown>;
 };
 
@@ -211,6 +212,7 @@ function seedChatFirstMessage(userId: string, companion: MockCompanionProfile) {
       id: first.id,
       content: first.content,
       role: 'assistant',
+      createdAt: new Date().toISOString(),
       meta: first.meta,
     },
   ]);
@@ -428,12 +430,15 @@ export function handleMockApiRequest<T>(
     const userText = typeof payload.message === 'string' ? payload.message : '';
     const userIdMsg = payload.clientMessageId ?? `user-${Date.now()}`;
     const thread = chatStore.get(userId) ?? [];
-    thread.push({ id: userIdMsg, content: userText, role: 'user' });
-    const assistantId = `mock-${Date.now()}`;
+    const now = Date.now();
+    thread.push({ id: userIdMsg, content: userText, role: 'user', createdAt: new Date(now).toISOString() });
+    const assistantId = `mock-${now}`;
     const assistant = {
       id: assistantId,
       content: 'Cuéntame más sobre eso.',
       role: 'assistant' as const,
+      // +1 ms para que no empate con el mensaje del usuario al ordenar.
+      createdAt: new Date(now + 1).toISOString(),
     };
     thread.push(assistant);
     chatStore.set(userId, thread);

@@ -13,7 +13,8 @@ import { queryKeys } from '@/shared/lib/queryKeys';
 import { Composer } from '~/features/chat/Composer';
 import { useChatSession } from '~/features/chat/ChatSessionProvider';
 import { Icebreakers } from '~/features/chat/Icebreakers';
-import { MessageList, type ChatBubble, firstMessageToBubble } from '~/features/chat/MessageList';
+import { buildChatBubbles } from '~/features/chat/buildChatBubbles';
+import { MessageList, type ChatBubble } from '~/features/chat/MessageList';
 import {
   clearPending,
   loadPending,
@@ -236,41 +237,29 @@ export default function ChatPage() {
     [mePresence, notifyActivity],
   );
 
+  const [introFallbackAt] = useState(() => new Date().toISOString());
+
   const bubbles = useMemo((): ChatBubble[] => {
-    const byId = new Map<string, ChatBubble>();
+    const pendingBubble: ChatBubble | undefined = pending
+      ? {
+          id: pending.clientMessageId,
+          role: 'user',
+          text: pending.text,
+          createdAt: pending.createdAt,
+          pending: sending && !pendingFailed,
+          failed: pendingFailed,
+          onRetry: pendingFailed ? () => void retryPending() : undefined,
+        }
+      : undefined;
 
-    for (const msg of historyMessages) {
-      byId.set(msg.id, firstMessageToBubble(msg));
-    }
-
-    if (firstMessage?.content) {
-      byId.set(firstMessage.id, {
-        id: firstMessage.id,
-        role: 'assistant',
-        text: firstMessage.content,
-        basedOnInterests: firstMessage.meta?.basedOnInterests,
-        createdAt: new Date().toISOString(),
-      });
-    }
-
-    if (pending) {
-      byId.set(pending.clientMessageId, {
-        id: pending.clientMessageId,
-        role: 'user',
-        text: pending.text,
-        createdAt: pending.createdAt,
-        pending: sending && !pendingFailed,
-        failed: pendingFailed,
-        onRetry: pendingFailed ? () => void retryPending() : undefined,
-      });
-    }
-
-    return [...byId.values()].sort((a, b) => {
-      const ta = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-      const tb = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-      return ta - tb;
+    return buildChatBubbles({
+      history: historyMessages,
+      hasMore: hasNextPage,
+      firstMessage,
+      introFallbackAt,
+      pending: pendingBubble,
     });
-  }, [firstMessage, historyMessages, pending, pendingFailed, retryPending, sending]);
+  }, [firstMessage, hasNextPage, historyMessages, introFallbackAt, pending, pendingFailed, retryPending, sending]);
 
   const hasUserMessage = bubbles.some((b) => b.role === 'user');
   const quickReplies = firstMessage?.meta?.quickReplies ?? [];
