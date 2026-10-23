@@ -55,6 +55,7 @@
     "step3": "Paso 3 de 3",
     "exit": "Salir",
     "save_failed": "No pudimos guardar tu progreso. Revisa tu conexión e inténtalo de nuevo.",
+    "create_failed": "No pudimos crear tu compañía. Revisa tu conexión e inténtalo de nuevo.",
     "title_who": "¿Quién es tu eJoi?",
     "subtitle_who": "Elige cómo se ve y de qué le gusta hablar.",
     "title_how": "¿Cómo habla tu eJoi?",

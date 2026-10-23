@@ -78,6 +78,28 @@ test.describe('Revisión antes de crear', () => {
     expect(companionBody?.name).toBe('Luna');
   });
 
+  test('Crear compañera llega a creando aunque el BE rechace webView "revision"', async ({ page }) => {
+    await installIntegrationMock(page, { draftWebViews: LEGACY_BE_DRAFT_WEB_VIEWS });
+    await page.goto('/acceso');
+    await loginWithTestSession(page);
+    await advanceToWizardStep(page, 4);
+    await page.getByLabel('Nombre').fill('Luna');
+    await page.getByRole('checkbox').click();
+    await page.getByRole('button', { name: 'Crear' }).click();
+    await page.waitForURL('**/crear/revision');
+
+    const consentChecks = page.getByTestId('review-consent').getByRole('checkbox');
+    const count = await consentChecks.count();
+    for (let i = 0; i < count; i += 1) {
+      const box = consentChecks.nth(i);
+      if (!(await box.isChecked())) await box.check();
+    }
+
+    await expect(page.getByTestId('review-create-cta')).toBeEnabled({ timeout: 20_000 });
+    await page.getByTestId('review-create-cta').click();
+    await page.waitForURL('**/crear/creando');
+  });
+
   test('editar desde revisión vuelve con volver=revision', async ({ page }) => {
     await installIntegrationMock(page);
     await page.goto('/acceso');

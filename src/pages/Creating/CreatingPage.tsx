@@ -36,7 +36,7 @@ export default function CreatingPage() {
   const [draftLoaded, setDraftLoaded] = useState(false);
   const navigatedRef = useRef(false);
 
-  const { state, steps, profile } = useCreationStatus(retryKey);
+  const { state, steps, profile, settled } = useCreationStatus(retryKey);
 
   useEffect(() => {
     const timer = window.setTimeout(() => setMinDisplayDone(true), CREATION_MIN_DISPLAY_MS);
@@ -90,7 +90,8 @@ export default function CreatingPage() {
 
   if (!draftLoaded) return null;
 
-  if (state === 'none') {
+  // Justo tras el POST el BE aún responde `none`: volver solo cuando el sondeo lo confirma.
+  if (state === 'none' && settled) {
     return <Navigate to="/crear/revision" replace />;
   }
 

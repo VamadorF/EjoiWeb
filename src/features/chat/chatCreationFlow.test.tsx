@@ -79,6 +79,7 @@ describe('chat conversación', () => {
         meta: { basedOnInterests: ['Música'] },
       },
       isCreating: false,
+      settled: true,
       pollError: null,
     });
   });
