@@ -20,6 +20,7 @@ import { validators } from '@/shared/utils/validators';
 
 import { AppIcon } from '~/components/AppIcon';
 import { logoutWeb } from '~/features/auth/api/auth.api';
+import { useWebSession } from '~/features/auth/useWebSession';
 import { CreationPreviewCrumbsStrip, WizardChoicePills } from '~/features/creation/CreationPreview';
 import { useGenderedTextWith } from '~/features/gender/useGenderedText';
 import { useCreationDraft } from '~/features/creation/useCreationDraft';
@@ -121,6 +122,7 @@ function CreateWizardScreen({ onboardingStep }: { onboardingStep: number }) {
   const { t } = useTranslation();
   const { t: tWeb } = useTranslation('web');
   const navigate = useNavigate();
+  const { markLoggedOut } = useWebSession();
   const [searchParams] = useSearchParams();
   const returnToRevision = searchParams.get('volver') === 'revision';
   const disabledHintId = useId();
@@ -240,7 +242,8 @@ function CreateWizardScreen({ onboardingStep }: { onboardingStep: number }) {
   const onConfirmLeave = async () => {
     await saveWithWebView(webView);
     await logoutWeb();
-    void navigate('/acceso');
+    markLoggedOut();
+    navigate('/', { replace: true });
   };
 
   const ctaLabel =
