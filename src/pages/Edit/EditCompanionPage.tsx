@@ -310,7 +310,9 @@ function EditCompanionContent() {
                               className="opt__thumb"
                               src={stylePortraitSrcForCard(
                                 id,
-                                draft.gender === 'masculino' ? 'masculino' : 'femenino',
+                                draft.gender === 'masculino' || draft.gender === 'neutro'
+                                  ? draft.gender
+                                  : 'femenino',
                               )}
                               alt=""
                             />

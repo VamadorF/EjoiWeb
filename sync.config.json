@@ -1,6 +1,6 @@
 {
   "appDir": "../ejoiFE/ejoi",
-  "ref": "b20f6d62a97a0266796ebfb82e772f0961ed9136",
+  "ref": "9234854dc9f9992b39b7f61dfb0e02b768be467d",
   "entries": [
     "src/shared/theme/tokens.ts",
     "src/shared/i18n/index.ts",

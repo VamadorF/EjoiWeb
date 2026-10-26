@@ -26,5 +26,7 @@ describe('portraits', () => {
   it('resuelve rutas de muestra por estilo y género', () => {
     expect(stylePortraitSrc('anime', 'femenino')).toContain('ilustrado-femenino');
     expect(stylePortraitSrc('realista', 'masculino')).toContain('realista-masculino');
+    expect(stylePortraitSrc('realista', 'neutro')).toContain('realista-neutro');
+    expect(stylePortraitSrc('anime', 'neutro')).toContain('ilustrado-neutro');
   });
 });

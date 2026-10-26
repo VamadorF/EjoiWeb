@@ -1,4 +1,4 @@
-// AUTO-SINCRONIZADO desde ejoiFE b20f6d62a97a0266796ebfb82e772f0961ed9136@b20f6d62a97a0266796ebfb82e772f0961ed9136:src/features/onboarding/data/companionNames.ts. No editar: npm run sync:app
+// AUTO-SINCRONIZADO desde ejoiFE 9234854dc9f9992b39b7f61dfb0e02b768be467d@9234854dc9f9992b39b7f61dfb0e02b768be467d:src/features/onboarding/data/companionNames.ts. No editar: npm run sync:app
 import raw from './companionNames.json';
 
 export type GenderId = 'femenino' | 'masculino' | 'neutro';
