@@ -1,9 +1,17 @@
-import { render, screen } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import { Suspense } from 'react';
 import { createMemoryRouter, RouterProvider } from 'react-router';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { WebSessionProvider } from '~/features/auth/useWebSession';
+
+// WebGL (ogl) no existe en jsdom; evita trabajo async post-test en la suite completa.
+vi.mock('~/pages/CreateWizard/CrystalizedBall', () => ({ default: () => null }));
+
+afterEach(() => {
+  cleanup();
+  vi.unstubAllGlobals();
+});
 import { routeConfig } from './routes';
 import { applyCssVars } from '~/theme/cssVars';
 
@@ -23,6 +31,5 @@ describe('App shell', () => {
     expect(await screen.findByTestId('shell-header', {}, { timeout: 5000 })).toBeTruthy();
     expect(screen.getByTestId('shell-footer')).toBeTruthy();
     expect(screen.queryByTestId('shell-preview')).toBeNull();
-    vi.unstubAllGlobals();
   }, 10_000);
 });
