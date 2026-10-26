@@ -6,9 +6,20 @@ type PortraitManifest = { files?: PortraitManifestEntry[]; assets?: PortraitMani
 
 const PORTRAIT_PREFIX = 'public/portraits/';
 
-const STYLE_PORTRAIT_PATHS: Record<VisualStyle, readonly [string, string]> = {
-  realista: ['/portraits/realista-femenino.webp', '/portraits/realista-masculino.webp'],
-  anime: ['/portraits/ilustrado-femenino.webp', '/portraits/ilustrado-masculino.webp'],
+const STYLE_PORTRAIT_PATHS: Record<
+  VisualStyle,
+  Record<'femenino' | 'masculino' | 'neutro', string>
+> = {
+  realista: {
+    femenino: '/portraits/realista-femenino.webp',
+    masculino: '/portraits/realista-masculino.webp',
+    neutro: '/portraits/realista-neutro.webp',
+  },
+  anime: {
+    femenino: '/portraits/ilustrado-femenino.webp',
+    masculino: '/portraits/ilustrado-masculino.webp',
+    neutro: '/portraits/ilustrado-neutro.webp',
+  },
 };
 
 export type VisualStyleSelectorOption = {
@@ -33,7 +44,7 @@ function portraitPathsFromManifest(manifest: PortraitManifest): Set<string> {
 export function listAvailableVisualStyles(manifest: PortraitManifest = syncManifest): VisualStyle[] {
   const paths = portraitPathsFromManifest(manifest);
   return (Object.keys(STYLE_PORTRAIT_PATHS) as VisualStyle[]).filter((style) =>
-    STYLE_PORTRAIT_PATHS[style].every((path) => paths.has(path)),
+    Object.values(STYLE_PORTRAIT_PATHS[style]).every((path) => paths.has(path)),
   );
 }
 
@@ -45,15 +56,12 @@ export function visualStyleSelectorOptions(
 }
 
 export function stylePortraitSrc(visualStyle: VisualStyle | '', gender: Gender | ''): string | null {
-  if (!visualStyle || !gender || gender === 'neutro') return null;
-  if (visualStyle === 'realista') {
-    return gender === 'femenino'
-      ? STYLE_PORTRAIT_PATHS.realista[0]
-      : STYLE_PORTRAIT_PATHS.realista[1];
-  }
-  return gender === 'femenino' ? STYLE_PORTRAIT_PATHS.anime[0] : STYLE_PORTRAIT_PATHS.anime[1];
+  if (!visualStyle || !gender) return null;
+  const style = visualStyle === 'anime' ? 'anime' : 'realista';
+  if (gender !== 'femenino' && gender !== 'masculino' && gender !== 'neutro') return null;
+  return STYLE_PORTRAIT_PATHS[style][gender];
 }
 
-export function stylePortraitSrcForCard(visualStyle: VisualStyle, gender: 'femenino' | 'masculino'): string {
+export function stylePortraitSrcForCard(visualStyle: VisualStyle, gender: Gender): string {
   return stylePortraitSrc(visualStyle, gender)!;
 }

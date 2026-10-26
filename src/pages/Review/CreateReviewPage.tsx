@@ -46,8 +46,9 @@ import { ReviewLegalConsent } from './ReviewLegalConsent';
 
 import './CreateReviewPage.css';
 
-function portraitGenderForCard(gender: Gender | ''): 'femenino' | 'masculino' {
-  return gender === 'masculino' ? 'masculino' : 'femenino';
+function portraitGenderForCard(gender: Gender | ''): Gender {
+  if (gender === 'masculino' || gender === 'neutro') return gender;
+  return 'femenino';
 }
 
 function placeholderPortrait(data: OnboardingData): string {

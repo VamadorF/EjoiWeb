@@ -42,7 +42,7 @@ test.describe('Asistente v2 — 7 pantallas en 4 pasos', () => {
       await expect(page.getByTestId('create-wizard')).toBeVisible();
     });
 
-    test('presencia con descripción en Balanceada', async ({ page }) => {
+    test('presencia con descripción en Equilibrada', async ({ page }) => {
       await installIntegrationMock(page);
       await page.goto('/acceso');
       await loginWithTestSession(page);

@@ -46,7 +46,7 @@ test.describe('Asistente de creación SCRUM-166', () => {
 
     await page.getByTestId('create-exit').click();
     await page.getByTestId('create-exit-confirm').click();
-    await page.waitForURL('**/acceso', { timeout: 15_000 });
+    await page.waitForURL((url) => url.pathname === '/', { timeout: 15_000 });
     expect(handle.getDraft()?.data).toMatchObject({
       gender: 'femenino',
       visualStyle: 'realista',

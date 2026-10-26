@@ -6,8 +6,8 @@ import { buildCharacterAttributes, intensityLabelFromProfile } from './profileAt
 
 describe('profileAttributes', () => {
   it('mapea intensidad a etiqueta de tarjeta', () => {
-    expect(intensityLabelFromProfile('balanced')).toBe('Balanceada');
-    expect(intensityLabelFromProfile(undefined)).toBe('Balanceada');
+    expect(intensityLabelFromProfile('balanced')).toBe('Equilibrada');
+    expect(intensityLabelFromProfile(undefined)).toBe('Equilibrada');
   });
 
   it('arma atributos de carácter desde persona e intensidad', () => {
