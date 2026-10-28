@@ -14,6 +14,7 @@ import { Composer } from '~/features/chat/Composer';
 import { useChatSession } from '~/features/chat/ChatSessionProvider';
 import { Icebreakers } from '~/features/chat/Icebreakers';
 import { buildChatBubbles } from '~/features/chat/buildChatBubbles';
+import { getOlderHistoryPageParam } from '~/features/chat/historyPagination';
 import { MessageList, type ChatBubble } from '~/features/chat/MessageList';
 import {
   clearPending,
@@ -102,11 +103,7 @@ export default function ChatPage() {
         beforeMessageId: pageParam,
       }),
     initialPageParam: undefined as string | undefined,
-    getNextPageParam: (lastPage) => {
-      if (!lastPage.hasMore) return undefined;
-      const oldest = lastPage.messages.at(-1);
-      return oldest?.id;
-    },
+    getNextPageParam: getOlderHistoryPageParam,
     enabled: isReady && Boolean(companionId),
   });
 
