@@ -1,9 +1,14 @@
-import { useId, useRef } from 'react';
+import { useId, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link, useNavigate } from 'react-router';
 
 import { AppIcon } from '~/components/AppIcon';
 import { ThemePreferenceControl } from '~/components/ThemePreferenceControl';
+import { readSessionUser, resolveUserInitials } from '~/features/account/useCurrentUser';
+import { logoutWeb } from '~/features/auth/api/auth.api';
+import { fetchSubscriptionMe } from '~/features/chat/useQuota';
 
+import '~/features/chat/SideMenu.css';
 import './ThemeSettingsMenu.css';
 
 export type ThemeSettingsMenuProps = {
@@ -11,21 +16,72 @@ export type ThemeSettingsMenuProps = {
   className?: string;
 };
 
-/** Engranaje fijo + diálogo de tema; montar una vez en el layout raíz. */
+type AccountIdentity = {
+  name: string;
+  initials: string;
+  plan: string;
+};
+
+/** Engranaje fijo: cuenta (lo que estaba en el sidebar) y tema. */
 export function ThemeSettingsMenu({ className = '' }: ThemeSettingsMenuProps) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const logoutDialogRef = useRef<HTMLDialogElement>(null);
   const titleId = useId();
+  const loadGen = useRef(0);
+  const [identity, setIdentity] = useState<AccountIdentity | null>(null);
+  const [loggingOut, setLoggingOut] = useState(false);
 
-  const open = () => dialogRef.current?.showModal();
   const close = () => dialogRef.current?.close();
+
+  const open = () => {
+    const gen = ++loadGen.current;
+    const user = readSessionUser();
+    const name = user?.name?.trim() || user?.email || '';
+    setIdentity(
+      name
+        ? { name, initials: resolveUserInitials(user?.name, user?.email), plan: 'Plan básico' }
+        : null,
+    );
+    dialogRef.current?.showModal();
+    if (!user) return;
+    void fetchSubscriptionMe()
+      .then((sub) => {
+        if (loadGen.current !== gen) return;
+        const plan = sub.planLabel?.trim() || 'Plan básico';
+        setIdentity((prev) => (prev ? { ...prev, plan } : prev));
+      })
+      .catch(() => {});
+  };
+
+  const openLogout = () => {
+    logoutDialogRef.current?.showModal();
+  };
+
+  const closeLogout = () => {
+    if (loggingOut) return;
+    logoutDialogRef.current?.close();
+  };
+
+  const confirmLogout = async () => {
+    setLoggingOut(true);
+    try {
+      await logoutWeb();
+      navigate('/', { replace: true });
+    } finally {
+      setLoggingOut(false);
+      logoutDialogRef.current?.close();
+      close();
+    }
+  };
 
   return (
     <>
       <button
         type="button"
         className={`theme-settings-trigger btn btn--icon ${className}`.trim()}
-        aria-label={t('drawer.appearance_theme')}
+        aria-label={t('drawer.title')}
         aria-haspopup="dialog"
         data-testid="theme-settings-trigger"
         onClick={open}
@@ -46,7 +102,7 @@ export function ThemeSettingsMenu({ className = '' }: ThemeSettingsMenuProps) {
         <div className="theme-settings-dialog__panel card">
           <header className="theme-settings-dialog__header">
             <h2 id={titleId} className="theme-settings-dialog__title">
-              {t('drawer.appearance_theme')}
+              {t('drawer.title')}
             </h2>
             <button
               type="button"
@@ -57,7 +113,59 @@ export function ThemeSettingsMenu({ className = '' }: ThemeSettingsMenuProps) {
               <AppIcon name="close-outline" />
             </button>
           </header>
-          <ThemePreferenceControl showSectionLabel={false} compact />
+
+          <div className="theme-settings-dialog__account">
+            {identity ? (
+              <div className="home-side-menu__header">
+                <div
+                  className="home-side-menu__avatar"
+                  aria-label={t('drawer.user_avatar_a11y', { name: identity.name })}
+                >
+                  {identity.initials}
+                </div>
+                <div className="home-side-menu__user">
+                  <p className="home-side-menu__name">{identity.name}</p>
+                  <p className="home-side-menu__plan">{identity.plan}</p>
+                </div>
+              </div>
+            ) : null}
+            <nav className="home-side-menu__nav" aria-label={t('drawer.subtitle')}>
+              <Link to="/chat/editar" className="home-side-menu__row" onClick={close}>
+                <AppIcon name="create-outline" />
+                {t('menu.edit', { ns: 'web', defaultValue: 'Editar eJoi' })}
+              </Link>
+              <Link to="/cuenta" className="home-side-menu__row" onClick={close}>
+                <AppIcon name="shield-checkmark-outline" />
+                {t('drawer.manage_account')}
+              </Link>
+              <button type="button" className="home-side-menu__row home-side-menu__switch" onClick={openLogout}>
+                <AppIcon name="log-out-outline" />
+                {t('auth.switch_account')}
+              </button>
+            </nav>
+          </div>
+
+          <ThemePreferenceControl showSectionLabel compact />
+        </div>
+      </dialog>
+
+      <dialog
+        ref={logoutDialogRef}
+        className="home-side-menu__logout-dialog"
+        data-testid="logout-confirm-dialog"
+        onCancel={(event) => {
+          if (loggingOut) event.preventDefault();
+        }}
+      >
+        <h2 className="home-side-menu__logout-title">{t('logout.title')}</h2>
+        <p>{t('logout.message')}</p>
+        <div className="home-side-menu__logout-actions">
+          <button type="button" className="btn btn--secondary btn--m" onClick={closeLogout} disabled={loggingOut}>
+            {t('common.cancel')}
+          </button>
+          <button type="button" className="btn btn--primary btn--m" onClick={() => void confirmLogout()} disabled={loggingOut}>
+            {loggingOut ? t('logout.loading') : t('logout.confirm')}
+          </button>
         </div>
       </dialog>
     </>

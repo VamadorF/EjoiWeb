@@ -3,11 +3,14 @@
  * Contrato alineado con e2e/fixtures/integrationMock.ts.
  */
 
+import { ensureLocalStorage } from './keyValue';
 import {
   buildFirstMessageTemplate,
   buildQuickReplies,
   catalogInterestsFromSelection,
 } from './mockGreeting';
+
+ensureLocalStorage();
 import {
   creationElapsedMs as elapsedCreatingMs,
   creationStepsForElapsed,
@@ -234,11 +237,78 @@ const draftStore = new Map<string, OnboardingDraftBody | null>();
 const creationStore = new Map<string, CreationRow>();
 const chatStore = new Map<string, MockChatMessage[]>();
 
-export function resetMockApiStoresForTests(): void {
+// ponytail: un JSON en localStorage; si el historial demo crece, partir por usuario.
+const MOCK_SESSION_KEY = 'ejoi_mock_session';
+
+type MockSessionSnapshot = {
+  drafts: [string, OnboardingDraftBody | null][];
+  creations: [string, CreationRow][];
+  chats: [string, MockChatMessage[]][];
+};
+
+function persistMockSession(): void {
+  if (typeof localStorage === 'undefined') return;
+  try {
+    const snapshot: MockSessionSnapshot = {
+      drafts: [...draftStore.entries()],
+      creations: [...creationStore.entries()],
+      chats: [...chatStore.entries()],
+    };
+    localStorage.setItem(MOCK_SESSION_KEY, JSON.stringify(snapshot));
+  } catch {
+    /* quota / private mode */
+  }
+}
+
+function hydrateMockSession(): void {
+  if (typeof localStorage === 'undefined') return;
+  let snapshot: MockSessionSnapshot | null = null;
+  try {
+    const raw = localStorage.getItem(MOCK_SESSION_KEY);
+    if (!raw) return;
+    snapshot = JSON.parse(raw) as MockSessionSnapshot;
+  } catch {
+    return;
+  }
+  draftStore.clear();
+  creationStore.clear();
+  chatStore.clear();
+  for (const [key, value] of snapshot.drafts ?? []) draftStore.set(key, value);
+  for (const [key, value] of snapshot.creations ?? []) creationStore.set(key, value);
+  for (const [key, value] of snapshot.chats ?? []) chatStore.set(key, value);
+}
+
+/** Simula un F5: vacía la memoria del módulo y relee localStorage. */
+export function reloadMockSessionFromStorage(): void {
+  draftStore.clear();
+  creationStore.clear();
+  chatStore.clear();
+  hydrateMockSession();
+}
+
+export function clearMockDemoSession(): void {
+  if (typeof sessionStorage !== 'undefined') {
+    try {
+      sessionStorage.removeItem(MOCK_DEMO_SESSION_KEY);
+    } catch {
+      /* noop */
+    }
+  }
+  if (typeof localStorage !== 'undefined') {
+    try {
+      localStorage.removeItem(MOCK_SESSION_KEY);
+    } catch {
+      /* noop */
+    }
+  }
   draftStore.clear();
   creationStore.clear();
   chatStore.clear();
   resetReviewMockGenerations();
+}
+
+export function resetMockApiStoresForTests(): void {
+  clearMockDemoSession();
 }
 
 function fakeAccessToken(userId: string): string {
@@ -311,7 +381,7 @@ function shouldFailCompanionCreateOnce(): boolean {
   return new URLSearchParams(window.location.search).get('demoFail') === 'create';
 }
 
-export function handleMockApiRequest<T>(
+function dispatchMockApiRequest<T>(
   absoluteOrRelativeUrl: string,
   config: MockRequestConfig,
 ): MockApiResponse<T> | null {
@@ -335,10 +405,15 @@ export function handleMockApiRequest<T>(
     return ok(authBody(userId) as T);
   }
 
-  if (
-    (path.endsWith('/auth/google') || path.endsWith('/auth/apple') || path.endsWith('/auth/mock-login')) &&
-    method === 'POST'
-  ) {
+  if (path.endsWith('/auth/mock-login') && method === 'POST') {
+    setMockDemoLoggedIn();
+    creation.state = 'ready';
+    if (!creation.companion) creation.companion = defaultMockCompanion();
+    if (!chatStore.get(userId)?.length) seedChatFirstMessage(userId, getMockCompanion(userId));
+    return ok(authBody(userId) as T);
+  }
+
+  if ((path.endsWith('/auth/google') || path.endsWith('/auth/apple')) && method === 'POST') {
     setMockDemoLoggedIn();
     return ok(authBody(userId) as T);
   }
@@ -519,6 +594,17 @@ export function handleMockApiRequest<T>(
 
   return null;
 }
+
+export function handleMockApiRequest<T>(
+  absoluteOrRelativeUrl: string,
+  config: MockRequestConfig,
+): MockApiResponse<T> | null {
+  const result = dispatchMockApiRequest<T>(absoluteOrRelativeUrl, config);
+  persistMockSession();
+  return result;
+}
+
+hydrateMockSession();
 
 export function installMockFetch(): void {
   if (typeof window === 'undefined' || (window as { __ejoiMockFetch?: boolean }).__ejoiMockFetch) {

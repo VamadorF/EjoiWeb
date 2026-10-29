@@ -73,6 +73,10 @@
   }
 }
 
+.companion-card__body {
+  display: contents;
+}
+
 .companion-card__header {
   padding: 0 16px;
 }

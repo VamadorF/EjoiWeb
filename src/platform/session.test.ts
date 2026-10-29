@@ -81,6 +81,20 @@ describe('session.refresh', () => {
     expect(session.getRefreshToken()).toBeNull();
   });
 
+  it('rehidrata access token y usuario desde localStorage', () => {
+    session.clearSession();
+    localStorage.setItem('ejoi_access_token', 'at-stored');
+    localStorage.setItem('ejoi_user_data', '{"id":"u1","email":"a@b.c","name":"Ana"}');
+
+    expect(session.getAccessToken()).toBe('at-stored');
+    expect(session.getUserDataJson()).toContain('u1');
+
+    session.clearSession();
+    expect(session.getAccessToken()).toBeNull();
+    expect(localStorage.getItem('ejoi_access_token')).toBeNull();
+    expect(localStorage.getItem('ejoi_user_data')).toBeNull();
+  });
+
   it('conserva el refresh token si falla la red', async () => {
     session.setRefreshToken('rt-keep');
     vi.mocked(fetch).mockRejectedValue(new TypeError('Failed to fetch'));

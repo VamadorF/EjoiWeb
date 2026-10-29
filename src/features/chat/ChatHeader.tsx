@@ -32,7 +32,7 @@ export function ChatHeader({
 
   return (
     <header className="chat-header" data-testid="chat-conv-header">
-      <div className="chat-header__leading">{leadingSlot}</div>
+      {leadingSlot ? <div className="chat-header__leading">{leadingSlot}</div> : null}
       <div className="chat-header__peer">
         {portraitUrl ? (
           <div className="chat-header__avatar-wrap">

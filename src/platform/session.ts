@@ -1,8 +1,50 @@
 import { API_URL, MOCK_API } from './env';
+import { ensureLocalStorage } from './keyValue';
 import { handleMockApiRequest } from './mockApi';
+
+ensureLocalStorage();
 
 let accessToken: string | null = null;
 let userDataJson: string | null = null;
+
+const ACCESS_TOKEN_KEY = 'ejoi_access_token';
+const USER_DATA_KEY = 'ejoi_user_data';
+
+function storageGet(key: string): string | null {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function storageSet(key: string, value: string): void {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    /* quota / private mode */
+  }
+}
+
+function storageRemove(key: string): void {
+  try {
+    localStorage.removeItem(key);
+  } catch {
+    /* noop */
+  }
+}
+
+/** Relee token y usuario guardados. El F5 vacía la memoria del módulo. */
+export function restoreStoredSession(): void {
+  if (!accessToken) {
+    const stored = storageGet(ACCESS_TOKEN_KEY);
+    if (stored) accessToken = stored;
+  }
+  if (!userDataJson) {
+    const storedUser = storageGet(USER_DATA_KEY);
+    if (storedUser) userDataJson = storedUser;
+  }
+}
 let refreshGeneration = 0;
 let lastRefreshAt = 0;
 
@@ -20,17 +62,25 @@ authChannel?.addEventListener('message', (ev: MessageEvent) => {
 });
 
 export function getAccessToken(): string | null {
+  restoreStoredSession();
   return accessToken;
 }
 
 export function setSession(token: string, userJson?: string | null): void {
   accessToken = token;
-  if (userJson !== undefined) userDataJson = userJson;
+  storageSet(ACCESS_TOKEN_KEY, token);
+  if (userJson !== undefined) {
+    userDataJson = userJson;
+    if (userJson) storageSet(USER_DATA_KEY, userJson);
+    else storageRemove(USER_DATA_KEY);
+  }
 }
 
 export function clearSession(): void {
   accessToken = null;
   userDataJson = null;
+  storageRemove(ACCESS_TOKEN_KEY);
+  storageRemove(USER_DATA_KEY);
 }
 
 /**
@@ -65,11 +115,14 @@ export function clearRefreshToken(): void {
 }
 
 export function getUserDataJson(): string | null {
+  restoreStoredSession();
   return userDataJson;
 }
 
 export function setUserDataJson(json: string | null): void {
   userDataJson = json;
+  if (json) storageSet(USER_DATA_KEY, json);
+  else storageRemove(USER_DATA_KEY);
 }
 
 type RefreshResponse = {
@@ -111,14 +164,15 @@ export async function refresh(): Promise<string> {
 }
 
 async function doRefresh(startedGeneration: number): Promise<string> {
+  restoreStoredSession();
   if (MOCK_API) {
     const mocked = handleMockApiRequest<{ accessToken?: string; access_token?: string }>(
       `${API_URL}/auth/refresh`,
       { method: 'POST' },
     );
-    const token = mocked?.data.accessToken ?? mocked?.data.access_token;
+    const token = mocked?.data.accessToken ?? mocked?.data.access_token ?? accessToken;
     if (token) {
-      accessToken = token;
+      setSession(token);
       refreshGeneration = startedGeneration + 1;
       lastRefreshAt = Date.now();
       authChannel?.postMessage({
@@ -159,7 +213,7 @@ async function doRefresh(startedGeneration: number): Promise<string> {
   const rotatedRefreshToken = data.refreshToken ?? data.refresh_token;
   if (rotatedRefreshToken) setRefreshToken(rotatedRefreshToken);
 
-  accessToken = token;
+  setSession(token);
   refreshGeneration = startedGeneration + 1;
   lastRefreshAt = Date.now();
   authChannel?.postMessage({

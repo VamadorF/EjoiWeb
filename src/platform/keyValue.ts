@@ -1,3 +1,43 @@
+/** Node 26 expone un localStorage vacío que pisa al de jsdom. En el navegador no hace nada. */
+export function ensureLocalStorage(): Storage {
+  try {
+    const current = globalThis.localStorage;
+    if (current && typeof current.getItem === 'function') return current;
+  } catch {
+    /* el getter de Node avisa y no es un Storage */
+  }
+  const store = new Map<string, string>();
+  const memory = {
+    get length() {
+      return store.size;
+    },
+    clear: () => store.clear(),
+    getItem: (key: string) => (store.has(key) ? store.get(key)! : null),
+    key: (index: number) => [...store.keys()][index] ?? null,
+    removeItem: (key: string) => {
+      store.delete(key);
+    },
+    setItem: (key: string, value: string) => {
+      store.set(key, String(value));
+    },
+  } as Storage;
+  Object.defineProperty(globalThis, 'localStorage', {
+    configurable: true,
+    enumerable: true,
+    writable: true,
+    value: memory,
+  });
+  if (typeof window !== 'undefined') {
+    Object.defineProperty(window, 'localStorage', {
+      configurable: true,
+      enumerable: true,
+      writable: true,
+      value: memory,
+    });
+  }
+  return memory;
+}
+
 export async function kvSetItem(key: string, value: string): Promise<void> {
   try {
     localStorage.setItem(key, value);

@@ -203,6 +203,7 @@ export function CompanionCard({
         ) : null}
       </div>
 
+      <div className="companion-card__body">
       <header className="companion-card__header">
         <div className="companion-card__name-row">
           <h2 className="companion-card__name">{name}</h2>
@@ -301,6 +302,7 @@ export function CompanionCard({
           {primaryActionLabel}
         </button>
       ) : null}
+      </div>
     </article>
   );
 }

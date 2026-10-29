@@ -1,5 +1,5 @@
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 
@@ -14,6 +14,11 @@ import { Composer } from '~/features/chat/Composer';
 import { useChatSession } from '~/features/chat/ChatSessionProvider';
 import { Icebreakers } from '~/features/chat/Icebreakers';
 import { buildChatBubbles } from '~/features/chat/buildChatBubbles';
+import {
+  applyChatThreadScroll,
+  commitChatThreadScroll,
+  readChatThreadScroll,
+} from '~/features/chat/chatThreadScroll';
 import { getOlderHistoryPageParam } from '~/features/chat/historyPagination';
 import { MessageList, type ChatBubble } from '~/features/chat/MessageList';
 import {
@@ -60,7 +65,7 @@ export default function ChatPage() {
     [queryClient],
   );
 
-  const { trigger: triggerReaction, notifyActivity } = useChatSession();
+  const { trigger: triggerReaction, notifyActivity, current: instantReaction } = useChatSession();
   const mePresence = usePresenceSignals('me');
   const companionPresence = usePresenceSignals('companion');
 
@@ -302,6 +307,29 @@ export default function ChatPage() {
   const composerDisabled = !isReady || quotaOut || sending;
   const composerHint = quotaOut ? t('chat.quota_out') : undefined;
 
+  const threadRef = useRef<HTMLDivElement>(null);
+  const restoredScrollRef = useRef(false);
+
+  useLayoutEffect(() => {
+    if (restoredScrollRef.current || !isReady) return;
+    const el = threadRef.current;
+    if (!el) return;
+    if (readChatThreadScroll() == null) {
+      restoredScrollRef.current = true;
+      return;
+    }
+    if (applyChatThreadScroll(el)) restoredScrollRef.current = true;
+  }, [bubbles, isReady]);
+
+  useLayoutEffect(() => {
+    const el = threadRef.current;
+    return () => {
+      // El skeleton no scrollea de verdad: no pisar el offset de la visita anterior.
+      if (!el?.querySelector('[data-testid="chat-messages"]')) return;
+      commitChatThreadScroll(el);
+    };
+  }, []);
+
   return (
     <div className="home-shell__read-inner">
       {isReady && summaryInterests ? (
@@ -332,7 +360,7 @@ export default function ChatPage() {
         </p>
       ) : null}
 
-      <div className="chat-thread">
+      <div className="chat-thread" ref={threadRef}>
         {hasNextPage ? (
           <button
             type="button"
@@ -349,6 +377,8 @@ export default function ChatPage() {
           loading={!isReady}
           showFirstMessageNote={isReady && basedOn.length > 0}
           companionId={companionId}
+          companionName={companionName}
+          instantReaction={instantReaction}
           showTyping={sending}
         />
       </div>

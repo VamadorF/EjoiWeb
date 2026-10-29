@@ -153,11 +153,6 @@ export default function WelcomePage() {
     }
   };
 
-  const enterReturning = () => {
-    setReturning(true);
-    navigate('/', { replace: true, state: { returning: true } });
-  };
-
   const legalDoc =
     legalKey === 'terms'
       ? legalDocuments.termsAndConditions
@@ -238,12 +233,6 @@ export default function WelcomePage() {
               </button>
             ) : null}
           </div>
-
-          {!returning ? (
-            <button type="button" className="btn btn--text" onClick={enterReturning}>
-              {t('web:access.sign_in')}
-            </button>
-          ) : null}
 
           {/* ponytail: DA-21 — código deshabilitado como LoginScreen app; confirmar con PO si se reactiva */}
           <button

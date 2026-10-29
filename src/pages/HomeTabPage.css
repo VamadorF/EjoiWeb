@@ -6,7 +6,8 @@
 
 .home-tab-page__inner {
   width: 100%;
-  max-width: var(--chat-read-max);
-  margin: 0 auto;
+  max-width: none;
+  min-width: 0;
+  margin: 0;
   padding: var(--space-4) var(--space-4) var(--space-6);
 }

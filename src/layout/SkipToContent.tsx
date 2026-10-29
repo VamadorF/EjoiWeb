@@ -1,3 +1,5 @@
+import './SkipToContent.css';
+
 export function SkipToContent() {
   return (
     <a

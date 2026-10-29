@@ -114,7 +114,7 @@ test.describe('Responsive creación', () => {
 test.describe('Chat bajo 1024', () => {
   test.use({ viewport: { width: 800, height: 900 } });
 
-  test('menú y perfil en paneles desplegables', async ({ page }) => {
+  test('chat a ancho del panel, sin sidebar', async ({ page }) => {
     await page.route('**/api/**', async (route) => {
       const path = new URL(route.request().url()).pathname.replace(/^\/api/, '');
       if (path.includes('/auth/refresh')) {
@@ -193,10 +193,9 @@ test.describe('Chat bajo 1024', () => {
     const read = page.getByTestId('chat-read');
     const readBox = await read.boundingBox();
     expect(readBox?.width ?? 0).toBeGreaterThan(700);
-
-    await page.getByTestId('chat-menu-toggle').click();
-    await expect(page.locator('.home-shell__menu--drawer-open')).toBeVisible();
-    await page.getByRole('button', { name: 'Cerrar menú' }).click();
-    await expect(page.locator('.home-shell__menu--drawer-open')).toBeHidden();
+    await expect(page.getByTestId('chat-menu')).toHaveCount(0);
+    await expect(page.getByTestId('chat-menu-toggle')).toHaveCount(0);
+    await expect(page.getByTestId('home-tabs')).toBeVisible();
+    await expect(page.getByTestId('theme-settings-trigger')).toBeVisible();
   });
 });

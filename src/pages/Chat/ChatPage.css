@@ -1,12 +1,12 @@
-.chat-shell__read-inner,
-.home-shell__read-inner {
+.home-shell__read > .home-shell__read-inner,
+.chat-shell__read > .chat-shell__read-inner {
   display: flex;
   flex-direction: column;
   min-height: 0;
   height: 100%;
   width: 100%;
-  max-width: var(--chat-read-max);
-  margin: 0 auto;
+  max-width: none;
+  margin: 0;
 }
 
 .chat-conv-header {
@@ -224,6 +224,24 @@
   min-height: auto;
 }
 
+.chat-messages__copy.btn--text,
+.chat-messages__react.btn--text {
+  text-decoration: none;
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+}
+
+.chat-messages__copy .app-icon svg,
+.chat-messages__react .app-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.chat-messages__react .app-icon svg {
+  fill: currentColor;
+}
+
 .chat-messages__image {
   display: block;
   max-width: min(100%, 280px);
@@ -231,10 +249,28 @@
   margin-bottom: var(--space-2);
 }
 
+.chat-messages__react-anchor {
+  position: relative;
+  display: inline-flex;
+}
+
 .chat-messages__reaction-picker {
+  position: absolute;
+  z-index: 5;
+  bottom: calc(100% + 4px);
+  left: 0;
   display: flex;
   gap: var(--space-1);
-  margin-top: var(--space-2);
+  margin: 0;
+  padding: 4px;
+  background: var(--c-surface);
+  border-radius: 999px;
+  box-shadow: var(--elev-1);
+}
+
+.bubble--user .chat-messages__reaction-picker {
+  left: auto;
+  right: 0;
 }
 
 .chat-messages__reaction-btn {

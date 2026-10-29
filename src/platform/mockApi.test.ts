@@ -4,6 +4,7 @@ import {
   handleMockApiRequest,
   MOCK_DEMO_SESSION_KEY,
   normalizeApiPath,
+  reloadMockSessionFromStorage,
   resetMockApiStoresForTests,
   setMockDemoLoggedIn,
 } from './mockApi';
@@ -38,12 +39,25 @@ describe('mockApi', () => {
     expect(allowed?.status).toBe(200);
   });
 
-  it('responde login mock', () => {
+  it('responde login mock y deja el compañero listo para el chat', () => {
     const res = handleMockApiRequest('/api/auth/mock-login', { method: 'POST' });
     expect(res?.status).toBe(200);
     const data = res?.data as { accessToken?: string; user?: { id: string } };
     expect(data.accessToken).toBeTruthy();
     expect(data.user?.id).toBeTruthy();
+    const creation = handleMockApiRequest('/api/companion/me/creation', { method: 'GET' });
+    expect((creation?.data as { state?: string }).state).toBe('ready');
+    const history = handleMockApiRequest('/api/chat/history', { method: 'GET' });
+    expect((history?.data as { messages: unknown[] }).messages.length).toBeGreaterThan(0);
+  });
+
+  it('restaura compañero y chat demo si se pierde la memoria del módulo', () => {
+    handleMockApiRequest('/api/auth/mock-login', { method: 'POST' });
+    reloadMockSessionFromStorage();
+    const creation = handleMockApiRequest('/api/companion/me/creation', { method: 'GET' });
+    expect((creation?.data as { state?: string }).state).toBe('ready');
+    const history = handleMockApiRequest('/api/chat/history', { method: 'GET' });
+    expect((history?.data as { messages: { content: string }[] }).messages[0]?.content).toContain('Luna');
   });
 
   it('persiste borrador de onboarding', () => {

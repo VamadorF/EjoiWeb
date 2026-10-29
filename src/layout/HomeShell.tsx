@@ -1,24 +1,16 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type KeyboardEvent as ReactKeyboardEvent,
-  type ReactNode,
-} from 'react';
+import { useRef, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NavLink, Outlet, useLocation } from 'react-router';
 
 import { AppIcon } from '~/components/AppIcon';
 import { AnniversaryBanner } from '~/features/companion/AnniversaryBanner';
-import { ChatSessionProvider, useChatSession } from '~/features/chat/ChatSessionProvider';
+import { ChatSessionProvider } from '~/features/chat/ChatSessionProvider';
 import { ChatHeader } from '~/features/chat/ChatHeader';
-import { CompanionReactionBubble } from '~/features/reactions/CompanionReactionBubble';
 import { formatPresenceSubtitle } from '~/features/presence/formatPresenceSubtitle';
 import { usePresence } from '~/features/presence/usePresence';
-import { SideMenu, type HomeTabId } from '~/features/chat/SideMenu';
 import { useCreationStatus } from '~/features/chat/useCreationStatus';
+
 import { useProfile } from '~/features/chat/useProfile';
 import { resolveMessagesRemaining, useQuota } from '~/features/chat/useQuota';
 import { stylePortraitSrc } from '~/features/creation/portraits';
@@ -26,6 +18,8 @@ import { stylePortraitSrc } from '~/features/creation/portraits';
 import { SkipToContent } from './SkipToContent';
 
 import './HomeShell.css';
+
+type HomeTabId = 'chat' | 'perfil' | 'recuerdos';
 
 const TAB_ROUTES: readonly { id: HomeTabId; to: string; icon: string; labelKey: string }[] = [
   { id: 'chat', to: '/chat', icon: 'chatbubble-outline', labelKey: 'home.tabs.chat' },
@@ -88,77 +82,16 @@ function HomeTabNav({ activeTab }: { activeTab: HomeTabId }) {
 
 type HomeShellFrameProps = {
   activeTab: HomeTabId;
-  menuOpen: boolean;
-  onCloseMenu: () => void;
-  menu: ReactNode;
   header: ReactNode;
   banner?: ReactNode;
   children: ReactNode;
 };
 
-export function HomeShellFrame({
-  activeTab,
-  menuOpen,
-  onCloseMenu,
-  menu,
-  header,
-  banner,
-  children,
-}: HomeShellFrameProps) {
-  const menuPanelRef = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-    if (!menuOpen) return;
-    const panel = menuPanelRef.current;
-    const focusables = panel?.querySelectorAll<HTMLElement>(
-      'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])',
-    );
-    focusables?.[0]?.focus();
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        event.preventDefault();
-        onCloseMenu();
-        return;
-      }
-      if (event.key !== 'Tab' || !focusables?.length) return;
-      const list = Array.from(focusables);
-      const first = list[0]!;
-      const last = list[list.length - 1]!;
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault();
-        first.focus();
-      }
-    };
-
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [menuOpen, onCloseMenu]);
-
+export function HomeShellFrame({ activeTab, header, banner, children }: HomeShellFrameProps) {
   return (
     <>
       <SkipToContent />
       <div className="home-shell">
-        {menuOpen ? (
-          <button
-            type="button"
-            className="home-shell__scrim"
-            aria-label="Cerrar menú"
-            onClick={onCloseMenu}
-          />
-        ) : null}
-        <nav
-          ref={menuPanelRef}
-          className={
-            menuOpen ? 'home-shell__menu home-shell__menu--drawer-open' : 'home-shell__menu'
-          }
-          data-testid="chat-menu"
-        >
-          {menu}
-        </nav>
         <div className="home-shell__main">
           {header}
           <HomeTabNav activeTab={activeTab} />
@@ -172,13 +105,7 @@ export function HomeShellFrame({
   );
 }
 
-function HomeShellHeader({
-  menuOpen,
-  onMenuToggle,
-}: {
-  menuOpen: boolean;
-  onMenuToggle: () => void;
-}) {
+function HomeShellHeader() {
   const { t } = useTranslation();
   const { t: tWeb } = useTranslation('web');
   const { profile, state } = useCreationStatus(0);
@@ -186,7 +113,6 @@ function HomeShellHeader({
   const { data: profileData } = useProfile(isReady);
   const { data: subscription, isLoading: quotaLoading } = useQuota(isReady);
   const companionPresence = usePresence('companion');
-  const { current: instantReaction } = useChatSession();
 
   const companionName = profileData?.name?.trim() || profile?.name?.trim() || 'tu eJoi';
   const samplePortrait =
@@ -198,19 +124,6 @@ function HomeShellHeader({
       : null;
   const portraitUrl = profileData?.avatarUrl ?? profile?.avatarUrl ?? samplePortrait;
   const messagesRemaining = resolveMessagesRemaining(subscription);
-
-  const leadingSlot = (
-    <button
-      type="button"
-      className="chat-header__menu-btn"
-      data-testid="chat-menu-toggle"
-      aria-expanded={menuOpen}
-      aria-label={t('drawer.open_menu')}
-      onClick={onMenuToggle}
-    >
-      <AppIcon name="menu-outline" />
-    </button>
-  );
 
   const quotaSlot =
     isReady && !quotaLoading && messagesRemaining != null ? (
@@ -225,13 +138,7 @@ function HomeShellHeader({
       portraitUrl={portraitUrl}
       subtitle={presenceSubtitle}
       presenceState={isReady ? companionPresence.state : 'offline'}
-      leadingSlot={leadingSlot}
       quotaSlot={quotaSlot}
-      reactionSlot={
-        instantReaction ? (
-          <CompanionReactionBubble reaction={instantReaction} companionName={companionName} />
-        ) : null
-      }
     />
   );
 }
@@ -243,21 +150,13 @@ const homeQueryClient = new QueryClient({
 function HomeRouteContent() {
   const location = useLocation();
   const activeTab = tabFromPath(location.pathname);
-  const [menuOpen, setMenuOpen] = useState(false);
   const { data: profileData } = useProfile(true);
-
-  const closeMenu = useCallback(() => setMenuOpen(false), []);
 
   return (
     <ChatSessionProvider>
       <HomeShellFrame
         activeTab={activeTab}
-        menuOpen={menuOpen}
-        onCloseMenu={closeMenu}
-        menu={<SideMenu activeTab={activeTab} drawerMode={menuOpen} onCloseDrawer={closeMenu} />}
-        header={
-          <HomeShellHeader menuOpen={menuOpen} onMenuToggle={() => setMenuOpen((open) => !open)} />
-        }
+        header={<HomeShellHeader />}
         banner={<AnniversaryBanner sharedMoments={profileData?.sharedMoments} />}
       >
         <Outlet />

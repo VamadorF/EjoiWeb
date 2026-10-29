@@ -1,11 +1,36 @@
 .profile-page__card-wrap {
-  max-width: 420px;
-  margin: 0 auto var(--space-4);
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  margin: 0 0 var(--space-4);
 }
 
 .profile-page__attributes {
-  max-width: 420px;
-  margin: 0 auto;
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  margin: 0;
+}
+
+.profile-page .companion-card {
+  max-width: none;
+}
+
+/* ponytail: retrato máx. 320px; el texto ocupa el resto. Subir el tope si el arte debe crecer. */
+@media (min-width: 720px) {
+  .profile-page .companion-card {
+    display: grid;
+    grid-template-columns: minmax(180px, 320px) minmax(0, 1fr);
+    column-gap: var(--space-6);
+    align-items: start;
+  }
+
+  .profile-page .companion-card__body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-width: 0;
+  }
 }
 
 .profile-page__subtabs {

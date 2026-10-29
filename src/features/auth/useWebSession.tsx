@@ -36,8 +36,8 @@ export function WebSessionProvider({ children }: { children: ReactNode }) {
         await session.refresh();
         if (!cancelled) setIsAuthenticated(true);
       } catch {
-        session.clearSession();
-        if (!cancelled) setIsAuthenticated(false);
+        // Un 401 de refresh ya borró el token. Un fallo de red no: la sesión local sigue.
+        if (!cancelled) setIsAuthenticated(Boolean(session.getAccessToken()));
       } finally {
         if (!cancelled) setBoot('ready');
       }
