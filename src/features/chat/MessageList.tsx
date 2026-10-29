@@ -2,13 +2,14 @@ import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { buildChatListItems } from '@/features/chat/utils/buildChatListItems';
-import type { Message } from '@/features/chat/types';
+import type { InstantReaction, Message } from '@/features/chat/types';
 import { resolveChatMediaUrl } from '@/features/chat/utils/resolveChatMediaUrl';
 
 import { AppIcon } from '~/components/AppIcon';
 import { ENABLE_TTS } from '~/platform/env';
 
 import { splitInterestHighlights } from './highlightInterests';
+import { CompanionReactionBubble } from '~/features/reactions/CompanionReactionBubble';
 import {
   getMessageReaction,
   REACTION_EMOJIS,
@@ -16,6 +17,20 @@ import {
   type ReactionEmoji,
 } from '~/features/reactions/messageReactions';
 import { TypingIndicator } from './TypingIndicator';
+
+/** Mensaje al que pertenece la reacción: el de esa fase, si no el último del hilo. */
+export function reactionAnchorId(
+  messages: readonly { id: string; role: 'user' | 'assistant' }[],
+  phase: InstantReaction['interactionPhase'],
+): string | null {
+  if (messages.length === 0) return null;
+  const want = phase === 'user_message' ? 'user' : phase === 'assistant_message' ? 'assistant' : null;
+  if (!want) return messages[messages.length - 1]!.id;
+  for (let i = messages.length - 1; i >= 0; i--) {
+    if (messages[i]!.role === want) return messages[i]!.id;
+  }
+  return messages[messages.length - 1]!.id;
+}
 
 export type ChatBubble = {
   id: string;
@@ -34,6 +49,8 @@ export type MessageListProps = {
   loading?: boolean;
   showFirstMessageNote?: boolean;
   companionId?: string;
+  companionName?: string;
+  instantReaction?: InstantReaction | null;
   showTyping?: boolean;
 };
 
@@ -42,6 +59,8 @@ export function MessageList({
   loading,
   showFirstMessageNote,
   companionId,
+  companionName = '',
+  instantReaction = null,
   showTyping,
 }: MessageListProps) {
   const { t } = useTranslation();
@@ -103,6 +122,9 @@ export function MessageList({
 
   const items = buildChatListItems(asMessages);
   let firstAssistantSeen = false;
+  const reactionOnId = instantReaction
+    ? reactionAnchorId(messages, instantReaction.interactionPhase)
+    : null;
 
   return (
     <ul className="chat-messages" data-testid="chat-messages">
@@ -172,38 +194,45 @@ export function MessageList({
                 <button
                   type="button"
                   className="btn btn--text chat-messages__copy"
+                  aria-label={copiedId === msg.id ? t('chat.bubble.copied') : t('chat.bubble.copy_message')}
                   onClick={() => void copyText(msg.id, msg.text)}
                 >
-                  {copiedId === msg.id ? t('chat.bubble.copied') : t('chat.bubble.copy_message')}
+                  <AppIcon name={copiedId === msg.id ? 'checkmark' : 'copy-outline'} />
                 </button>
                 {ENABLE_TTS && isAssistant ? (
                   <button type="button" className="btn btn--text chat-messages__tts" disabled>
                     {t('chat.bubble.play_tts')}
                   </button>
                 ) : null}
-                <button
-                  type="button"
-                  className="btn btn--text chat-messages__react"
-                  aria-expanded={reactionPickerFor === msg.id}
-                  onClick={() => setReactionPickerFor((id) => (id === msg.id ? null : msg.id))}
-                >
-                  {reaction ? reaction : '☺'}
-                </button>
+                <span className="chat-messages__react-anchor">
+                  <button
+                    type="button"
+                    className="btn btn--text chat-messages__react"
+                    aria-expanded={reactionPickerFor === msg.id}
+                    aria-label={t('chat.reactions.title')}
+                    onClick={() => setReactionPickerFor((id) => (id === msg.id ? null : msg.id))}
+                  >
+                    {reaction ?? <AppIcon name="happy-outline" />}
+                  </button>
+                  {reactionPickerFor === msg.id ? (
+                    <div className="chat-messages__reaction-picker" role="group" aria-label={t('chat.reactions.title')}>
+                      {REACTION_EMOJIS.map((emoji) => (
+                        <button
+                          key={emoji}
+                          type="button"
+                          className="chat-messages__reaction-btn"
+                          onClick={() => void pickReaction(msg.id, emoji)}
+                        >
+                          {emoji}
+                        </button>
+                      ))}
+                    </div>
+                  ) : null}
+                  {reactionOnId === msg.id && instantReaction ? (
+                    <CompanionReactionBubble reaction={instantReaction} companionName={companionName} />
+                  ) : null}
+                </span>
               </div>
-              {reactionPickerFor === msg.id ? (
-                <div className="chat-messages__reaction-picker" role="group" aria-label={t('chat.reactions.title')}>
-                  {REACTION_EMOJIS.map((emoji) => (
-                    <button
-                      key={emoji}
-                      type="button"
-                      className="chat-messages__reaction-btn"
-                      onClick={() => void pickReaction(msg.id, emoji)}
-                    >
-                      {emoji}
-                    </button>
-                  ))}
-                </div>
-              ) : null}
               {reaction ? <span className="chat-messages__reaction-badge">{reaction}</span> : null}
               {msg.failed && msg.onRetry ? (
                 <button type="button" className="btn btn--text chat-messages__retry" onClick={msg.onRetry}>

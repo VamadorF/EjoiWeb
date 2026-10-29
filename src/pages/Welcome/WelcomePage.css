@@ -183,13 +183,6 @@ html.welcome-route {
   cursor: pointer;
 }
 
-.welcome-actions .btn--text:not(.welcome-actions__invite) {
-  align-self: center;
-  font-weight: 700;
-  color: var(--c-ink);
-  text-decoration: underline;
-}
-
 .welcome-actions__invite {
   align-self: center;
   font-weight: 700;

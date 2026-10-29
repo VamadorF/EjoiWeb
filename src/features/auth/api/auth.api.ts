@@ -1,5 +1,6 @@
 import type { AppleLoginRequest, GoogleLoginRequest, User } from '@/features/auth/types';
 import { ApiError, httpClient } from '~/platform/http';
+import { clearMockDemoSession } from '~/platform/mockApi';
 import * as session from '~/platform/session';
 import { notifySessionExpired } from '~/platform/sessionEvents';
 
@@ -61,6 +62,7 @@ export async function logoutWeb(): Promise<void> {
   } finally {
     session.clearSession();
     session.clearRefreshToken();
+    clearMockDemoSession();
     notifySessionExpired();
   }
 }

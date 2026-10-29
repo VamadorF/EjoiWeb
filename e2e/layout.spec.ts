@@ -161,16 +161,19 @@ test.describe('Desktop shell 1440×900', () => {
     });
     await page.goto('/chat');
     await page.waitForSelector('[data-testid="chat-read"]');
-    const menu = page.getByTestId('chat-menu');
+    await expect(page.getByTestId('chat-menu')).toHaveCount(0);
     const read = page.getByTestId('chat-read');
-
-    const menuBox = await menu.boundingBox();
     const readBox = await read.boundingBox();
 
-    expect(menuBox?.width).toBe(320);
-    expect(readBox?.width).toBeGreaterThanOrEqual(680);
-    expect(readBox?.width).toBeLessThanOrEqual(900);
+    expect(readBox?.x ?? 99).toBeLessThanOrEqual(1);
+    expect(readBox?.width ?? 0).toBeGreaterThanOrEqual(1400);
     await expect(page.getByTestId('home-tabs')).toBeVisible();
+    await page.getByTestId('theme-settings-trigger').click();
+    const settings = page.getByTestId('theme-settings-dialog');
+    await expect(settings.getByRole('link', { name: 'Editar eJoi' })).toBeVisible();
+    await expect(settings.getByRole('link', { name: 'Gestionar mi cuenta' })).toBeVisible();
+    await expect(settings.getByRole('button', { name: 'Usar otra cuenta' })).toBeVisible();
+    await expect(settings.getByRole('link', { name: 'Chat' })).toHaveCount(0);
   });
 
   test('chat: encabezado, cupo y burbujas del manual', async ({ page }) => {

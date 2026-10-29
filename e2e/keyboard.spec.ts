@@ -149,7 +149,7 @@ test.describe('Teclado desktop (SCRUM-113)', () => {
     expect(stops.length).toBeGreaterThan(1);
   });
 
-  test('bienvenida: returning y código por teclado', async ({ page }) => {
+  test('bienvenida: código por teclado', async ({ page }) => {
     await page.route('**/api/**', async (route) => {
       const path = new URL(route.request().url()).pathname.replace(/^\/api/, '');
       if (path.includes('/auth/refresh')) {
@@ -167,13 +167,6 @@ test.describe('Teclado desktop (SCRUM-113)', () => {
       await route.fulfill({ status: 200, contentType: 'application/json', body: '{}' });
     });
     await page.goto('/');
-    const signIn = page.getByRole('button', { name: 'Iniciar sesión' });
-    await signIn.focus();
-    await expect(signIn).toBeFocused();
-    await page.keyboard.press('Enter');
-    await expect(page.getByRole('heading', { name: 'Qué bueno verte de nuevo' })).toBeVisible();
-
-    await page.goto('/acceso');
     await expect(page.getByTestId('page-bienvenida')).toBeVisible();
     const codeBtn = page.getByRole('button', { name: 'Tengo un código' });
     await codeBtn.focus();

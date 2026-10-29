@@ -88,7 +88,7 @@
   color: var(--c-ink2);
   text-align: left;
   text-decoration: none;
-  font: 500 16px/24px Apis, system-ui, sans-serif;
+  font: 500 16px/24px Apis, "Noto Color Emoji", system-ui, sans-serif;
   cursor: pointer;
 }
 

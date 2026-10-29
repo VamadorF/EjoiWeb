@@ -220,7 +220,7 @@ test.describe('Tema claro/oscuro (SCRUM-112)', () => {
     for (const theme of ['light', 'dark'] as const) {
       await page.goto('/');
       await applyTheme(page, theme);
-      const btn = page.getByRole('button', { name: 'Iniciar sesión' });
+      const btn = page.getByRole('button', { name: 'Términos' });
       await btn.hover();
       const hoverBg = await btn.evaluate((el) => getComputedStyle(el).backgroundColor);
       expect(hoverBg).not.toBe('rgba(0, 0, 0, 0)');

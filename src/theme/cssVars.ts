@@ -119,34 +119,23 @@ function layoutMediaQueries(): string {
   .desktop-shell__preview {
     display: none;
   }
-  .chat-shell,
-  .home-shell {
+  .chat-shell {
     grid-template-columns: 1fr;
     grid-template-rows: auto minmax(0, 1fr);
     padding: 0 16px;
   }
-  .chat-shell__menu,
-  .chat-shell__profile,
-  .home-shell__menu {
+  .home-shell {
+    padding: 0 16px;
+  }
+  .chat-shell__profile {
     display: none;
   }
-  .chat-shell__menu--drawer-open,
   .chat-shell__profile--drawer-open {
     display: block;
     position: fixed;
     inset: 0;
     z-index: 40;
     max-width: min(320px, 90vw);
-    margin: 0;
-    border-radius: 0;
-    box-shadow: var(--state-hover-shadow);
-  }
-  .home-shell__menu--drawer-open {
-    display: flex;
-    position: fixed;
-    inset: 0 auto 0 0;
-    z-index: 40;
-    width: min(var(--chat-menu-w), 90vw);
     margin: 0;
     border-radius: 0;
     box-shadow: var(--state-hover-shadow);
@@ -170,7 +159,7 @@ export function definedCssVarNames(): Set<string> {
 
 function webTypographyAndLayoutTokens(): string {
   // ponytail: tipografía, espaciado y elevación definidos en la web; moverlos a tokens.ts de ejoiFE cuando la app los necesite
-  const fontStack = 'Apis, system-ui, sans-serif';
+  const fontStack = 'Apis, "Noto Color Emoji", system-ui, sans-serif';
   return [
     `  --font-title1: 800 28px/34px ${fontStack};`,
     '  --ls-title1: -0.2px;',

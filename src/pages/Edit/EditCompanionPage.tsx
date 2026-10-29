@@ -18,7 +18,6 @@ import { COMPANION_MAX_AGE, COMPANION_MIN_AGE } from '@/features/onboarding/cons
 
 import { AppIcon } from '~/components/AppIcon';
 import { ProfilePanel } from '~/features/chat/ProfilePanel';
-import { SideMenu } from '~/features/chat/SideMenu';
 import { EditSummaryRow } from '~/features/edit/EditSummaryRow';
 import { hasAppearanceChanges, type EditFormSnapshot } from '~/features/edit/editPatch';
 import {
@@ -203,7 +202,6 @@ function EditCompanionContent() {
 
   return (
     <ChatShell
-      menu={<SideMenu />}
       profile={
         <ProfilePanel
           profile={profile}

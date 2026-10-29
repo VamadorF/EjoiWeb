@@ -7,7 +7,7 @@ import { normalizeAuthUser } from '~/features/auth/authWeb.adapter';
 import { MOCK_USER_ID, isMockDemoLoggedIn } from '~/platform/mockApi';
 import * as session from '~/platform/session';
 
-function readUserFromSession(): User | null {
+export function readSessionUser(): User | null {
   const raw = session.getUserDataJson();
   if (raw) {
     try {
@@ -29,7 +29,7 @@ function readUserFromSession(): User | null {
 export function useCurrentUser() {
   const query = useQuery({
     queryKey: queryKeys.auth.currentUser,
-    queryFn: async () => readUserFromSession(),
+    queryFn: async () => readSessionUser(),
     retry: false,
     staleTime: 60_000,
   });

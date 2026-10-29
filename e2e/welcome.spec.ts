@@ -38,10 +38,10 @@ test.describe('Bienvenida (PAR-WEB-04)', () => {
     await expect(page.getByText('Ejemplo')).not.toBeVisible();
   });
 
-  test('Iniciar sesión activa modo returning en la misma pantalla', async ({ page }) => {
+  test('la bienvenida no muestra Iniciar sesión', async ({ page }) => {
     await mockWelcomeGuestApi(page);
     await page.goto('/');
-    await page.getByRole('button', { name: 'Iniciar sesión' }).click();
-    await expect(page.getByRole('heading', { name: 'Qué bueno verte de nuevo' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Iniciar sesión' })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Tengo un código' })).toBeVisible();
   });
 });

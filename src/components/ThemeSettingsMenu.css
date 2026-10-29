@@ -26,6 +26,19 @@
   margin: 0;
   padding: var(--space-5);
   border-radius: var(--radius-modal);
+  max-height: calc(100dvh - var(--space-8));
+  overflow: auto;
+}
+
+.theme-settings-dialog__account {
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--c-line);
+}
+
+.theme-settings-dialog__account .home-side-menu__nav {
+  flex: none;
+  overflow: visible;
 }
 
 .theme-settings-dialog__header {

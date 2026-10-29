@@ -1,0 +1,18 @@
+.skip-to-content {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  z-index: 100;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-control);
+  background: var(--c-surface);
+  color: var(--c-ink);
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: var(--state-hover-shadow);
+}
+
+.skip-to-content:focus {
+  left: 1rem;
+  top: 1rem;
+}
