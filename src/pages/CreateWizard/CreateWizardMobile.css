@@ -9,6 +9,13 @@
   background: var(--bg-brand-gradient);
 }
 
+.create-mobile__header,
+.create-mobile__main,
+.create-mobile__footer {
+  position: relative;
+  z-index: 1;
+}
+
 .create-mobile__header {
   display: flex;
   align-items: center;
