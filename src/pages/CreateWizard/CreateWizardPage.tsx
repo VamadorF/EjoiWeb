@@ -42,9 +42,8 @@ import { CreationShellHeader, DesktopShell } from '~/layout/DesktopShell';
 import { OptionGroup } from '~/layout/OptionGroup';
 import { useDesktopShortcuts } from '~/layout/useDesktopShortcuts';
 import { CRYSTAL_BALL_GENDER_COLORS } from '~/theme/crystalBallColors';
-import { useThemePreference } from '~/theme/theme';
 
-import CrystalizedBall from './CrystalizedBall';
+import GenderWaves from './GenderWaves';
 import { useIsMobileLayout } from './useIsMobileLayout';
 
 import './CreateWizardWho.css';
@@ -65,18 +64,10 @@ const STYLES: { id: VisualStyle; labelKey: 'create.style_realistic' | 'create.st
 
 const BALL_COLOR: Record<Gender, string> = CRYSTAL_BALL_GENDER_COLORS;
 
-function WizardCrystal({ color }: { color: string }) {
-  const { resolved } = useThemePreference();
-  const light = resolved === 'light';
+function WizardWaves({ color }: { color: string }) {
   return (
-    <div className={light ? 'create-wizard-glow create-wizard-glow--light' : 'create-wizard-glow'} aria-hidden>
-      <CrystalizedBall
-        color={color}
-        theme={resolved}
-        haze={light ? 0.1 : 0.2}
-        size={0.84}
-        hoverStrength={light ? 0.35 : 0.7}
-      />
+    <div className="create-wizard-glow" aria-hidden>
+      <GenderWaves color={color} />
     </div>
   );
 }
@@ -687,11 +678,12 @@ function CreateWizardScreen({ onboardingStep }: { onboardingStep: number }) {
     </p>
   ) : null;
 
-  const crystal = <WizardCrystal color={data.gender ? BALL_COLOR[data.gender] : BALL_COLOR.femenino} />;
+  const waves = <WizardWaves color={data.gender ? BALL_COLOR[data.gender] : BALL_COLOR.femenino} />;
 
   if (mobile) {
     return (
       <div className="create-mobile" data-testid="create-wizard">
+        {waves}
         {hintToast}
         <header className="create-mobile__header">
           <span data-testid="create-wizard-step">
@@ -704,7 +696,6 @@ function CreateWizardScreen({ onboardingStep }: { onboardingStep: number }) {
         </header>
         <main className="create-mobile__main">
           <div className="create-wizard-stage">
-            {crystal}
             {showBuildingPreview ? (
               <CreationPreviewCrumbsStrip
                 data={data}
@@ -739,6 +730,7 @@ function CreateWizardScreen({ onboardingStep }: { onboardingStep: number }) {
 
   return (
     <div data-testid="create-wizard">
+      {waves}
       {hintToast}
       <DesktopShell
         header={
@@ -774,7 +766,6 @@ function CreateWizardScreen({ onboardingStep }: { onboardingStep: number }) {
         }
       >
         <div className="create-wizard-stage">
-          {crystal}
           <div
             key={onboardingStep}
             className="create-who create-wizard-step-panel"

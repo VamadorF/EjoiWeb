@@ -18,7 +18,7 @@ vi.mock('~/platform/env', async (importOriginal) => ({
 }));
 
 // WebGL (ogl) no existe en jsdom.
-vi.mock('./CrystalizedBall', () => ({ default: () => null }));
+vi.mock('./GenderWaves', () => ({ default: () => null }));
 
 function jsonResponse(status: number, body: unknown = {}) {
   return new Response(JSON.stringify(body), {

@@ -6,7 +6,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { WebSessionProvider } from '~/features/auth/useWebSession';
 
 // WebGL (ogl) no existe en jsdom; evita trabajo async post-test en la suite completa.
-vi.mock('~/pages/CreateWizard/CrystalizedBall', () => ({ default: () => null }));
+vi.mock('~/pages/CreateWizard/GenderWaves', () => ({ default: () => null }));
 
 afterEach(() => {
   cleanup();
