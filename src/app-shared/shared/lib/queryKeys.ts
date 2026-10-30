@@ -1,4 +1,4 @@
-// AUTO-SINCRONIZADO desde ejoiFE 9234854dc9f9992b39b7f61dfb0e02b768be467d@9234854dc9f9992b39b7f61dfb0e02b768be467d:src/shared/lib/queryKeys.ts. No editar: npm run sync:app
+// AUTO-SINCRONIZADO desde ejoiFE a1e61e3d072b6cc9e8b074adda33480eb1d3a1f2@a1e61e3d072b6cc9e8b074adda33480eb1d3a1f2:src/shared/lib/queryKeys.ts. No editar: npm run sync:app
 /**
  * Query Keys centralizadas para React Query
  * Evita strings mágicos y facilita invalidación de cache

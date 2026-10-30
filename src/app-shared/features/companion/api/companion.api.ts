@@ -1,4 +1,4 @@
-// AUTO-SINCRONIZADO desde ejoiFE 9234854dc9f9992b39b7f61dfb0e02b768be467d@9234854dc9f9992b39b7f61dfb0e02b768be467d:src/features/companion/api/companion.api.ts. No editar: npm run sync:app
+// AUTO-SINCRONIZADO desde ejoiFE a1e61e3d072b6cc9e8b074adda33480eb1d3a1f2@a1e61e3d072b6cc9e8b074adda33480eb1d3a1f2:src/features/companion/api/companion.api.ts. No editar: npm run sync:app
 /**
  * Servicio de API para Companion
  * Todos los endpoints usan /companion/me (la identidad viene del JWT)

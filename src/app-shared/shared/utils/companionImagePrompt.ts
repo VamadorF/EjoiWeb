@@ -1,4 +1,4 @@
-// AUTO-SINCRONIZADO desde ejoiFE 9234854dc9f9992b39b7f61dfb0e02b768be467d@9234854dc9f9992b39b7f61dfb0e02b768be467d:src/shared/utils/companionImagePrompt.ts. No editar: npm run sync:app
+// AUTO-SINCRONIZADO desde ejoiFE a1e61e3d072b6cc9e8b074adda33480eb1d3a1f2@a1e61e3d072b6cc9e8b074adda33480eb1d3a1f2:src/shared/utils/companionImagePrompt.ts. No editar: npm run sync:app
 /**
  * Generador de prompts para gpt-image-1 basado en datos del onboarding.
  *
@@ -143,6 +143,26 @@ const ETHNICITY_TO_DESCRIPTION: Record<string, string> = {
   Mixta: 'This person is mixed-race with ambiguous ethnic features, warm medium skin tone, and a natural blend of facial features from multiple ethnicities.',
 };
 
+const HAIR_COLOR_TO_ENGLISH: Record<string, string> = {
+  Negro: 'black',
+  'Castaño oscuro': 'dark brown',
+  'Castaño claro': 'light brown',
+  Rubio: 'blonde',
+  Pelirrojo: 'red',
+  Canoso: 'gray',
+};
+
+/** Color de cabello en inglés para prompts; `undefined` si el valor no es uno de los conocidos. */
+export function hairColorToEnglish(hairColor?: string | null): string | undefined {
+  return HAIR_COLOR_TO_ENGLISH[hairColor?.trim() ?? ''];
+}
+
+function buildHairColorInstruction(hairColor?: string): string {
+  const english = hairColorToEnglish(hairColor);
+  if (!english) return '';
+  return `Hair color: natural ${english} hair. This hair color overrides any hair color implied by ethnicity; keep the hair texture and style natural for the person.`;
+}
+
 const PERSONA_TO_VISUAL: Record<string, string> = {
   friendly:     'with a warm relaxed smile, approachable, candid expression',
   professional: 'with a calm natural expression, composed but not posed, relaxed confidence',
@@ -263,6 +283,7 @@ export function generateCompanionImagePrompt(onboardingData: OnboardingData, mod
     compositionRules,
     promptRules.anatomyRules,
     styleConfig.buildPrompt(gender, ethnicityDesc, toneKey, age),
+    buildHairColorInstruction(onboardingData.hairColor),
     `The person is ${personaVisual}.`,
     toneVisual,
     background,

@@ -61,6 +61,12 @@ export function hasAppearanceChanges(baseline: EditFormSnapshot, current: EditFo
   return false;
 }
 
+/** Solo cambió el color de cabello: el retrato se edita en vez de regenerarse (SCRUM-192). */
+export function isHairOnlyChange(baseline: EditFormSnapshot, current: EditFormSnapshot): boolean {
+  if ((baseline.hairColor ?? '') === (current.hairColor ?? '')) return false;
+  return !hasAppearanceChanges(baseline, { ...current, hairColor: baseline.hairColor });
+}
+
 export function hasConversationalChanges(baseline: EditFormSnapshot, current: EditFormSnapshot): boolean {
   if (baseline.companionName !== current.companionName) return true;
   if (baseline.persona !== current.persona) return true;
@@ -165,7 +171,22 @@ export function buildConversationalSectionPatchBody(
   return Object.fromEntries(Object.entries(full).filter(([key]) => keys.has(key)));
 }
 
-export function editFormToOnboardingData(form: EditFormSnapshot) {
+/**
+ * Color de cabello para el prompt del retrato (SCRUM-192). Si el perfil nunca guardó color y el usuario
+ * no lo cambió, el formulario muestra el valor por defecto: no se fuerza en la imagen.
+ */
+export function resolvePromptHairColor(
+  baseline: EditFormSnapshot,
+  current: EditFormSnapshot,
+  profile: Pick<CompanionProfile, 'hairColor'> | null,
+): string | undefined {
+  if (profile?.hairColor?.trim() || (baseline.hairColor ?? '') !== (current.hairColor ?? '')) {
+    return current.hairColor;
+  }
+  return undefined;
+}
+
+export function editFormToOnboardingData(form: EditFormSnapshot, hairColor?: string) {
   return {
     visualStyle: form.visualStyle,
     gender: form.gender,
@@ -177,6 +198,7 @@ export function editFormToOnboardingData(form: EditFormSnapshot) {
     boundaries: [...form.boundaries],
     companionName: form.companionName,
     ethnicity: form.ethnicity,
+    hairColor,
     age: form.age,
     intensity: form.intensity,
   };
