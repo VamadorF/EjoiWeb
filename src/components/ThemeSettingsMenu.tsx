@@ -1,6 +1,6 @@
 import { useId, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useNavigate } from 'react-router';
+import { Link, NavLink, useNavigate } from 'react-router';
 
 import { AppIcon } from '~/components/AppIcon';
 import { ThemePreferenceControl } from '~/components/ThemePreferenceControl';
@@ -130,10 +130,17 @@ export function ThemeSettingsMenu({ className = '' }: ThemeSettingsMenuProps) {
               </div>
             ) : null}
             <nav className="home-side-menu__nav" aria-label={t('drawer.subtitle')}>
-              <Link to="/chat/editar" className="home-side-menu__row" onClick={close}>
+              <NavLink
+                to="/chat/editar"
+                end
+                className={({ isActive }) =>
+                  isActive ? 'home-side-menu__row home-side-menu__row--active' : 'home-side-menu__row'
+                }
+                onClick={close}
+              >
                 <AppIcon name="create-outline" />
                 {t('menu.edit', { ns: 'web', defaultValue: 'Editar eJoi' })}
-              </Link>
+              </NavLink>
               <Link to="/cuenta" className="home-side-menu__row" onClick={close}>
                 <AppIcon name="shield-checkmark-outline" />
                 {t('drawer.manage_account')}
