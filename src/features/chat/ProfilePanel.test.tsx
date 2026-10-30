@@ -36,7 +36,7 @@ describe('ProfilePanel', () => {
     expect(screen.queryByTestId('chat-quota')).toBeNull();
     const more = screen.getByTestId('chat-profile-more') as HTMLDetailsElement;
     expect(more.open).toBe(false);
-    expect(screen.getByRole('link', { name: 'Editar eJoi' }).getAttribute('href')).toBe('/chat/editar');
+    expect(screen.queryByRole('link', { name: 'Editar eJoi' })).toBeNull();
   });
 
   it('despliega límites y apariencia en Ver perfil completo', () => {
