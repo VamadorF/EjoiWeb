@@ -1,4 +1,3 @@
-import { Link } from 'react-router';
 import { useTranslation } from 'react-i18next';
 
 import type { OnboardingData } from '@/features/onboarding/types';
@@ -216,10 +215,6 @@ export function ProfilePanel({
               {t('chat.portrait_retry')}
             </button>
           ) : null}
-
-          <Link to="/chat/editar" className="btn btn--secondary btn--m chat-profile-panel__edit">
-            {t('menu.edit')}
-          </Link>
         </>
       ) : null}
     </div>
