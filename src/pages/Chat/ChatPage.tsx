@@ -6,13 +6,12 @@ import { Link } from 'react-router';
 import { getChatMessages } from '@/features/chat/api/chat.api';
 import { mergeAndSortChatMessages } from '@/features/chat/utils/mergeChatPages';
 import { inferReaction } from '@/features/chat/utils/inferReaction';
-import { generateIcebreakerSuggestions } from '@/shared/utils/companionTextGenerator';
-import type { Companion } from '@/features/companion/types';
 import { queryKeys } from '@/shared/lib/queryKeys';
 
 import { Composer } from '~/features/chat/Composer';
 import { useChatSession } from '~/features/chat/ChatSessionProvider';
 import { Icebreakers } from '~/features/chat/Icebreakers';
+import { buildIcebreakerSuggestions } from '~/features/chat/icebreakerSuggestions';
 import { buildChatBubbles } from '~/features/chat/buildChatBubbles';
 import {
   applyChatThreadScroll,
@@ -272,27 +271,12 @@ export default function ChatPage() {
 
   const icebreakerSuggestions = useMemo(() => {
     if (!profileData?.id) return [];
-    const companionForIcebreakers: Companion = {
-      id: profileData.id,
-      name: profileData.name ?? companionName,
-      gender: (profileData.gender ?? 'femenino') as Companion['gender'],
-      visualStyle: (profileData.visualStyle ?? 'realista') as Companion['visualStyle'],
-      persona: profileData.persona ?? '',
-      tone: '',
-      interactionStyle: '',
-      conversationDepth: '',
-      interests: profileData.interests ?? [],
-      boundaries: profileData.boundaries ?? [],
-    };
-    const fromCompanion = generateIcebreakerSuggestions(companionForIcebreakers);
-    const fallbacks = [tChat('chat.icebreaker.fallback_1'), tChat('chat.icebreaker.fallback_2')];
-    const merged = [...fromCompanion];
-    for (const line of fallbacks) {
-      if (merged.length >= 3) break;
-      if (!merged.includes(line)) merged.push(line);
-    }
-    return merged.slice(0, 3);
-  }, [companionName, profileData, tChat]);
+    return buildIcebreakerSuggestions(
+      { name: profileData.name ?? companionName, interests: profileData.interests ?? [] },
+      t,
+      tChat,
+    );
+  }, [companionName, profileData, t, tChat]);
 
   const showIcebreakers =
     isReady && !quotaOut && !hasUserMessage && !sending && icebreakerSuggestions.length > 0;
