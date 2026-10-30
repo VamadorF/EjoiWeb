@@ -1,3 +1,3 @@
-// AUTO-SINCRONIZADO desde ejoiFE 9234854dc9f9992b39b7f61dfb0e02b768be467d@9234854dc9f9992b39b7f61dfb0e02b768be467d:src/features/companion/constants/avatarVariants.ts. No editar: npm run sync:app
+// AUTO-SINCRONIZADO desde ejoiFE 64d4aac4c69dbe3ca4d58a65271d9b91a96b60b7@64d4aac4c69dbe3ca4d58a65271d9b91a96b60b7:src/features/companion/constants/avatarVariants.ts. No editar: npm run sync:app
 /** Máximo de imágenes generadas por sesión de creación (incluye la inicial). */
 export const MAX_COMPANION_AVATAR_VARIANTS = 5;

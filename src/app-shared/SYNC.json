@@ -1,108 +1,108 @@
 {
   "repo": "ejoiFE",
-  "ref": "9234854dc9f9992b39b7f61dfb0e02b768be467d",
-  "sha": "9234854dc9f9992b39b7f61dfb0e02b768be467d",
-  "syncedAt": "2026-10-26T18:10:32-03:00",
+  "ref": "64d4aac4c69dbe3ca4d58a65271d9b91a96b60b7",
+  "sha": "64d4aac4c69dbe3ca4d58a65271d9b91a96b60b7",
+  "syncedAt": "2026-10-30T15:31:53-03:00",
   "files": [
     {
       "path": "features/auth/assets/legalDocuments.ts",
-      "sha256": "8ce1dc6ae4db9d89a9cd96e7680fa04558eb3fdc4fe3578cb3fd3a107a3e286a"
+      "sha256": "81202e29a76fae8938770622ef4caae98ffca9c670edc4a4350fe715affadbc6"
     },
     {
       "path": "features/auth/types.ts",
-      "sha256": "8874d798faa069b630c5ce2888226bf8b379acdb73f263e11f422044216be87e"
+      "sha256": "9dcba154f77a3d0873efb2ca5695a0fd28e97e7cacf192af77ceda26a88be0f8"
     },
     {
       "path": "features/chat/adapters/chat.adapter.ts",
-      "sha256": "86170c4f63c5846182f020bbd2ad1e76058fcb0a45b0059da4faf21dfbf7ecf9"
+      "sha256": "949e677236365fb06d3a0770a8de5f793e0d933a0eeacc8f40849a5fb8be8159"
     },
     {
       "path": "features/chat/api/chat.api.ts",
-      "sha256": "84fcaea38c280259f10569827dee60acddd5d83df22fd7636d0cfbc713d1bfbf"
+      "sha256": "ad76b8b35da4cd4789f056b1c0a794523c23b13ed585734ed8f24e1d7c60b4ee"
     },
     {
       "path": "features/chat/api/tts.api.ts",
-      "sha256": "14e1c5e5d649acfbe0dec5ef568649f1e36471aa167b7672f80fa11814f0d9d4"
+      "sha256": "2cc1f7ededa4db573edd844f3431742880d1e240393b0b77c2733f6bdc66e7de"
     },
     {
       "path": "features/chat/constants.ts",
-      "sha256": "575e877dc4335a6a2c07ce6fe293d222b8f36b05df664cb4ddcf49d64ef4bdc2"
+      "sha256": "9986425335f2591bd2030ff82f0afd6469d589d818979cf49215671979bb3ecd"
     },
     {
       "path": "features/chat/types.ts",
-      "sha256": "4c252b0f1d2341a95b19995251587bdbc210904f6b740ce0c08bfed0bdbc4431"
+      "sha256": "0921080540ddfb91b1013d69cc43f9455cfe94472270cbd5db59e3232b6adf1a"
     },
     {
       "path": "features/chat/utils/buildChatListItems.ts",
-      "sha256": "8f0b983536c788cf7d55fc1b3638b764a255a678867425cd83b0f2b6313e0d74"
+      "sha256": "e66f294ef49ca6c298aa76f7723e54449a1534e27611a6c351cff6605c4e59e9"
     },
     {
       "path": "features/chat/utils/formatMessageDate.ts",
-      "sha256": "8fa44ee54de4dc4c8ae39db89f34d5a84fa75f205d059f935d3b6cfa117acfde"
+      "sha256": "049450eb054e3b580be4be41b920f3fc488a7ca8e0afa6dc5347e54ce5276827"
     },
     {
       "path": "features/chat/utils/inferReaction.ts",
-      "sha256": "bb5da48f94eee47629ae0cf7c70aabe6f3e7321c0f206e53bef6a55ef2ba153f"
+      "sha256": "c86d6aad4b675fcd78b2ba78d1a21c06708af3bb24810471bd2686d65c24cd4c"
     },
     {
       "path": "features/chat/utils/mergeChatPages.ts",
-      "sha256": "b991dc8fcebe13b6d9ec63d645bdb5284e3399f17be8df44fd1d3ba8fb9abb91"
+      "sha256": "29e50c94da1f25b6fffc50752a32c0807481d54d0d222a8d1c910522aca24ac9"
     },
     {
       "path": "features/chat/utils/reactionEmojiCatalog.ts",
-      "sha256": "0e5a4ea48a219132bc94150e08b48934a5dabc42da0422fdd721a53cb97292aa"
+      "sha256": "1213c84859d0205b733007ae05db5fd3dd87faa495d68534c31bbd2751f53cd5"
     },
     {
       "path": "features/chat/utils/resolveChatMediaUrl.ts",
-      "sha256": "9f9101b31365ed6e0c7fd3eb1129d7d1cca985d652cdb53dd429ba896cc37ed3"
+      "sha256": "b4d02d572c2c9ad1e2c21fd1260b18fba6991d25ef554e1ebaf5bc9e61ac0497"
     },
     {
       "path": "features/companion/adapters/companion.adapter.ts",
-      "sha256": "dcfb29c7267999c7c58223b87473e10b6356e5069f2f677b518b8a1fb496d6e5"
+      "sha256": "5bfb4c9d01037d96b15ec7f44fe138097a624840b2165027b31c4d77e31a29ea"
     },
     {
       "path": "features/companion/api/companion.api.ts",
-      "sha256": "37e5177c034f9c9b0e09d003b696dabd1c075e9fcdacc6070ec531ae17001509"
+      "sha256": "36aaa70e15abce9315c070985e9f9e77853faff24ddecff237f6a145b4530147"
     },
     {
       "path": "features/companion/api/image.api.ts",
-      "sha256": "2350398bf06d06db3beb450b5f045217a5259cbfc69663f77ab9f75c38b58a8a"
+      "sha256": "04c8f242c987f38bf2f18de75980aee2cbfa9d8a23bb0afb3a7e05632027192c"
     },
     {
       "path": "features/companion/constants/avatarVariants.ts",
-      "sha256": "f02662209952cc0f30771ab915636fd307b8e1ce25899637ffd7e8fdeb7f3f25"
+      "sha256": "8fdc6e5fee456de97c9e2e7f4b87ccbba095572b8264334f4752aa7249715d7b"
     },
     {
       "path": "features/companion/types.ts",
-      "sha256": "f0d56a8d2322529497c6c3b8c18c27a7a068fe00a12042e9d0045dbb1e700044"
+      "sha256": "d0b821730c52972da454c5cbfa4d2c95e2137b58c007d8ab63da8add86174c9c"
     },
     {
       "path": "features/memories/adapters/memories.adapter.ts",
-      "sha256": "3e0c5cba20fb81bd5c6dd7859b624d362c401b9d9af079a0c122704f318f465b"
+      "sha256": "3852c99dbca30e05c9b0bf3a72730f131baf15838e89f67b200f83bf3bb1a110"
     },
     {
       "path": "features/memories/api/memories.api.ts",
-      "sha256": "3c3000678256e5b7af0cf0a002deccaf471a4b933b44a478b866f130531d183f"
+      "sha256": "7e991464fd8435a74ae2ac44a85d823382d846e681c0a4aa776673a4cb733687"
     },
     {
       "path": "features/memories/types.ts",
-      "sha256": "e18c41ca7983ff0504f0af73bd9355816a910277ae50ddddfe4a24383025c25e"
+      "sha256": "6f8c53f324145aee451af57ce29578f4215748aa2459adf33d7afc7f54b729a2"
     },
     {
       "path": "features/onboarding/constants/onboardingSteps.ts",
-      "sha256": "581e4cdad60a5f5431149e1cfd4dc8c99b1b6f48dfa59802fef55969bc07f347"
+      "sha256": "afde424a301336b1bb13153fa37775d7a946d7104e12b127af1e8758fba3561f"
     },
     {
       "path": "features/onboarding/data/boundaryOptions.ts",
-      "sha256": "ba31c7792e360d3c288cef716a33531534a78cd8eb4a336abf5b21f35e65440b"
+      "sha256": "cc046e830d6d8950115604e06820fc80be38735e5f05abfd7ebf86e96add5bb3"
     },
     {
       "path": "features/onboarding/data/companionArchetypes.ts",
-      "sha256": "4a5e25f5fd37f1fa093e849818efc8e67be7160c6648ea411dff78672f5abc2d"
+      "sha256": "5e503be336e45f4d9ee4a653d5ace4b3b70471e4467e79bb1d059a1a53fb5fc2"
     },
     {
       "path": "features/onboarding/data/companionIntensity.ts",
-      "sha256": "482b02df974161f9c9c62f139934915cff5e46f014a033aef59878e6d9a2ad6d"
+      "sha256": "b40d78a69b62f8ab72bb7e3349c7216d0a24af59b7bfa389f44860b5b646eff1"
     },
     {
       "path": "features/onboarding/data/companionNames.json",
@@ -110,55 +110,55 @@
     },
     {
       "path": "features/onboarding/data/companionNames.ts",
-      "sha256": "ba0f17e5b7ff0cb62fc10cdbe03ebb6f6065d8a21ad63af85c0dbe281604fb3f"
+      "sha256": "a701bc3c39cd1f44f0389470ac91e25c29829759d7c2b3c508479dc0ad962fdd"
     },
     {
       "path": "features/onboarding/data/getRandomCompanionName.ts",
-      "sha256": "12e78e7291221742170700cb153deb2c0fa9b4e5aa29ebaaa100fb6f349b7c71"
+      "sha256": "6bc188cf39996a7f77793e4069e64936e43c85e49e539ea76b18dbb0b6d4c115"
     },
     {
       "path": "features/onboarding/data/interestOptions.ts",
-      "sha256": "46fd5b20dd5707a58e06a64cec701797e785101bb8e70b86bd6d76410eb1589b"
+      "sha256": "193cea02ee6a33fa77fd1e35a4553bded2385f2675892394c62545d3f8fb35c2"
     },
     {
       "path": "features/onboarding/data/personalityOptions.ts",
-      "sha256": "1c12d3bbce8b5a80dfccc880c01b0fc99c2182af98f36830efd2a7f3eaae3947"
+      "sha256": "195d7a17a97de17d27275af6e0a87534037b3862aec315183bfee80404f8883d"
     },
     {
       "path": "features/onboarding/types.ts",
-      "sha256": "f40e87fe4a7e6825c54cf93e1fc4ce48ba06f9554aaafbfc4375318bb895a20c"
+      "sha256": "1674ae1e6abe3de4eef6726759a3b028368d9b11305118c4d4fc0f2fa8d24ab2"
     },
     {
       "path": "features/onboarding/utils/wizardPreviewCrumbs.ts",
-      "sha256": "f7c3b6df27cf9071b4d1aaac65f45afa77e5b7df33fab93a6b1de53ced4c1c8c"
+      "sha256": "fc3e613a6e210f2531343e24cfb10a2c1cb5e390b12c320910cbda0408fe08a0"
     },
     {
       "path": "features/presence/types.ts",
-      "sha256": "0fd0240c645b9d112a9af1729fe87ecbbbe3aba2551f2556ca5902991767de93"
+      "sha256": "71ed8e6256d29950d7507cca8d9cb6d02c035f1c0b4c02610b34f6d31ad2c58e"
     },
     {
       "path": "features/presence/utils/derivePresence.ts",
-      "sha256": "3f313a62282248e99743f97f2fd69ea0fc9635813fc4b5082c24460264793a6e"
+      "sha256": "a09a7bd9d0780b8fd9f5510cdeeb477e8a534d51285c4aec6e49f57f3119a605"
     },
     {
       "path": "features/presence/utils/formatLastSeen.ts",
-      "sha256": "1f066cf275aab694d8f6c819027fdb2fbb48e4c511a5c5b272bcc81d2d10ddf3"
+      "sha256": "047839616a2ff2521f1881d78f2cd019acc6d3fd9425ee8549b000d14e3d69b8"
     },
     {
       "path": "features/proactivity/adapters/proactivity.adapter.ts",
-      "sha256": "f34e3cff831dbc1ed9e8666abd39e28c8c2ee26ca114e92b08ee2385a4d8480d"
+      "sha256": "4f8dff479054a2d0b0f4cc056e6cf984bacd2f6ea0ebba01d252d37feb89280c"
     },
     {
       "path": "features/proactivity/api/proactivity.api.ts",
-      "sha256": "107089cea73e4dcac7e821babb0553f8ee33a7cda3d0a40bdb4618fcdc04f02f"
+      "sha256": "43fd0ae178c3a88bc82f3374d6880da22ecf631dbc99e19de9fdf4d45ebeee62"
     },
     {
       "path": "features/proactivity/types.ts",
-      "sha256": "b47cd8e16b894f13c45db1bc84651e0167f4066660d5feca7f94ca9ff4d68fca"
+      "sha256": "bd5fce636f5c08c8de315558056f9e4d23dd15b8f0ee4aa38b0c1364fe11cfb1"
     },
     {
       "path": "shared/i18n/index.ts",
-      "sha256": "1512944e52d2089edb44b74917410c9eb3cfa7397f0fe71411f10429ecc76d50"
+      "sha256": "da1ef9c5303c8eb3e5e0d9da1c2bc468cdf6c280464723a20fb8a819ec66e6da"
     },
     {
       "path": "shared/i18n/locales/achievements.es.json",
@@ -194,55 +194,55 @@
     },
     {
       "path": "shared/lib/queryKeys.ts",
-      "sha256": "5e136f1e1add8f7287725523dc8d945eef3120d6b83a920b1f9a800e8df5fc17"
+      "sha256": "8e2cb96dcd775d1104cb8bb07334de5735805d5a8804a4f3a90fa92eac91039f"
     },
     {
       "path": "shared/theme/tokens.ts",
-      "sha256": "7c91e589e3d1a67321141d2df677f6db2f8093fd6571bdc8b1a49085f2894b68"
+      "sha256": "99f13e306a5ad130c2350aa6b0d165c1993bde06052c43be78974abab3ede45d"
     },
     {
       "path": "shared/utils/ageToDob.ts",
-      "sha256": "a1c308df9d9cbd9d398f8127bdfae5c8a212ca19641a0f466fa056b1b89db048"
+      "sha256": "8511f441e8961c8b1fcd67c8e7e5f869a78fd9013bf8c24ecd1539ee65a2fad9"
     },
     {
       "path": "shared/utils/companionAgeAppearance.ts",
-      "sha256": "03c817741beccde43d18b9bacde7c5d83be6a4ac006da4304c23292d4aba9731"
+      "sha256": "f26fbda203fc77e1b077bb53391cbbac7a876650e1abb9693890e0fa87ed71d7"
     },
     {
       "path": "shared/utils/companionImagePrompt.anime.ts",
-      "sha256": "b034082ff2184287ed295c4d90ae01067f68a13e4524598bed07a906e8a192fa"
+      "sha256": "daab1b1e991591f2764e4216566d953e329cb27fd45399e4bce58d0d01ac9198"
     },
     {
       "path": "shared/utils/companionImagePrompt.realista.ts",
-      "sha256": "4c4732cb4501a633af66626e991bf8a0d9ca3c21c78ff25b02a9397794ab63ac"
+      "sha256": "cb8d7ffbbe9e5b4f053da10c70ae9f8c1f3f701c2e361e484ce3de6375560fe7"
     },
     {
       "path": "shared/utils/companionImagePrompt.ts",
-      "sha256": "45481a19a6b276ac2281d734825c12f08e1db7d9af2e1be86d7c03fb72f6e0c7"
+      "sha256": "44938c49bf7c7ac86776aa87b08117300cda2de6ff3d4a884a975c34ce836ac9"
     },
     {
       "path": "shared/utils/companionTextGenerator.ts",
-      "sha256": "35159e398b91f25d0bbc6d0b6bc9320c5d40299e87a71f157cd432cac8e635f1"
+      "sha256": "6221402df110a2c32bd2a094d172bc8df9522b09a0fc01e03d701a305a83b02e"
     },
     {
       "path": "shared/utils/ethnicityLabel.ts",
-      "sha256": "2b71c1a74a1bf51e26a1786e78cf8c1e5f896262cef5d499b1977f9e7e019c07"
+      "sha256": "5b3b691c94595a0168daf3f81d4fc11aa32eace1aa66a0ee28a0c0362dd3a0f3"
     },
     {
       "path": "shared/utils/genderedText.ts",
-      "sha256": "e16ff210214f760c6714f8e12c13cf310f053783c4788f690f737699fc394afb"
+      "sha256": "bb952d75a5e4b066cb8ef8bf94e2160e50ae05648875333451a23c49e20bece3"
     },
     {
       "path": "shared/utils/logger.ts",
-      "sha256": "4d83cf02f3b9fc9ad04c803d0b575bd8413d38e43a943d9dd16892ab9d828402"
+      "sha256": "c09a1a73338c86ce92fc16b8b93b24fcfa02f404af9ada5b22bb6355caf8775e"
     },
     {
       "path": "shared/utils/uuid.ts",
-      "sha256": "52962d2a903088774c3326e14754d0f190ff6746035f7a0ac81d0b6f99536819"
+      "sha256": "d2d551ac421299ed602d40a73e1e6982f8e881aaaf2424f6f773e0e2731e4905"
     },
     {
       "path": "shared/utils/validators.ts",
-      "sha256": "cf20add56927d73e8df32e214a7f4394f966447d76e26d0c7e7c90a81e56ab03"
+      "sha256": "ae4cfcd81d926c1fb8d68ab2e972cadfddc703cb83c635a3c0051248803e33bf"
     }
   ],
   "assets": [

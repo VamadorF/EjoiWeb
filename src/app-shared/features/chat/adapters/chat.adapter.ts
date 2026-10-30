@@ -1,4 +1,4 @@
-// AUTO-SINCRONIZADO desde ejoiFE 9234854dc9f9992b39b7f61dfb0e02b768be467d@9234854dc9f9992b39b7f61dfb0e02b768be467d:src/features/chat/adapters/chat.adapter.ts. No editar: npm run sync:app
+// AUTO-SINCRONIZADO desde ejoiFE 64d4aac4c69dbe3ca4d58a65271d9b91a96b60b7@64d4aac4c69dbe3ca4d58a65271d9b91a96b60b7:src/features/chat/adapters/chat.adapter.ts. No editar: npm run sync:app
 import { fromRawPreferenceChange } from '@/features/proactivity/adapters/proactivity.adapter';
 import type { PreferenceChange } from '@/features/proactivity/types';
 import { MESSAGE_MAX_LENGTH, SPONTANEOUS_PICTURE_TRIGGER_PREFIX } from '../constants';
