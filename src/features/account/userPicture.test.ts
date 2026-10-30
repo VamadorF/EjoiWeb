@@ -26,10 +26,10 @@ describe('persistPictureCandidates', () => {
 
   it('si el primero no cabe guarda un recorte menor; si ninguno cabe deja la foto', () => {
     session.setUserDataJson(JSON.stringify(user));
-    const real = localStorage.setItem.bind(localStorage);
-    vi.spyOn(localStorage, 'setItem').mockImplementation((key, value) => {
+    const real = Storage.prototype.setItem;
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(function (this: Storage, key, value) {
       if (String(value).includes('HUGE')) throw new DOMException('quota', 'QuotaExceededError');
-      return real(key, value);
+      return real.call(this, key, value);
     });
 
     expect(persistPictureCandidates(['HUGE', 'small'], session.getUserDataJson(), null)).toBe('shrunk');
