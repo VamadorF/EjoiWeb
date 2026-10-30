@@ -124,7 +124,10 @@
     "profile_age": "{{count}} años",
     "profile_load_error": "No pudimos cargar el perfil.",
     "profile_more": "Ver perfil completo",
-    "load_older": "Ver mensajes anteriores"
+    "load_older": "Ver mensajes anteriores",
+    "icebreaker_greet": "¡Hola, {{name}}! ¿Cómo estás?",
+    "icebreaker_interest": "¿Qué es lo que más te gusta de {{interest}}?",
+    "icebreaker_about": "Cuéntame un poco sobre ti."
   },
   "profile": {
     "avoids": "Evita hablar de"
