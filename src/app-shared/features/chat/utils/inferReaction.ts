@@ -1,4 +1,4 @@
-// AUTO-SINCRONIZADO desde ejoiFE 64d4aac4c69dbe3ca4d58a65271d9b91a96b60b7@64d4aac4c69dbe3ca4d58a65271d9b91a96b60b7:src/features/chat/utils/inferReaction.ts. No editar: npm run sync:app
+// AUTO-SINCRONIZADO desde ejoiFE a1e61e3d072b6cc9e8b074adda33480eb1d3a1f2@a1e61e3d072b6cc9e8b074adda33480eb1d3a1f2:src/features/chat/utils/inferReaction.ts. No editar: npm run sync:app
 /**
  * Heurística local para inferir la reacción instantánea del compañante a partir
  * del texto que el usuario acaba de enviar.

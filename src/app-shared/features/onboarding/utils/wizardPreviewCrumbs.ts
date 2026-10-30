@@ -1,4 +1,4 @@
-// AUTO-SINCRONIZADO desde ejoiFE 64d4aac4c69dbe3ca4d58a65271d9b91a96b60b7@64d4aac4c69dbe3ca4d58a65271d9b91a96b60b7:src/features/onboarding/utils/wizardPreviewCrumbs.ts. No editar: npm run sync:app
+// AUTO-SINCRONIZADO desde ejoiFE a1e61e3d072b6cc9e8b074adda33480eb1d3a1f2@a1e61e3d072b6cc9e8b074adda33480eb1d3a1f2:src/features/onboarding/utils/wizardPreviewCrumbs.ts. No editar: npm run sync:app
 import type { TFunction } from 'i18next';
 import { INTENSITY_OPTIONS } from '../data/companionIntensity';
 import { ONBOARDING_STEPS } from '../constants/onboardingSteps';

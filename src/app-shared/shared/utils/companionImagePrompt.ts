@@ -1,4 +1,4 @@
-// AUTO-SINCRONIZADO desde ejoiFE 64d4aac4c69dbe3ca4d58a65271d9b91a96b60b7@64d4aac4c69dbe3ca4d58a65271d9b91a96b60b7:src/shared/utils/companionImagePrompt.ts. No editar: npm run sync:app
+// AUTO-SINCRONIZADO desde ejoiFE a1e61e3d072b6cc9e8b074adda33480eb1d3a1f2@a1e61e3d072b6cc9e8b074adda33480eb1d3a1f2:src/shared/utils/companionImagePrompt.ts. No editar: npm run sync:app
 /**
  * Generador de prompts para gpt-image-1 basado en datos del onboarding.
  *
@@ -152,8 +152,13 @@ const HAIR_COLOR_TO_ENGLISH: Record<string, string> = {
   Canoso: 'gray',
 };
 
+/** Color de cabello en inglés para prompts; `undefined` si el valor no es uno de los conocidos. */
+export function hairColorToEnglish(hairColor?: string | null): string | undefined {
+  return HAIR_COLOR_TO_ENGLISH[hairColor?.trim() ?? ''];
+}
+
 function buildHairColorInstruction(hairColor?: string): string {
-  const english = HAIR_COLOR_TO_ENGLISH[hairColor?.trim() ?? ''];
+  const english = hairColorToEnglish(hairColor);
   if (!english) return '';
   return `Hair color: natural ${english} hair. This hair color overrides any hair color implied by ethnicity; keep the hair texture and style natural for the person.`;
 }
