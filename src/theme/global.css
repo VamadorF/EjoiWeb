@@ -156,16 +156,84 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-html.theme-transition,
-html.theme-transition *,
-html.theme-transition *::before,
-html.theme-transition *::after {
+html:not([data-motion='off']).theme-transition,
+html:not([data-motion='off']).theme-transition *,
+html:not([data-motion='off']).theme-transition *::before,
+html:not([data-motion='off']).theme-transition *::after {
   transition:
     color var(--motion-theme) ease,
     background-color var(--motion-theme) ease,
     border-color var(--motion-theme) ease,
     box-shadow var(--motion-theme) ease,
     fill var(--motion-theme) ease;
+}
+
+@property --theme-aurora-bg {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #1a1430;
+}
+
+@property --theme-aurora-surface {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #261c3e;
+}
+
+@property --theme-pulse-brand {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #d00954;
+}
+
+@property --theme-pulse-bg {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #fff4f8;
+}
+
+html:not([data-motion='off'])[data-theme-id='aurora'] {
+  animation: theme-aurora 5.5s ease-in-out infinite alternate;
+}
+
+html:not([data-motion='off'])[data-theme-id='pulse'] {
+  animation: theme-pulse 2.8s ease-in-out infinite alternate;
+}
+
+@keyframes theme-aurora {
+  from {
+    --theme-aurora-bg: #1a1430;
+    --theme-aurora-surface: #261c3e;
+  }
+  to {
+    --theme-aurora-bg: #0e3038;
+    --theme-aurora-surface: #143e46;
+  }
+}
+
+@keyframes theme-pulse {
+  from {
+    --theme-pulse-brand: #d00954;
+    --theme-pulse-bg: #fff4f8;
+  }
+  to {
+    --theme-pulse-brand: #5b4dff;
+    --theme-pulse-bg: #f0edff;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-motion='on'])[data-theme-id='aurora'],
+  html:not([data-motion='on'])[data-theme-id='pulse'] {
+    animation: none;
+  }
+
+  html:not([data-motion='on']).theme-transition,
+  html:not([data-motion='on']).theme-transition *,
+  html:not([data-motion='on']).theme-transition *::before,
+  html:not([data-motion='on']).theme-transition *::after {
+    transition: none;
+  }
 }
 
 button {

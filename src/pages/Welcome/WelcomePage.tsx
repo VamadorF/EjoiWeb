@@ -62,6 +62,7 @@ export default function WelcomePage() {
     !isAppleSignInConfigured();
 
   useEffect(() => {
+    document.title = 'eJoi — Tu compañía de IA para conversar';
     document.documentElement.classList.add('welcome-route');
     return () => document.documentElement.classList.remove('welcome-route');
   }, []);

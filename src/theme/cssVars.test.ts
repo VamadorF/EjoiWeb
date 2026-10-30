@@ -18,4 +18,20 @@ describe('cssVars', () => {
       expect(css).toContain(`${colorVarName(key)}:`);
     }
   });
+
+  it('incluye packs de la app y temas web', () => {
+    const css = buildCssVarsText();
+    expect(css).toContain('[data-theme-id="romantic"]');
+    expect(css).toContain('#fff8f3');
+    expect(css).toContain('[data-theme-id="minimal"]');
+    expect(css).toContain('[data-theme-id="kawaii"]');
+    expect(css).toContain('#fff0f5');
+    expect(css).toContain('[data-theme-id="aurora"]');
+    expect(css).toContain('var(--theme-aurora-bg)');
+    expect(css).toContain('[data-theme-id="pulse"]');
+    expect(css).toContain('var(--theme-pulse-brand)');
+    expect(css).toContain('[data-theme-id="liquid"]');
+    expect(css).toContain('#172033');
+    expect(css).not.toContain('cyber');
+  });
 });

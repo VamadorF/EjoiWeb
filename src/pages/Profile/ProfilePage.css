@@ -14,6 +14,12 @@
 
 .profile-page .companion-card {
   max-width: none;
+  padding: 16px;
+}
+
+.profile-page .companion-card__header,
+.profile-page .companion-card__section {
+  padding: 0;
 }
 
 /* ponytail: retrato máx. 320px; el texto ocupa el resto. Subir el tope si el arte debe crecer. */

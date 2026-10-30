@@ -1,8 +1,10 @@
 import { lazy } from 'react';
 import { Navigate, createBrowserRouter, Outlet, type RouteObject } from 'react-router';
 
+import { GlassFilter } from '~/components/LiquidButton';
 import { ThemeSettingsMenu } from '~/components/ThemeSettingsMenu';
 import { SessionRouting } from '~/features/auth/useWebSession';
+import { useThemePreference } from '~/theme/theme';
 
 const WelcomePage = lazy(() => import('~/pages/Welcome/WelcomePage'));
 const CreateCrearRedirect = lazy(() => import('~/pages/CreateWizard/CreateCrearRedirect'));
@@ -16,6 +18,7 @@ const HomeRouteLayout = lazy(() => import('~/layout/HomeShell'));
 const ProfilePage = lazy(() => import('~/pages/Profile/ProfilePage'));
 const MemoriesPage = lazy(() => import('~/pages/Memories/MemoriesPage'));
 const AccountPage = lazy(() => import('~/pages/Account/AccountPage'));
+const SubscriptionPage = lazy(() => import('~/pages/Subscription/SubscriptionPage'));
 
 export const routeConfig: RouteObject[] = [
   { path: '/', element: <WelcomePage /> },
@@ -39,12 +42,15 @@ export const routeConfig: RouteObject[] = [
   },
   /** Ruta autenticada fuera del shell Home (orquestador de sesión). */
   { path: '/cuenta', element: <AccountPage /> },
+  { path: '/cuenta/suscripcion', element: <SubscriptionPage /> },
   { path: '/chat/editar', element: <ChatEditPage /> },
 ];
 
 function RootLayout() {
+  const { preference } = useThemePreference();
   return (
     <>
+      {preference === 'liquid' ? <GlassFilter /> : null}
       <SessionRouting />
       <ThemeSettingsMenu />
       <Outlet />

@@ -2,15 +2,9 @@ import { useId } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { OptionGroup } from '~/layout/OptionGroup';
-import { useThemePreference, type ThemePreference } from '~/theme/theme';
+import { THEME_CHOICES, useThemePreference } from '~/theme/theme';
 
 import './ThemePreferenceControl.css';
-
-const OPTIONS: readonly { id: ThemePreference; labelKey: string }[] = [
-  { id: 'system', labelKey: 'drawer.theme_auto' },
-  { id: 'light', labelKey: 'drawer.theme_light' },
-  { id: 'dark', labelKey: 'drawer.theme_dark' },
-];
 
 export type ThemePreferenceControlProps = {
   className?: string;
@@ -47,16 +41,23 @@ export function ThemePreferenceControl({
         aria-label={groupAriaLabel}
         className={`seg theme-preference__seg${compact ? ' theme-preference__seg--compact' : ''}`}
       >
-        {OPTIONS.map((opt) => (
+        {THEME_CHOICES.map((opt) => (
           <button
             key={opt.id}
             type="button"
             role="radio"
             className="seg__item"
             aria-checked={preference === opt.id}
+            data-theme-choice={opt.id}
+            data-testid={`theme-option-${opt.id}`}
             onClick={() => setPreference(opt.id)}
           >
-            {t(opt.labelKey)}
+            <span className="theme-preference__name">
+              {opt.web ? t(opt.labelKey, { ns: 'web' }) : t(opt.labelKey)}
+            </span>
+            {opt.web ? (
+              <span className="theme-preference__web">{t('theme.web_mark', { ns: 'web' })}</span>
+            ) : null}
           </button>
         ))}
       </OptionGroup>

@@ -80,3 +80,18 @@
   font: var(--font-caption);
   color: var(--c-ink2);
 }
+
+/* ponytail: solo entrada; la salida animada exigiría conservar el panel anterior. */
+@media (prefers-reduced-motion: no-preference) {
+  .home-shell__read > .home-shell__read-inner,
+  .home-shell__read > .home-tab-page {
+    animation: home-shell-panel-in 180ms ease-out;
+  }
+}
+
+@keyframes home-shell-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
