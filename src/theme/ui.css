@@ -537,9 +537,6 @@
     var(--c-skeleton-base) 100%
   );
   background-size: 200% 100%;
-}
-
-html:not([data-motion='off']) .skeleton {
   animation: ui-shimmer 1.2s ease-in-out infinite;
 }
 
@@ -577,7 +574,7 @@ html:not([data-motion='off']) .skeleton {
 
   .btn,
   .opt,
-  html:not([data-motion='on']) .skeleton,
+  .skeleton,
   .spinner {
     transition-duration: 120ms;
     animation: none;

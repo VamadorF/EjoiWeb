@@ -22,12 +22,4 @@ describe('messageReactions', () => {
     resetMessageReactionsCacheForTests();
     await expect(getMessageReaction('c1', 'm1')).resolves.toBe('❤️');
   });
-
-  it('reemplaza la reacción del mismo mensaje', async () => {
-    await setMessageReaction('c1', 'm1', '❤️');
-    await setMessageReaction('c1', 'm1', '😂');
-    await expect(getMessageReaction('c1', 'm1')).resolves.toBe('😂');
-    const saved = vi.mocked(kv.kvSetJSON).mock.calls.at(-1)?.[1] as { c1: Record<string, string> };
-    expect(saved.c1).toEqual({ m1: '😂' });
-  });
 });

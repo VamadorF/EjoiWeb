@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!-- ponytail: README no documenta el host de este cliente. Base https://www.ejoi.cl (CAMPAIGN_LANDING_URL). Sustituir si el deploy es otro origen. -->
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://www.ejoi.cl/</loc>
-  </url>
-</urlset>

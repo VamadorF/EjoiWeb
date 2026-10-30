@@ -159,15 +159,6 @@
   flex-direction: column;
 }
 
-.chat-thread__jump {
-  position: sticky;
-  bottom: var(--space-3);
-  z-index: 1;
-  align-self: flex-end;
-  flex-shrink: 0;
-  margin-top: -44px;
-}
-
 .chat-page__load-history {
   align-self: flex-start;
   margin-bottom: var(--space-2);
@@ -217,54 +208,12 @@
   list-style: none;
 }
 
-.chat-messages__foot {
-  display: flex;
-  align-items: flex-end;
-  gap: var(--space-2);
-  margin-top: var(--space-2);
-}
-
-.chat-messages__foot--mine {
-  flex-direction: row-reverse;
-}
-
-.chat-messages__who {
-  position: relative;
-  flex: none;
-  width: 32px;
-  height: 32px;
-}
-
-.chat-messages__who-photo {
-  display: block;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  object-fit: cover;
-  background: var(--c-surface);
-}
-
-.chat-messages__who-photo--initials {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--c-line);
-  color: var(--c-ink);
-  font: 700 11px/1 Apis, system-ui, sans-serif;
-}
-
-.chat-messages__who .chat-messages__reaction-badge {
-  position: absolute;
-  top: -6px;
-  right: -8px;
-  z-index: 1;
-}
-
 .chat-messages__meta {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-2);
+  margin-top: var(--space-2);
 }
 
 .chat-messages__copy,
@@ -334,18 +283,9 @@
 }
 
 .chat-messages__reaction-badge {
-  flex: none;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 22px;
-  height: 22px;
-  padding: 0 2px;
-  border-radius: 999px;
-  background: var(--c-bg);
-  box-shadow: var(--elev-1);
-  font-size: 14px;
-  line-height: 1;
+  display: inline-block;
+  margin-top: var(--space-1);
+  font-size: 16px;
 }
 
 .bubble--ai,
@@ -543,6 +483,30 @@
   color: var(--c-dis-ink);
   cursor: not-allowed;
   box-shadow: none;
+}
+
+.chat-page__summary {
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  margin: var(--space-3) var(--space-6) 0;
+}
+
+.chat-page__summary-text {
+  margin: 0;
+  flex: 1;
+  min-width: min(100%, 280px);
+}
+
+.chat-page__summary-edit {
+  flex-shrink: 0;
+}
+
+@media (min-width: 1024px) {
+  .chat-page__summary {
+    display: none;
+  }
 }
 
 .chat-page__ready-moment {

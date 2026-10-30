@@ -17,25 +17,13 @@
         var root = document.documentElement;
         root.dataset.theme = theme;
         root.style.colorScheme = theme;
-        var motionPref;
-        try {
-          motionPref = localStorage.getItem('ejoi.motion');
-        } catch (e) {}
-        var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        root.dataset.motion =
-          motionPref === 'on' || (motionPref !== 'off' && !reduceMotion) ? 'on' : 'off';
       })();
     </script>
     <meta charset="UTF-8" />
     <meta name="color-scheme" content="light dark" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- ponytail: README no documenta el host. Canónica = https://www.ejoi.cl (CAMPAIGN_LANDING_URL). Sustituir si el deploy es otro origen. -->
-    <link rel="canonical" href="https://www.ejoi.cl/" />
-    <meta
-      name="description"
-      content="Crea tu compañía de IA para conversar y tener apoyo emocional. Empiezas en un minuto, a tu ritmo."
-    />
-    <title>eJoi — Tu compañía de IA para conversar</title>
+    <meta name="robots" content="noindex" />
+    <title>eJoi</title>
     <link rel="icon" href="/logos/principal.png" type="image/png" />
   </head>
   <body>

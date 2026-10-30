@@ -171,6 +171,17 @@ test.describe('Chat paridad móvil v2 (SCRUM-168)', () => {
     expect(bg).toBe(disBg);
   });
 
+  test('franja resumen solo bajo 1024 px', async ({ page }) => {
+    await mockChatReady(page);
+    await page.setViewportSize({ width: 800, height: 900 });
+    await page.goto('/chat');
+    await expect(page.getByTestId('chat-summary-banner')).toBeVisible();
+    await expect(page.getByTestId('chat-summary-banner')).toContainText('Editar');
+
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await expect(page.getByTestId('chat-summary-banner')).toBeHidden();
+  });
+
   test('error de creación: Intentar de nuevo y Revisar mis elecciones', async ({ page }) => {
     await page.addInitScript(() => {
       sessionStorage.setItem('ejoi-mock-demo-logged-in', '1');

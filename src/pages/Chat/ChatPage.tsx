@@ -1,23 +1,22 @@
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router';
 
 import { getChatMessages } from '@/features/chat/api/chat.api';
 import { mergeAndSortChatMessages } from '@/features/chat/utils/mergeChatPages';
 import { inferReaction } from '@/features/chat/utils/inferReaction';
 import { queryKeys } from '@/shared/lib/queryKeys';
 
-import { AppIcon } from '~/components/AppIcon';
 import { Composer } from '~/features/chat/Composer';
 import { useChatSession } from '~/features/chat/ChatSessionProvider';
 import { Icebreakers } from '~/features/chat/Icebreakers';
 import { buildIcebreakerSuggestions } from '~/features/chat/icebreakerSuggestions';
 import { buildChatBubbles } from '~/features/chat/buildChatBubbles';
 import {
+  applyChatThreadScroll,
   commitChatThreadScroll,
-  planThreadScroll,
   readChatThreadScroll,
-  showJumpToLatest,
 } from '~/features/chat/chatThreadScroll';
 import { getOlderHistoryPageParam } from '~/features/chat/historyPagination';
 import { MessageList, type ChatBubble } from '~/features/chat/MessageList';
@@ -32,6 +31,7 @@ import { QuickReplies } from '~/features/chat/QuickReplies';
 import { useCreationStatus } from '~/features/chat/useCreationStatus';
 import { useProfile } from '~/features/chat/useProfile';
 import { isQuotaExhausted, resolveMessagesRemaining, useQuota } from '~/features/chat/useQuota';
+import { useGenderedTextWith } from '~/features/gender/useGenderedText';
 import { presenceActions } from '~/features/presence/presenceStore';
 import { usePresenceSignals } from '~/features/presence/usePresenceSignals';
 import { POST_ASSISTANT_REACTION_DELAY_MS } from '~/features/reactions/useCompanionReaction';
@@ -39,6 +39,15 @@ import { POST_ASSISTANT_REACTION_DELAY_MS } from '~/features/reactions/useCompan
 import './ChatPage.css';
 
 const QUOTA_LOW_THRESHOLD = 10;
+
+const INTENSITY_LABEL_KEYS: Record<
+  string,
+  'create.presence_soft' | 'create.presence_balanced' | 'create.presence_intense'
+> = {
+  soft: 'create.presence_soft',
+  balanced: 'create.presence_balanced',
+  intense: 'create.presence_intense',
+};
 
 export default function ChatPage() {
   const { t } = useTranslation('web');
@@ -63,12 +72,10 @@ export default function ChatPage() {
   const [pendingFailed, setPendingFailed] = useState(false);
   const [sending, setSending] = useState(false);
   const lastInstantReactionRef = useRef<string | undefined>(undefined);
-  const followSendRef = useRef(false);
-  const tailAtSendRef = useRef<string | undefined>(undefined);
-  const bubblesRef = useRef<ChatBubble[]>([]);
-  const wasAtBottomRef = useRef(false);
 
   const companionName = profileData?.name?.trim() || 'tu eJoi';
+  const companionGender = (profileData?.gender ?? '') as '' | 'femenino' | 'masculino' | 'neutro';
+  const gendered = useGenderedTextWith(companionGender);
   const companionId = profileData?.id;
 
   useEffect(() => {
@@ -91,7 +98,6 @@ export default function ChatPage() {
     isFetchingNextPage,
     fetchNextPage,
     refetch: refetchHistory,
-    isSuccess: historyReady,
   } = useInfiniteQuery({
     queryKey: queryKeys.chat.messages(companionId ?? 'pending'),
     queryFn: ({ pageParam }: { pageParam: string | undefined }) =>
@@ -112,11 +118,6 @@ export default function ChatPage() {
 
   const retryPending = useCallback(async () => {
     if (!pending || !companionId) return;
-    followSendRef.current = true;
-    const atRetry = bubblesRef.current;
-    const retryTail = atRetry[atRetry.length - 1];
-    tailAtSendRef.current =
-      retryTail?.id === pending.clientMessageId ? atRetry[atRetry.length - 2]?.id : retryTail?.id;
     setSending(true);
     setPendingFailed(false);
     companionPresence.setSending(true);
@@ -143,12 +144,6 @@ export default function ChatPage() {
     async (text: string) => {
       const userId = resolveUserIdFromSession();
       if (!userId || !isReady || quotaOut || !companionId || sending) return;
-      followSendRef.current = true;
-      const atSend = bubblesRef.current;
-      const sendTail = atSend[atSend.length - 1];
-      tailAtSendRef.current =
-        sendTail?.id === pending?.clientMessageId ? atSend[atSend.length - 2]?.id : sendTail?.id;
-      const beforeSendId = tailAtSendRef.current;
 
       notifyActivity();
       mePresence.touchActivity();
@@ -164,7 +159,7 @@ export default function ChatPage() {
       );
       if (inferred) {
         lastInstantReactionRef.current = inferred;
-        triggerReaction(inferred, { interactionPhase: 'user_message', anchorMessageId: beforeSendId });
+        triggerReaction(inferred, { interactionPhase: 'user_message' });
       }
 
       setSending(true);
@@ -203,11 +198,7 @@ export default function ChatPage() {
             );
             if (post) {
               lastInstantReactionRef.current = post;
-              triggerReaction(post, {
-                interactionPhase: 'assistant_message',
-                anchorMessageId: result.assistantMessage?.id,
-                beforeSendId,
-              });
+              triggerReaction(post, { interactionPhase: 'assistant_message' });
             }
           }, POST_ASSISTANT_REACTION_DELAY_MS);
         }
@@ -270,7 +261,6 @@ export default function ChatPage() {
       pending: pendingBubble,
     });
   }, [firstMessage, hasNextPage, historyMessages, introFallbackAt, pending, pendingFailed, retryPending, sending]);
-  bubblesRef.current = bubbles;
 
   const hasUserMessage = bubbles.some((b) => b.role === 'user');
   const quickReplies = firstMessage?.meta?.quickReplies ?? [];
@@ -291,79 +281,57 @@ export default function ChatPage() {
   const showIcebreakers =
     isReady && !quotaOut && !hasUserMessage && !sending && icebreakerSuggestions.length > 0;
 
+  const summaryPersonaRaw = profileData?.persona?.trim() || '';
+  const summaryPersona = summaryPersonaRaw ? gendered.trait(summaryPersonaRaw) : '';
+  const summaryIntensity = profileData?.intensity;
+  const summaryPresenceKey = summaryIntensity ? INTENSITY_LABEL_KEYS[summaryIntensity] : undefined;
+  const summaryPresence = summaryPresenceKey ? t(summaryPresenceKey) : '';
+  const summaryInterests = (profileData?.interests ?? []).slice(0, 3).join(', ');
+
   const composerDisabled = !isReady || quotaOut || sending;
   const composerHint = quotaOut ? t('chat.quota_out') : undefined;
 
   const threadRef = useRef<HTMLDivElement>(null);
   const restoredScrollRef = useRef(false);
-  const [showJump, setShowJump] = useState(false);
-
-  const persistThreadScroll = useCallback(() => {
-    if (!restoredScrollRef.current) return;
-    const el = threadRef.current;
-    if (!el?.querySelector('[data-testid="chat-messages"]')) return;
-    wasAtBottomRef.current = !showJumpToLatest(el);
-    commitChatThreadScroll(el);
-    setShowJump(!wasAtBottomRef.current);
-  }, []);
 
   useLayoutEffect(() => {
-    if (!isReady) return;
+    if (restoredScrollRef.current || !isReady) return;
     const el = threadRef.current;
     if (!el) return;
-    const plan = planThreadScroll({
-      box: el,
-      saved: readChatThreadScroll(),
-      restorePending: !restoredScrollRef.current,
-      followSend: followSendRef.current,
-      wasAtBottom: wasAtBottomRef.current,
-    });
-    if (plan === 'wait') return;
-    restoredScrollRef.current = true;
-    wasAtBottomRef.current = plan === 'end' || !showJumpToLatest(el);
-    if (plan === 'end') commitChatThreadScroll(el);
-    setShowJump(!wasAtBottomRef.current);
-    // ponytail: el follow se suelta cuando el último mensaje ya no es el de antes del envío.
-    // Un stream que sigue creciendo el mismo id se sigue solo si el usuario no se fue del fondo.
-    const tail = bubbles[bubbles.length - 1];
-    const tailMoved = tail?.id !== tailAtSendRef.current;
-    if (followSendRef.current && !sending && (pendingFailed || (!pending && tailMoved))) {
-      followSendRef.current = false;
+    if (readChatThreadScroll() == null) {
+      restoredScrollRef.current = true;
+      return;
     }
-  }, [bubbles, isReady, pending, pendingFailed, sending]);
+    if (applyChatThreadScroll(el)) restoredScrollRef.current = true;
+  }, [bubbles, isReady]);
 
   useLayoutEffect(() => {
     const el = threadRef.current;
     return () => {
       // El skeleton no scrollea de verdad: no pisar el offset de la visita anterior.
-      if (!restoredScrollRef.current) return;
       if (!el?.querySelector('[data-testid="chat-messages"]')) return;
       commitChatThreadScroll(el);
     };
   }, []);
 
-  useEffect(() => {
-    const el = threadRef.current;
-    if (!el) return;
-    el.addEventListener('scroll', persistThreadScroll, { passive: true });
-    window.addEventListener('pagehide', persistThreadScroll);
-    return () => {
-      el.removeEventListener('scroll', persistThreadScroll);
-      window.removeEventListener('pagehide', persistThreadScroll);
-    };
-  }, [persistThreadScroll]);
-
-  const jumpToLatest = useCallback(() => {
-    const el = threadRef.current;
-    if (!el) return;
-    el.scrollTop = el.scrollHeight;
-    wasAtBottomRef.current = true;
-    commitChatThreadScroll(el);
-    setShowJump(false);
-  }, []);
-
   return (
     <div className="home-shell__read-inner">
+      {isReady && summaryInterests ? (
+        <div className="banner--info chat-page__summary" data-testid="chat-summary-banner">
+          <p className="chat-page__summary-text">
+            {t('chat.summary', {
+              name: companionName,
+              persona: summaryPersona,
+              presence: summaryPresence,
+              interests: summaryInterests,
+            })}
+          </p>
+          <Link to="/chat/editar" className="btn btn--text chat-page__summary-edit">
+            {t('chat.summary_edit')}
+          </Link>
+        </div>
+      ) : null}
+
       {isReady && showQuotaLow ? (
         <p className="banner--warn chat-conv-banner" role="status" data-testid="chat-quota-low">
           {t('chat.quota_low', { count: messagesRemaining })}
@@ -391,23 +359,12 @@ export default function ChatPage() {
         <MessageList
           messages={bubbles}
           loading={!isReady}
-          historyReady={historyReady}
           showFirstMessageNote={isReady && basedOn.length > 0}
           companionId={companionId}
           companionName={companionName}
           instantReaction={instantReaction}
           showTyping={sending}
         />
-        {showJump ? (
-          <button
-            type="button"
-            className="btn btn--secondary btn--icon chat-thread__jump"
-            aria-label="Bajar al último mensaje"
-            onClick={jumpToLatest}
-          >
-            <AppIcon name="chevron-down-outline" />
-          </button>
-        ) : null}
       </div>
 
       {showIcebreakers ? (

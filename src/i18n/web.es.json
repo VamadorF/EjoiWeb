@@ -109,14 +109,13 @@
     "back_to_step3": "Volver a ajustar",
     "ready_moment": "{{name}} ya puede conversar contigo",
     "placeholder": "Escribe un mensaje…",
+    "summary": "{{name}} es {{persona}}, con presencia {{presence}}, y le interesan {{interests}}.",
+    "summary_edit": "Editar",
     "quota_left": "Te quedan {{count}} mensajes",
     "quota_remaining": "{{count}} mensajes restantes",
     "quota_low": "Te quedan {{count}} mensajes",
     "quota_out": "Usaste todos tus mensajes disponibles. Puedes seguir conversando desde la app de eJoi.",
     "send_label": "Enviar mensaje",
-    "speech_unsupported": "Este navegador no puede dictar.",
-    "speech_denied": "Permite el micrófono para dictar.",
-    "speech_failed": "No se pudo dictar.",
     "profile_personality": "Personalidad",
     "profile_presence": "Presencia",
     "profile_interests": "Intereses",
@@ -189,13 +188,5 @@
     "boundaries": "Temas a evitar",
     "voice": "Voz",
     "name": "Nombre"
-  },
-  "theme": {
-    "web_mark": "Web",
-    "aurora": "Aurora",
-    "pulse": "Pulso",
-    "liquid": "Liquid Glass",
-    "aparicion": "Aparición",
-    "motion": "Animaciones"
   }
 }

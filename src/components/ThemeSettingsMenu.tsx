@@ -4,7 +4,6 @@ import { Link, NavLink, useNavigate } from 'react-router';
 
 import { AppIcon } from '~/components/AppIcon';
 import { ThemePreferenceControl } from '~/components/ThemePreferenceControl';
-import { useMotionEnabled } from '~/theme/theme';
 import { readSessionUser, resolveUserInitials } from '~/features/account/useCurrentUser';
 import { logoutWeb } from '~/features/auth/api/auth.api';
 import { fetchSubscriptionMe } from '~/features/chat/useQuota';
@@ -21,14 +20,12 @@ type AccountIdentity = {
   name: string;
   initials: string;
   plan: string;
-  picture?: string;
 };
 
 /** Engranaje fijo: cuenta (lo que estaba en el sidebar) y tema. */
 export function ThemeSettingsMenu({ className = '' }: ThemeSettingsMenuProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { enabled: motionOn, setEnabled: setMotionOn } = useMotionEnabled();
   const dialogRef = useRef<HTMLDialogElement>(null);
   const logoutDialogRef = useRef<HTMLDialogElement>(null);
   const titleId = useId();
@@ -44,12 +41,7 @@ export function ThemeSettingsMenu({ className = '' }: ThemeSettingsMenuProps) {
     const name = user?.name?.trim() || user?.email || '';
     setIdentity(
       name
-        ? {
-            name,
-            initials: resolveUserInitials(user?.name, user?.email),
-            plan: 'Plan básico',
-            picture: user?.picture,
-          }
+        ? { name, initials: resolveUserInitials(user?.name, user?.email), plan: 'Plan básico' }
         : null,
     );
     dialogRef.current?.showModal();
@@ -129,11 +121,7 @@ export function ThemeSettingsMenu({ className = '' }: ThemeSettingsMenuProps) {
                   className="home-side-menu__avatar"
                   aria-label={t('drawer.user_avatar_a11y', { name: identity.name })}
                 >
-                  {identity.picture ? (
-                    <img src={identity.picture} alt="" />
-                  ) : (
-                    identity.initials
-                  )}
+                  {identity.initials}
                 </div>
                 <div className="home-side-menu__user">
                   <p className="home-side-menu__name">{identity.name}</p>
@@ -164,17 +152,6 @@ export function ThemeSettingsMenu({ className = '' }: ThemeSettingsMenuProps) {
             </nav>
           </div>
 
-          <label className="theme-motion">
-            <span className="label">{t('theme.motion', { ns: 'web', defaultValue: 'Animaciones' })}</span>
-            <input
-              type="checkbox"
-              role="switch"
-              className="theme-motion__switch"
-              checked={motionOn}
-              data-testid="motion-toggle"
-              onChange={(event) => setMotionOn(event.target.checked)}
-            />
-          </label>
           <ThemePreferenceControl showSectionLabel compact />
         </div>
       </dialog>

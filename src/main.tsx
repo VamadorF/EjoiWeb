@@ -9,7 +9,6 @@ import { installMockFetch } from '~/platform/mockApi';
 import { applyCssVars } from '~/theme/cssVars';
 import '~/theme/global.css';
 import '~/theme/ui.css';
-import '~/theme/liquidGlass.css';
 
 if (MOCK_API) {
   installMockFetch();

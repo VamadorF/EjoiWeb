@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import type { InstantReaction, ReactionKind } from '@/features/chat/types';
-import { getRandomEmojiForReaction } from '@/features/chat/utils/reactionEmojiCatalog';
 import { IDLE_AFK_REACTION_MS, SPONTANEOUS_REACTIONS } from '@/features/chat/utils/inferReaction';
 
 const VISIBLE_DURATION_MS = 2400;
@@ -13,33 +12,20 @@ const SPONTANEOUS_COOLDOWN_MS = 90_000;
 type TriggerOptions = {
   fromServer?: boolean;
   interactionPhase?: InstantReaction['interactionPhase'];
-  /** Reacción 1: id del mensaje anterior al envío. Reacción 2: id de la respuesta, si ya se conoce. */
-  anchorMessageId?: string;
-  /** Cola del hilo justo antes de enviar. La reacción 2 no puede caer ahí. */
-  beforeSendId?: string;
-};
-
-export type ShownReaction = InstantReaction & {
-  anchorMessageId?: string;
-  beforeSendId?: string;
-  glyph?: string;
 };
 
 export type UseCompanionReactionResult = {
-  current: ShownReaction | null;
+  current: InstantReaction | null;
   trigger: (kind: ReactionKind, options?: TriggerOptions) => void;
   notifyActivity: () => void;
   clear: () => void;
 };
 
-const glyphFor = (kind: ReactionKind): string =>
-  kind === 'typing' ? '…' : (getRandomEmojiForReaction(kind) ?? '✨');
-
 const pickRandom = <T,>(arr: readonly T[]): T => arr[Math.floor(Math.random() * arr.length)];
 
 export function useCompanionReaction(options: { enabled?: boolean; spontaneousEnabled?: boolean } = {}): UseCompanionReactionResult {
   const { enabled = true, spontaneousEnabled = true } = options;
-  const [current, setCurrent] = useState<ShownReaction | null>(null);
+  const [current, setCurrent] = useState<InstantReaction | null>(null);
 
   const lastTriggerAtRef = useRef(0);
   const lastSpontaneousAtRef = useRef(0);
@@ -57,7 +43,7 @@ export function useCompanionReaction(options: { enabled?: boolean; spontaneousEn
     idleTimeoutRef.current = null;
   }, []);
 
-  const showReaction = useCallback((reaction: ShownReaction) => {
+  const showReaction = useCallback((reaction: InstantReaction) => {
     if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current);
     setCurrent(reaction);
     hideTimeoutRef.current = setTimeout(() => {
@@ -70,9 +56,7 @@ export function useCompanionReaction(options: { enabled?: boolean; spontaneousEn
     (kind, opts) => {
       if (!enabled) return;
       const now = Date.now();
-      // La reacción 2 es el segundo beat del mismo envío: el cooldown de la 1 no debe comérsela.
-      const paired = opts?.interactionPhase === 'assistant_message';
-      if (!paired && now - lastTriggerAtRef.current < COOLDOWN_MS) return;
+      if (now - lastTriggerAtRef.current < COOLDOWN_MS) return;
       lastTriggerAtRef.current = now;
       if (showTimeoutRef.current) clearTimeout(showTimeoutRef.current);
       showTimeoutRef.current = setTimeout(() => {
@@ -80,9 +64,6 @@ export function useCompanionReaction(options: { enabled?: boolean; spontaneousEn
           kind,
           fromServer: opts?.fromServer,
           interactionPhase: opts?.interactionPhase,
-          anchorMessageId: opts?.anchorMessageId,
-          beforeSendId: opts?.beforeSendId,
-          glyph: glyphFor(kind),
         });
         showTimeoutRef.current = null;
       }, TRIGGER_DELAY_MS);

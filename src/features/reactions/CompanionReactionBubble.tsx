@@ -10,11 +10,9 @@ import './CompanionReactionBubble.css';
 export type CompanionReactionBubbleProps = {
   reaction: InstantReaction | null;
   companionName: string;
-  /** Emoji ya elegido para este beat. Si no viene, se sortea uno del catálogo. */
-  glyph?: string;
 };
 
-export function CompanionReactionBubble({ reaction, companionName, glyph: glyphProp }: CompanionReactionBubbleProps) {
+export function CompanionReactionBubble({ reaction, companionName }: CompanionReactionBubbleProps) {
   const { t } = useTranslation();
   const [glyph, setGlyph] = useState('');
   const [visible, setVisible] = useState(false);
@@ -25,15 +23,13 @@ export function CompanionReactionBubble({ reaction, companionName, glyph: glyphP
       setGlyph('');
       return;
     }
-    if (glyphProp) {
-      setGlyph(glyphProp);
-    } else if (reaction.kind === 'typing') {
+    if (reaction.kind === 'typing') {
       setGlyph('…');
     } else {
       setGlyph(getRandomEmojiForReaction(reaction.kind) ?? '✨');
     }
     setVisible(true);
-  }, [glyphProp, reaction]);
+  }, [reaction]);
 
   const a11yLabel = useMemo(() => {
     if (!reaction) return undefined;

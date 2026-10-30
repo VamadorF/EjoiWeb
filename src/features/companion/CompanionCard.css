@@ -85,7 +85,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 5px;
+  gap: 8px;
 }
 
 .companion-card__name {
@@ -93,29 +93,22 @@
   font-size: 1.375rem;
   line-height: 1.3;
   font-weight: 700;
-  text-box-trim: trim-both;
-  text-box-edge: cap alphabetic;
 }
 
 .companion-card__verified {
   display: inline-flex;
-  flex: none;
-  align-self: center;
   align-items: center;
   justify-content: center;
   width: 18px;
   height: 18px;
-  overflow: hidden;
   border-radius: 50%;
   background: var(--c-brand);
   color: #fff;
 }
 
-/* El glifo de ionicons deja aire en el viewBox; 22px lo llena sin salirse del círculo. */
-.companion-card__verified .app-icon,
-.companion-card__verified .app-icon svg {
-  width: 22px;
-  height: 22px;
+.companion-card__verified .app-icon {
+  width: 12px;
+  height: 12px;
 }
 
 .companion-card__personality-pill {
