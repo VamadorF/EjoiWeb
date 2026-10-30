@@ -5,6 +5,8 @@ import { generateCompanionImage } from '@/features/companion/api/image.api';
 import type { OnboardingData } from '@/features/onboarding/types';
 import { generateCompanionImagePrompt } from '@/shared/utils/companionImagePrompt';
 
+import { toPersistedAvatarUrl } from '~/features/companion/avatarUrl';
+
 import type { CreationSteps } from './useCreationStatus';
 
 export type PortraitGenerationState = 'idle' | 'generating' | 'ready' | 'error';
@@ -47,7 +49,7 @@ export function usePortraitGeneration(options: {
       const prompt = generateCompanionImagePrompt(options.onboardingData, 'avatar');
       const image = await generateCompanionImage(buildCompanionAvatarImageRequest(prompt));
       await patchCompanion({
-        avatarUrl: image.fileUrl,
+        avatarUrl: toPersistedAvatarUrl(image.fileUrl),
         avatarStoragePath: image.storagePath,
       });
       setAvatarUrl(image.fileUrl);

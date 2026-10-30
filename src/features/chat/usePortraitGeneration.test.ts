@@ -17,7 +17,15 @@ vi.mock('@/features/companion/api/companion.api', () => ({
   patchCompanion: vi.fn().mockResolvedValue(undefined),
 }));
 
+import { patchCompanion } from '@/features/companion/api/companion.api';
 import { generateCompanionImage } from '@/features/companion/api/image.api';
+
+const unsignedAvatar = 'https://storage.googleapis.com/ejoi-images/avatars/u1/a.webp';
+const signedAvatar =
+  unsignedAvatar +
+  '?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=sa%40p.iam.gserviceaccount.com%2F20261030%2Fauto%2Fstorage%2Fgoog4_request' +
+  '&X-Goog-Date=20261030T120000Z&X-Goog-Expires=3600&X-Goog-SignedHeaders=host' +
+  `&X-Goog-Signature=${'a'.repeat(512)}`;
 
 const baseOnboarding: OnboardingData = {
   visualStyle: 'realista',
@@ -58,6 +66,28 @@ describe('usePortraitGeneration', () => {
     );
     expect(result.current.state).toBe('ready');
     expect(result.current.portraitPending).toBe(false);
+  });
+
+  it('persiste avatarUrl sin firma pero muestra la URL firmada', async () => {
+    vi.mocked(generateCompanionImage).mockResolvedValue({
+      fileUrl: signedAvatar,
+      storagePath: 'avatars/u1/a.webp',
+    });
+
+    const { result } = renderHook(() =>
+      usePortraitGeneration({
+        steps: { portrait: false },
+        onboardingData: baseOnboarding,
+        canPatchCompanion: true,
+      }),
+    );
+
+    await waitFor(() => expect(result.current.state).toBe('ready'));
+    expect(patchCompanion).toHaveBeenCalledWith({
+      avatarUrl: unsignedAvatar,
+      avatarStoragePath: 'avatars/u1/a.webp',
+    });
+    expect(result.current.avatarUrl).toBe(signedAvatar);
   });
 
   it('pide el mismo tamaño C15 para realista e ilustrado', async () => {

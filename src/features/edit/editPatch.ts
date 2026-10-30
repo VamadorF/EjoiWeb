@@ -9,6 +9,7 @@ import { DEFAULT_HAIR_COLOR } from '~/theme/hairSwatches';
 import { ENABLE_AGE, ENABLE_ETHNICITY } from '~/platform/env';
 
 import type { CompanionProfile } from '~/features/chat/useProfile';
+import { toPersistedAvatarUrl } from '~/features/companion/avatarUrl';
 
 export type EditConversationalSection = 'personality' | 'presence' | 'interests' | 'boundaries' | 'voice';
 
@@ -132,7 +133,7 @@ export function buildAppearancePatchBody(
   }
 
   if (avatar) {
-    partial.avatarUrl = avatar.fileUrl;
+    partial.avatarUrl = toPersistedAvatarUrl(avatar.fileUrl);
     if (avatar.storagePath) {
       partial.avatarStoragePath = avatar.storagePath;
     }

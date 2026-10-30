@@ -37,6 +37,13 @@ const profile = {
   avatarUrl: 'https://example.com/old.jpg',
 };
 
+const unsignedAvatar = 'https://storage.googleapis.com/ejoi-images/avatars/u1/a.webp';
+const signedAvatar =
+  unsignedAvatar +
+  '?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=sa%40p.iam.gserviceaccount.com%2F20261030%2Fauto%2Fstorage%2Fgoog4_request' +
+  '&X-Goog-Date=20261030T120000Z&X-Goog-Expires=3600&X-Goog-SignedHeaders=host' +
+  `&X-Goog-Signature=${'a'.repeat(512)}`;
+
 describe('useRegeneration', () => {
   it('fallo de C15 no llama PATCH ni reemplaza el retrato', async () => {
     vi.mocked(generateCompanionImage).mockRejectedValue(new Error('C15 down'));
@@ -78,6 +85,62 @@ describe('useRegeneration', () => {
       avatarUrl: 'https://example.com/new.jpg',
       avatarStoragePath: 'avatars/new',
     });
+  });
+
+  it('PATCH de cabello con URL firmada envía avatarUrl sin firma (SCRUM-189)', () => {
+    const baseline = profileToEditForm(profile);
+    const values = { ...baseline, hairColor: 'Rubio' };
+    const body = buildAppearancePatchBody(baseline, values, {
+      fileUrl: signedAvatar,
+      storagePath: 'avatars/u1/a.webp',
+    });
+    expect(body).toEqual({
+      avatarUrl: unsignedAvatar,
+      avatarStoragePath: 'avatars/u1/a.webp',
+      hairColor: 'Rubio',
+    });
+    expect((body.avatarUrl as string).length).toBeLessThanOrEqual(400);
+  });
+
+  it('sin storagePath igual envía avatarUrl sin firma y omite avatarStoragePath', () => {
+    const baseline = profileToEditForm(profile);
+    const values = { ...baseline, visualStyle: 'anime' as const };
+    const body = buildAppearancePatchBody(baseline, values, { fileUrl: signedAvatar });
+    expect(body).toEqual({ visualStyle: 'anime', avatarUrl: unsignedAvatar });
+  });
+
+  it('applyRegeneration hace PATCH con avatarUrl sin firma y la vista previa conserva la firmada', async () => {
+    vi.mocked(generateCompanionImage).mockResolvedValue({
+      fileUrl: signedAvatar,
+      storagePath: 'avatars/u1/a.webp',
+    });
+    vi.mocked(httpClient.patch).mockResolvedValue({ data: {} } as never);
+    const queryClient = new QueryClient();
+    const baseline = profileToEditForm(profile);
+    const values = { ...baseline, hairColor: 'Rubio' };
+    const onApplied = vi.fn();
+
+    const { result } = renderHook(() =>
+      useRegeneration({ queryClient, baseline, values, profile, onApplied }),
+    );
+
+    await act(async () => {
+      await result.current.generatePortrait();
+    });
+    await waitFor(() => expect(result.current.phase).toBe('compare'));
+    expect(result.current.pendingPortrait?.fileUrl).toBe(signedAvatar);
+
+    let applied = false;
+    await act(async () => {
+      applied = await result.current.applyRegeneration();
+    });
+
+    expect(applied).toBe(true);
+    expect(httpClient.patch).toHaveBeenCalledWith(
+      '/companion/me',
+      expect.objectContaining({ avatarUrl: unsignedAvatar }),
+    );
+    expect(onApplied).toHaveBeenCalled();
   });
 
   it('generación ilustrada usa el mismo tamaño C15 que realista', async () => {

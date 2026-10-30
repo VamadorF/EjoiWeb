@@ -6,6 +6,7 @@ import type { Gender, OnboardingData, VisualStyle } from '@/features/onboarding/
 import { ageToDob } from '@/shared/utils/ageToDob';
 import { getCompanionAge } from '@/shared/utils/companionAgeAppearance';
 
+import { toPersistedAvatarUrl } from '~/features/companion/avatarUrl';
 import { httpClient } from '~/platform/http';
 
 import { buildPutBody, putOnboardingDraft, type WebView } from './onboardingDraft.api';
@@ -89,14 +90,6 @@ export async function fetchGreetingPreview(body: GreetingPreviewBody): Promise<G
   return response.data;
 }
 
-/**
- * La URL firmada de GCS supera el `@MaxLength(400)` de `avatarUrl` en eJoi-BE (400 silencioso).
- * Sin la firma sigue identificando el objeto; el BE la re-firma desde `avatarStoragePath`.
- */
-function withoutQuery(url: string): string {
-  return url.split('?')[0];
-}
-
 export type StartCreationParams = {
   data: OnboardingData;
   step: number;
@@ -116,7 +109,7 @@ export async function startCreation(
 
   const payload = {
     ...buildCreateCompanionPayload(params.data),
-    avatarUrl: withoutQuery(params.avatarUrl),
+    avatarUrl: toPersistedAvatarUrl(params.avatarUrl),
     ...(params.avatarStoragePath ? { avatarStoragePath: params.avatarStoragePath } : {}),
   };
 
