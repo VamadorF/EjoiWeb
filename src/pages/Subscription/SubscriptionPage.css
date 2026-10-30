@@ -1,0 +1,228 @@
+.sub-page {
+  height: 100vh;
+  overflow: auto;
+  position: relative;
+  color: var(--c-ink);
+  background:
+    radial-gradient(ellipse at top, color-mix(in srgb, var(--c-brand) 18%, transparent), transparent 58%),
+    var(--c-bg);
+}
+
+.sub-stars {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.sub-stars span {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: var(--c-brand);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--c-brand) 55%, transparent);
+  animation: sub-star 5.2s ease-in-out infinite;
+}
+
+.sub-stars span:nth-child(3n) {
+  width: 3px;
+  height: 3px;
+  animation-duration: 6.8s;
+}
+
+.sub-stars span:nth-child(4n) {
+  background: var(--c-ink2);
+  box-shadow: none;
+}
+
+@keyframes sub-star {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.28;
+  }
+  50% {
+    transform: translateY(-12px);
+    opacity: 0.95;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sub-stars span {
+    animation: none;
+    opacity: 0.45;
+  }
+}
+
+[data-motion='off'] .sub-stars span {
+  animation: none;
+  opacity: 0.45;
+}
+
+.sub-page__inner {
+  position: relative;
+  z-index: 1;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-4) var(--space-8);
+}
+
+.sub-back {
+  display: inline-flex;
+  margin-bottom: var(--space-5);
+  text-decoration: none;
+}
+
+.sub-title {
+  margin: 0;
+  font: var(--font-title1);
+  letter-spacing: var(--ls-title1);
+  text-align: center;
+}
+
+.sub-sub,
+.sub-hint {
+  max-width: 38rem;
+  margin: var(--space-3) auto 0;
+  font: var(--font-secondary);
+  color: var(--c-ink2);
+  text-align: center;
+}
+
+.sub-toggle {
+  display: flex;
+  width: fit-content;
+  margin: var(--space-6) auto 0;
+  padding: 4px;
+  border-radius: 999px;
+  background: var(--c-surface);
+  border: 1px solid var(--c-line);
+  box-shadow: var(--elev-1);
+}
+
+.sub-toggle button {
+  border: none;
+  border-radius: 999px;
+  padding: var(--space-2) var(--space-4);
+  background: transparent;
+  color: var(--c-ink2);
+  font: var(--font-button);
+}
+
+.sub-toggle button[aria-pressed='true'] {
+  background: var(--c-sel-fill);
+  color: var(--c-sel-ink);
+  box-shadow: inset 0 0 0 1.5px var(--c-sel-border);
+}
+
+.sub-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-5);
+  align-items: stretch;
+  margin-top: var(--space-7);
+  padding-top: var(--space-3);
+}
+
+.sub-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.sub-card--hot {
+  z-index: 1;
+  border-color: var(--c-brand);
+  box-shadow: var(--elev-sel);
+}
+
+.sub-badge {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  margin: 0;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--c-surface);
+  color: var(--c-ink);
+  border: 1px solid var(--c-brand);
+  font: var(--font-label);
+  letter-spacing: var(--ls-label);
+  white-space: nowrap;
+}
+
+.sub-card__title {
+  margin: var(--space-2) 0 0;
+  font: var(--font-title2);
+  text-align: center;
+}
+
+.sub-card__tag,
+.sub-card__charge {
+  margin: var(--space-2) 0 0;
+  font: var(--font-caption);
+  color: var(--c-ink2);
+  text-align: center;
+}
+
+.sub-price,
+.sub-price__free {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: var(--space-1);
+  margin: var(--space-4) 0 0;
+  font-weight: 800;
+  font-size: clamp(28px, 4vw, 40px);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+.sub-price__suffix {
+  font: var(--font-caption);
+  color: var(--c-ink2);
+}
+
+.sub-features {
+  margin: var(--space-4) 0 var(--space-5);
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  flex: 1;
+}
+
+.sub-features li {
+  display: flex;
+  gap: var(--space-2);
+  font: var(--font-caption);
+}
+
+.sub-features span {
+  color: var(--c-brand);
+  font-weight: 700;
+}
+
+.sub-card__cta {
+  width: 100%;
+}
+
+/* Brand de algunos temas (aurora, kawaii) es claro: el blanco de btn--primary no se lee. */
+.sub-card__cta.btn--primary {
+  background: var(--c-sel-fill);
+  color: var(--c-sel-ink);
+  border: 1.5px solid var(--c-brand);
+  box-shadow: none;
+}
+
+@media (min-width: 1100px) {
+  .sub-card--hot {
+    transform: translateY(-8px);
+  }
+}

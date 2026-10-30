@@ -6,7 +6,7 @@ export const REACTION_EMOJIS: ReactionEmoji[] = ['❤️', '🔥', '😂', '😮
 
 const STORAGE_KEY = 'chat_message_reactions_v1';
 
-type ReactionsByMessage = Record<string, ReactionEmoji>;
+type ReactionsByMessage = Record<string, string>;
 type ReactionsState = Record<string, ReactionsByMessage>;
 
 let cache: ReactionsState | null = null;
@@ -25,7 +25,7 @@ async function persist(next: ReactionsState) {
 export async function getMessageReaction(
   companionId: string,
   messageId: string,
-): Promise<ReactionEmoji | undefined> {
+): Promise<string | undefined> {
   const all = await loadMessageReactions();
   return all[companionId]?.[messageId];
 }
@@ -33,7 +33,7 @@ export async function getMessageReaction(
 export async function setMessageReaction(
   companionId: string,
   messageId: string,
-  emoji: ReactionEmoji,
+  emoji: string,
 ): Promise<void> {
   const all = await loadMessageReactions();
   const forCompanion = { ...(all[companionId] ?? {}), [messageId]: emoji };

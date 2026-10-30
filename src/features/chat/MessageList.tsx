@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { buildChatListItems } from '@/features/chat/utils/buildChatListItems';
@@ -6,9 +6,15 @@ import type { InstantReaction, Message } from '@/features/chat/types';
 import { resolveChatMediaUrl } from '@/features/chat/utils/resolveChatMediaUrl';
 
 import { AppIcon } from '~/components/AppIcon';
+import { readSessionUser, resolveUserInitials } from '~/features/account/useCurrentUser';
+import { stylePortraitSrc } from '~/features/creation/portraits';
 import { ENABLE_TTS } from '~/platform/env';
+import { useThemePreference } from '~/theme/theme';
 
+import { AparicionText } from './AparicionText';
+import { emptyAparicion, noteAparicion } from './aparicion';
 import { splitInterestHighlights } from './highlightInterests';
+import { useProfile } from './useProfile';
 import { CompanionReactionBubble } from '~/features/reactions/CompanionReactionBubble';
 import {
   getMessageReaction,
@@ -16,20 +22,72 @@ import {
   setMessageReaction,
   type ReactionEmoji,
 } from '~/features/reactions/messageReactions';
+import type { ShownReaction } from '~/features/reactions/useCompanionReaction';
 import { TypingIndicator } from './TypingIndicator';
 
-/** Mensaje al que pertenece la reacción: el de esa fase, si no el último del hilo. */
+export type ReactionAnchorOpts = {
+  /** Reacción 1: el mensaje anterior. Reacción 2: el id de la respuesta, si ya está en el hilo. */
+  anchorMessageId?: string;
+  /** Cola justo antes de enviar. La reacción 2 no se ancla ahí. */
+  beforeSendId?: string;
+};
+
+/**
+ * Reacción 1 (`user_message`): el mensaje anterior al nuevo.
+ * Reacción 2 (`assistant_message`): el mensaje nuevo (la respuesta).
+ * Sin fase (espontánea): el último del hilo.
+ */
 export function reactionAnchorId(
   messages: readonly { id: string; role: 'user' | 'assistant' }[],
   phase: InstantReaction['interactionPhase'],
+  opts?: ReactionAnchorOpts,
 ): string | null {
-  if (messages.length === 0) return null;
-  const want = phase === 'user_message' ? 'user' : phase === 'assistant_message' ? 'assistant' : null;
-  if (!want) return messages[messages.length - 1]!.id;
-  for (let i = messages.length - 1; i >= 0; i--) {
-    if (messages[i]!.role === want) return messages[i]!.id;
+  if (phase === 'user_message') return opts?.anchorMessageId ?? null;
+  if (phase === 'assistant_message') {
+    const pinned = opts?.anchorMessageId;
+    if (pinned && messages.some((m) => m.id === pinned)) return pinned;
+    const last = messages[messages.length - 1];
+    if (!last || last.role !== 'assistant') return null;
+    if (opts?.beforeSendId && last.id === opts.beforeSendId) return null;
+    return last.id;
   }
+  if (messages.length === 0) return null;
   return messages[messages.length - 1]!.id;
+}
+
+const isPhasedReaction = (reaction: ShownReaction | null | undefined): reaction is ShownReaction =>
+  reaction?.interactionPhase === 'user_message' || reaction?.interactionPhase === 'assistant_message';
+
+function BubbleFace({
+  src,
+  initials,
+  reaction,
+  instant,
+}: {
+  src?: string;
+  initials: string;
+  reaction?: string;
+  instant?: ReactNode;
+}) {
+  const [broken, setBroken] = useState(false);
+  useEffect(() => setBroken(false), [src]);
+  return (
+    <span className="chat-messages__who">
+      {src && !broken ? (
+        <img src={src} alt="" className="chat-messages__who-photo" onError={() => setBroken(true)} />
+      ) : (
+        <span className="chat-messages__who-photo chat-messages__who-photo--initials" aria-hidden="true">
+          {initials}
+        </span>
+      )}
+      {reaction ? (
+        <span className="chat-messages__reaction-badge" data-testid="chat-message-reaction">
+          {reaction}
+        </span>
+      ) : null}
+      {instant}
+    </span>
+  );
 }
 
 export type ChatBubble = {
@@ -50,8 +108,10 @@ export type MessageListProps = {
   showFirstMessageNote?: boolean;
   companionId?: string;
   companionName?: string;
-  instantReaction?: InstantReaction | null;
+  instantReaction?: ShownReaction | null;
   showTyping?: boolean;
+  /** Historial ya cargado: lo que haya en ese momento no se anima. */
+  historyReady?: boolean;
 };
 
 export function MessageList({
@@ -62,24 +122,74 @@ export function MessageList({
   companionName = '',
   instantReaction = null,
   showTyping,
+  historyReady = false,
 }: MessageListProps) {
   const { t } = useTranslation();
   const { t: tWeb } = useTranslation('web');
-  const [reactions, setReactions] = useState<Record<string, ReactionEmoji>>({});
+  const { preference } = useThemePreference();
+  const watchRef = useRef(emptyAparicion());
+  const replayBlockRef = useRef(new Set<string>());
+  const watchCompanion = useRef(companionId);
+  const [reactions, setReactions] = useState<Record<string, string>>({});
+  const pendingPlaceRef = useRef<ShownReaction | null>(null);
+  const bubblePinRef = useRef<{ reaction: ShownReaction; id: string } | null>(null);
   const [reactionPickerFor, setReactionPickerFor] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const { data: profile } = useProfile(Boolean(companionId));
+  const sessionUser = readSessionUser();
+  const companionSrc =
+    profile?.avatarUrl ||
+    stylePortraitSrc(
+      (profile?.visualStyle ?? '') as Parameters<typeof stylePortraitSrc>[0],
+      (profile?.gender ?? '') as Parameters<typeof stylePortraitSrc>[1],
+    ) ||
+    undefined;
+  const userSrc = sessionUser?.picture || undefined;
+  const companionInitials = resolveUserInitials(companionName);
+  const userInitials = resolveUserInitials(sessionUser?.name, sessionUser?.email);
 
   useEffect(() => {
     if (!companionId) return;
+    let cancel = false;
     void (async () => {
-      const next: Record<string, ReactionEmoji> = {};
+      const stored: Record<string, string> = {};
       for (const msg of messages) {
         const emoji = await getMessageReaction(companionId, msg.id);
-        if (emoji) next[msg.id] = emoji;
+        if (emoji) stored[msg.id] = emoji;
       }
-      setReactions(next);
+      if (cancel) return;
+      setReactions((prev) => {
+        const next: Record<string, string> = {};
+        for (const msg of messages) {
+          const emoji = stored[msg.id] ?? prev[msg.id];
+          if (emoji) next[msg.id] = emoji;
+        }
+        return next;
+      });
     })();
+    return () => {
+      cancel = true;
+    };
   }, [companionId, messages]);
+
+  useEffect(() => {
+    if (!isPhasedReaction(instantReaction)) return;
+    if (pendingPlaceRef.current !== instantReaction) pendingPlaceRef.current = instantReaction;
+  }, [instantReaction]);
+
+  useEffect(() => {
+    const waiting = pendingPlaceRef.current;
+    if (!companionId || !waiting?.glyph) return;
+    const id = reactionAnchorId(messages, waiting.interactionPhase, {
+      anchorMessageId: waiting.anchorMessageId,
+      beforeSendId: waiting.beforeSendId,
+    });
+    if (!id) return;
+    pendingPlaceRef.current = null;
+    const glyph = waiting.glyph;
+    void setMessageReaction(companionId, id, glyph);
+    setReactions((prev) => ({ ...prev, [id]: glyph }));
+  }, [companionId, instantReaction, messages]);
 
   const copyText = useCallback(async (id: string, text: string) => {
     try {
@@ -100,6 +210,18 @@ export function MessageList({
     },
     [companionId],
   );
+
+  if (watchCompanion.current !== companionId) {
+    watchCompanion.current = companionId;
+    watchRef.current = emptyAparicion();
+    replayBlockRef.current = new Set();
+  }
+  if (!loading && historyReady) {
+    watchRef.current = noteAparicion(watchRef.current, messages, preference === 'aparicion');
+  }
+  if (preference !== 'aparicion') {
+    for (const id of watchRef.current.play) replayBlockRef.current.add(id);
+  }
 
   if (loading) {
     return (
@@ -122,9 +244,19 @@ export function MessageList({
 
   const items = buildChatListItems(asMessages);
   let firstAssistantSeen = false;
-  const reactionOnId = instantReaction
-    ? reactionAnchorId(messages, instantReaction.interactionPhase)
-    : null;
+  let bubbleId: string | null = null;
+  if (instantReaction) {
+    if (bubblePinRef.current?.reaction === instantReaction) {
+      bubbleId = bubblePinRef.current.id;
+    } else {
+      bubbleId = reactionAnchorId(messages, instantReaction.interactionPhase, {
+        anchorMessageId: instantReaction.anchorMessageId,
+        beforeSendId: instantReaction.beforeSendId,
+      });
+      if (bubbleId) bubblePinRef.current = { reaction: instantReaction, id: bubbleId };
+    }
+  }
+  const hideStoredForInstant = isPhasedReaction(instantReaction);
 
   return (
     <ul className="chat-messages" data-testid="chat-messages">
@@ -152,6 +284,11 @@ export function MessageList({
             : [{ text: msg.text }];
 
         const reaction = reactions[msg.id];
+        const animate =
+          isAssistant &&
+          preference === 'aparicion' &&
+          watchRef.current.play.has(msg.id) &&
+          !replayBlockRef.current.has(msg.id);
 
         return (
           <li
@@ -174,17 +311,36 @@ export function MessageList({
                 ) : null,
               )}
               <p>
-                {body.map((part, index) =>
-                  part.highlight ? (
-                    <strong key={index} className="bubble__hl">
-                      {part.text}
-                    </strong>
-                  ) : (
-                    <span key={index}>{part.text}</span>
-                  ),
+                {animate ? (
+                  <AparicionText text={msg.text} />
+                ) : (
+                  body.map((part, index) =>
+                    part.highlight ? (
+                      <strong key={index} className="bubble__hl">
+                        {part.text}
+                      </strong>
+                    ) : (
+                      <span key={index}>{part.text}</span>
+                    ),
+                  )
                 )}
               </p>
-              <div className="chat-messages__meta">
+              <div className={`chat-messages__foot${isAssistant ? '' : ' chat-messages__foot--mine'}`}>
+                <BubbleFace
+                  src={isAssistant ? companionSrc : userSrc}
+                  initials={isAssistant ? companionInitials : userInitials}
+                  reaction={bubbleId === msg.id && hideStoredForInstant ? undefined : reaction}
+                  instant={
+                    bubbleId === msg.id && instantReaction ? (
+                      <CompanionReactionBubble
+                        reaction={instantReaction}
+                        companionName={companionName}
+                        glyph={instantReaction.glyph}
+                      />
+                    ) : null
+                  }
+                />
+                <div className="chat-messages__meta">
                 {msg.pending ? (
                   <span className="chat-messages__pending-label">
                     <AppIcon name="time-outline" className="chat-messages__pending-icon" />
@@ -212,7 +368,7 @@ export function MessageList({
                     aria-label={t('chat.reactions.title')}
                     onClick={() => setReactionPickerFor((id) => (id === msg.id ? null : msg.id))}
                   >
-                    {reaction ?? <AppIcon name="happy-outline" />}
+                    <AppIcon name="happy-outline" />
                   </button>
                   {reactionPickerFor === msg.id ? (
                     <div className="chat-messages__reaction-picker" role="group" aria-label={t('chat.reactions.title')}>
@@ -228,12 +384,9 @@ export function MessageList({
                       ))}
                     </div>
                   ) : null}
-                  {reactionOnId === msg.id && instantReaction ? (
-                    <CompanionReactionBubble reaction={instantReaction} companionName={companionName} />
-                  ) : null}
                 </span>
+                </div>
               </div>
-              {reaction ? <span className="chat-messages__reaction-badge">{reaction}</span> : null}
               {msg.failed && msg.onRetry ? (
                 <button type="button" className="btn btn--text chat-messages__retry" onClick={msg.onRetry}>
                   {t('chat.bubble.retry')}

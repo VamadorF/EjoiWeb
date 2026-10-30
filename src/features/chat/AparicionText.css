@@ -1,0 +1,41 @@
+.aparicion__sr {
+  user-select: none;
+}
+
+.aparicion__mask {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+  height: 1lh;
+}
+
+.aparicion__char {
+  display: inline-block;
+  height: 1lh;
+  white-space: pre;
+}
+
+html:not([data-motion='off'])[data-theme-id='aparicion'] .aparicion__char {
+  transform: translateY(100%);
+}
+
+html:not([data-motion='off'])[data-theme-id='aparicion'] .aparicion--run .aparicion__char {
+  animation: aparicion-up 0.5s cubic-bezier(0.625, 0.05, 0, 1) both;
+}
+
+@keyframes aparicion-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-motion='on'])[data-theme-id='aparicion'] .aparicion__char,
+  html:not([data-motion='on'])[data-theme-id='aparicion'] .aparicion--run .aparicion__char {
+    transform: none;
+    animation: none;
+  }
+}

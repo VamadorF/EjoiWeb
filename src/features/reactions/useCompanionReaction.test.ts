@@ -25,6 +25,25 @@ describe('useCompanionReaction', () => {
     expect(result.current.current?.kind).toBe('surprise');
   });
 
+  it('la reacción 2 no la come el cooldown de la 1 y conserva su mensaje', () => {
+    const { result } = renderHook(() => useCompanionReaction());
+    act(() => {
+      result.current.trigger('love', { interactionPhase: 'user_message', anchorMessageId: 'intro' });
+      vi.advanceTimersByTime(150);
+    });
+    act(() => {
+      result.current.trigger('fire', {
+        interactionPhase: 'assistant_message',
+        anchorMessageId: 'a2',
+        beforeSendId: 'intro',
+      });
+      vi.advanceTimersByTime(150);
+    });
+    expect(result.current.current?.kind).toBe('fire');
+    expect(result.current.current?.anchorMessageId).toBe('a2');
+    expect(result.current.current?.glyph).toBeTruthy();
+  });
+
   it('respeta cooldown de 1200 ms entre reacciones', () => {
     const { result } = renderHook(() => useCompanionReaction());
     act(() => {

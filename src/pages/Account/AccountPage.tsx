@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router';
 
@@ -8,7 +8,8 @@ import { queryKeys } from '@/shared/lib/queryKeys';
 
 import { deleteUserAccount, patchUserName } from '~/features/account/account.api';
 import { buildDataRightsMailto, DATA_RIGHTS } from '~/features/account/dataRightsRequest';
-import { useCurrentUser } from '~/features/account/useCurrentUser';
+import { resolveUserInitials, useCurrentUser } from '~/features/account/useCurrentUser';
+import { saveUserPicture } from '~/features/account/userPicture';
 import { sanitizeUserNameInput, validateUserName } from '~/features/account/userName';
 import { logoutWeb } from '~/features/auth/api/auth.api';
 import { AppIcon } from '~/components/AppIcon';
@@ -42,6 +43,7 @@ function AccountPageInner() {
   const [showNameToast, setShowNameToast] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [photoNote, setPhotoNote] = useState<string | null>(null);
 
   const nameDialogRef = useRef<HTMLDialogElement>(null);
   const deleteDialogRef = useRef<HTMLDialogElement>(null);
@@ -101,6 +103,32 @@ function AccountPageInner() {
     }
   };
 
+  const onPhoto = async (event: ChangeEvent<HTMLInputElement>) => {
+    const input = event.currentTarget;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) return;
+    const result = await saveUserPicture(file);
+    if (result === 'saved' || result === 'shrunk') {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.auth.currentUser });
+    }
+    setPhotoNote(
+      result === 'shrunk'
+        ? t('account.photo_shrunk', {
+            defaultValue: 'La foto no cabía completa. Guardamos una versión más chica.',
+          })
+        : result === 'full'
+          ? t('account.photo_full', {
+              defaultValue: 'No cabe en el almacenamiento del navegador. Se mantiene la foto actual.',
+            })
+          : result === 'unread'
+            ? t('account.photo_unread', {
+                defaultValue: 'No pudimos leer esa imagen. Se mantiene la foto actual.',
+              })
+            : null,
+    );
+  };
+
   const confirmDelete = async () => {
     setDeleting(true);
     try {
@@ -130,6 +158,36 @@ function AccountPageInner() {
         <p className="account-page__section-label">{t('account.data_section')}</p>
         <p className="account-page__section-hint">{t('account.name_hint')}</p>
         <div className="card account-page__card">
+          <div className="account-page__photo-row">
+            {user?.picture ? (
+              <img
+                src={user.picture}
+                alt={t('account.photo_alt', { defaultValue: 'Foto de perfil' })}
+                className="account-page__photo"
+                data-testid="account-photo"
+              />
+            ) : (
+              <span className="account-page__photo account-page__photo--empty" data-testid="account-photo" aria-hidden="true">
+                {resolveUserInitials(user?.name, user?.email)}
+              </span>
+            )}
+            <label className="account-page__photo-label">
+              {t('account.photo_change', { defaultValue: 'Cambiar foto' })}
+              <input
+                type="file"
+                accept="image/*"
+                className="visually-hidden"
+                data-testid="account-photo-input"
+                onChange={(event) => void onPhoto(event)}
+              />
+            </label>
+          </div>
+          {photoNote ? (
+            <p className="account-page__photo-note" role="status">
+              {photoNote}
+            </p>
+          ) : null}
+          <div className="account-page__divider" />
           <button type="button" className="account-page__row" onClick={openName}>
             <span className="account-page__row-label">{t('account.data_name')}</span>
             <span className="account-page__row-value">{user?.name?.trim() || t('account.name_add')}</span>
@@ -146,6 +204,15 @@ function AccountPageInner() {
               {user?.provider ? t(`account.provider_${user.provider}`) : t('account.data_unavailable')}
             </span>
           </div>
+        </div>
+
+        <p className="account-page__section-label">Suscripción</p>
+        <p className="account-page__section-hint">Elige un plan. La elección queda en este navegador y no cobra nada.</p>
+        <div className="card account-page__card">
+          <Link to="/cuenta/suscripcion" className="account-page__row" data-testid="account-subscription-link">
+            <span>Ver planes</span>
+            <AppIcon name="chevron-forward-outline" />
+          </Link>
         </div>
 
         <p className="account-page__section-label">{t('account.rights_section')}</p>

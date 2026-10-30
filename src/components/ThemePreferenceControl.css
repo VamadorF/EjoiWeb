@@ -10,10 +10,146 @@
 }
 
 .theme-preference__seg.seg {
-  min-height: 52px;
+  flex-wrap: wrap;
+  align-items: stretch;
+  height: auto;
+  min-height: 0;
+}
+
+.theme-preference__seg .seg__item {
+  flex: 1 1 calc(50% - var(--space-1));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: 44px;
+  height: auto;
+  padding: 6px 8px;
+  line-height: 1.15;
 }
 
 .theme-preference__seg--compact.seg {
-  min-height: 44px;
+  min-height: 0;
   padding: 2px;
+}
+
+.theme-preference__web {
+  display: block;
+  font: var(--font-caption);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+
+/* Muestra del tema: fondo + tinta. No pisa el anillo del seleccionado. */
+.theme-preference__seg .seg__item[data-theme-choice='system'] {
+  background: linear-gradient(90deg, #fbf7f4 50%, #1b1918 50%);
+}
+
+.theme-preference__seg .seg__item[data-theme-choice='system'] .theme-preference__name {
+  width: 100%;
+  text-align: center;
+  background: linear-gradient(90deg, #2b2a29 50%, #f3eeea 50%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.theme-preference__seg .seg__item[data-theme-choice='light'] {
+  background: #fbf7f4;
+  color: #2b2a29;
+}
+
+.theme-preference__seg .seg__item[data-theme-choice='dark'] {
+  background: #1b1918;
+  color: #f3eeea;
+}
+
+.theme-preference__seg .seg__item[data-theme-choice='romantic'] {
+  background: #fff8f3;
+  color: #3a1c2c;
+}
+
+.theme-preference__seg .seg__item[data-theme-choice='minimal'] {
+  background: #ffffff;
+  color: #0a0a0a;
+}
+
+.theme-preference__seg .seg__item[data-theme-choice='kawaii'] {
+  background: #fff0f5;
+  color: #5a3656;
+}
+
+.theme-preference__seg .seg__item[data-theme-choice='aurora'] {
+  background: var(--theme-aurora-bg);
+  color: #f4eefe;
+  transition: box-shadow 200ms ease;
+}
+
+.theme-preference__seg .seg__item[data-theme-choice='pulse'] {
+  background: var(--theme-pulse-bg);
+  color: var(--theme-pulse-brand);
+  transition: box-shadow 200ms ease;
+}
+
+.theme-preference__seg .seg__item[data-theme-choice='liquid'] {
+  background:
+    radial-gradient(ellipse 70% 55% at 0% 0%, #f7c2e3 0%, transparent 58%),
+    radial-gradient(ellipse 60% 50% at 100% 0%, #9ec4ff 0%, transparent 52%),
+    radial-gradient(ellipse 55% 45% at 70% 100%, #b8f0df 0%, transparent 50%),
+    #d5e3f4;
+  color: #172033;
+}
+
+.theme-preference__seg .seg__item[data-theme-choice='aparicion'] {
+  background: #fbf7f4;
+  color: #2b2a29;
+}
+
+.theme-preference__seg .seg__item[aria-checked='true'] {
+  box-shadow: 0 0 0 2px var(--c-sel-border);
+  font-weight: 800;
+}
+
+html:not([data-motion='off']) .theme-preference .seg__item {
+  transition:
+    background-color 200ms ease,
+    color 200ms ease,
+    box-shadow 200ms ease;
+}
+
+html:not([data-motion='off']) .theme-preference__seg .seg__item[data-theme-choice='aurora'],
+html:not([data-motion='off']) .theme-preference__seg .seg__item[data-theme-choice='pulse'] {
+  transition: box-shadow 200ms ease;
+}
+
+html:not([data-motion='off']) .theme-preference .seg__item[aria-checked='true']:not([data-theme-choice='aurora']):not([data-theme-choice='pulse']) {
+  animation: theme-option-in 220ms ease;
+}
+
+html:not([data-motion='off']) .theme-preference__seg .seg__item[data-theme-choice='aurora'] {
+  animation: theme-aurora 5.5s ease-in-out infinite alternate;
+}
+
+html:not([data-motion='off']) .theme-preference__seg .seg__item[data-theme-choice='pulse'] {
+  animation: theme-pulse 2.8s ease-in-out infinite alternate;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-motion='on']) .theme-preference .seg__item {
+    transition: none;
+  }
+
+  html:not([data-motion='on']) .theme-preference .seg__item[aria-checked='true']:not([data-theme-choice='aurora']):not([data-theme-choice='pulse']),
+  html:not([data-motion='on']) .theme-preference__seg .seg__item[data-theme-choice='aurora'],
+  html:not([data-motion='on']) .theme-preference__seg .seg__item[data-theme-choice='pulse'] {
+    animation: none;
+  }
+}
+
+@keyframes theme-option-in {
+  from {
+    transform: scale(0.96);
+  }
 }

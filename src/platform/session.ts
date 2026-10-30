@@ -125,6 +125,17 @@ export function setUserDataJson(json: string | null): void {
   else storageRemove(USER_DATA_KEY);
 }
 
+/** Como setUserDataJson, pero false si localStorage rechaza el tamaño. No borra el valor anterior. */
+export function trySetUserDataJson(json: string): boolean {
+  try {
+    localStorage.setItem(USER_DATA_KEY, json);
+  } catch {
+    return false;
+  }
+  userDataJson = json;
+  return true;
+}
+
 type RefreshResponse = {
   access_token?: string;
   accessToken?: string;
@@ -197,9 +208,12 @@ async function doRefresh(startedGeneration: number): Promise<string> {
     body: storedRefreshToken ? JSON.stringify({ refreshToken: storedRefreshToken }) : undefined,
   });
 
-  if (!response.ok) {
+  // Solo un 401 rechaza la sesión. Un 403 (CSRF) o un 400 no invalidan el access token guardado.
+  if (response.status === 401) {
     clearSession();
     clearRefreshToken();
+  }
+  if (!response.ok) {
     throw new Error(`Refresh failed: ${response.status}`);
   }
 
