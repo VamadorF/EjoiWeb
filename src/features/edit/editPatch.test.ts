@@ -6,6 +6,7 @@ import {
   buildAppearancePatchBody,
   buildConversationalPatchBody,
   editFormToOnboardingData,
+  isHairOnlyChange,
   profileToEditForm,
   resolvePromptHairColor,
 } from './editPatch';
@@ -67,5 +68,13 @@ describe('editPatch', () => {
     const baseline = profileToEditForm({ ...profile, hairColor: 'Pelirrojo' });
     const current = { ...baseline, visualStyle: 'anime' as const };
     expect(resolvePromptHairColor(baseline, current, { hairColor: 'Pelirrojo' })).toBe('Pelirrojo');
+  });
+
+  it('isHairOnlyChange: solo cabello es true; cabello + estilo, solo estilo o sin cambios es false', () => {
+    const baseline = profileToEditForm({ ...profile, hairColor: 'Negro' });
+    expect(isHairOnlyChange(baseline, { ...baseline, hairColor: 'Rubio' })).toBe(true);
+    expect(isHairOnlyChange(baseline, { ...baseline, hairColor: 'Rubio', visualStyle: 'anime' })).toBe(false);
+    expect(isHairOnlyChange(baseline, { ...baseline, visualStyle: 'anime' })).toBe(false);
+    expect(isHairOnlyChange(baseline, baseline)).toBe(false);
   });
 });

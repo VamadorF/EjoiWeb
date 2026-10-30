@@ -61,6 +61,12 @@ export function hasAppearanceChanges(baseline: EditFormSnapshot, current: EditFo
   return false;
 }
 
+/** Solo cambió el color de cabello: el retrato se edita en vez de regenerarse (SCRUM-192). */
+export function isHairOnlyChange(baseline: EditFormSnapshot, current: EditFormSnapshot): boolean {
+  if ((baseline.hairColor ?? '') === (current.hairColor ?? '')) return false;
+  return !hasAppearanceChanges(baseline, { ...current, hairColor: baseline.hairColor });
+}
+
 export function hasConversationalChanges(baseline: EditFormSnapshot, current: EditFormSnapshot): boolean {
   if (baseline.companionName !== current.companionName) return true;
   if (baseline.persona !== current.persona) return true;
