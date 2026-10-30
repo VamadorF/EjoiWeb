@@ -16,6 +16,7 @@ import {
   buildAppearancePatchBody,
   editFormToOnboardingData,
   hasAppearanceChanges,
+  resolvePromptHairColor,
   type EditFormSnapshot,
 } from './editPatch';
 
@@ -57,7 +58,10 @@ export function useRegeneration(options: {
     setErrorMessage(null);
     setPendingPortrait(null);
     try {
-      const onboardingData = editFormToOnboardingData(current);
+      const onboardingData = editFormToOnboardingData(
+        current,
+        resolvePromptHairColor(options.baseline, current, options.profile),
+      );
       const prompt = generateCompanionImagePrompt(onboardingData, 'avatar');
       const image = await generateCompanionImage(buildCompanionAvatarImageRequest(prompt));
       setPendingPortrait({ fileUrl: image.fileUrl, storagePath: image.storagePath });
@@ -66,7 +70,7 @@ export function useRegeneration(options: {
       setPhase('error');
       setErrorMessage('regen');
     }
-  }, [options.baseline, options.values]);
+  }, [options.baseline, options.values, options.profile]);
 
   const applyRegeneration = useCallback(async (snapshot?: EditFormSnapshot): Promise<boolean> => {
     const current = snapshot ?? options.values;

@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildAppearancePatchBody, buildConversationalPatchBody, profileToEditForm } from './editPatch';
+import { generateCompanionImagePrompt } from '@/shared/utils/companionImagePrompt';
+
+import {
+  buildAppearancePatchBody,
+  buildConversationalPatchBody,
+  editFormToOnboardingData,
+  profileToEditForm,
+  resolvePromptHairColor,
+} from './editPatch';
 
 describe('editPatch', () => {
   const profile = {
@@ -36,5 +44,28 @@ describe('editPatch', () => {
     const current = { ...baseline, hairColor: 'Rubio' };
     const body = buildAppearancePatchBody(baseline, current);
     expect(body.hairColor).toBe('Rubio');
+  });
+
+  it('el prompt generado desde el formulario incluye el color elegido (SCRUM-192)', () => {
+    const baseline = profileToEditForm({ ...profile, hairColor: 'Castaño oscuro' });
+    const current = { ...baseline, hairColor: 'Rubio' };
+    const data = editFormToOnboardingData(
+      current,
+      resolvePromptHairColor(baseline, current, { hairColor: 'Castaño oscuro' }),
+    );
+    expect(data.hairColor).toBe('Rubio');
+    expect(generateCompanionImagePrompt(data, 'avatar')).toContain('natural blonde hair');
+  });
+
+  it('perfil sin color guardado y sin cambio de cabello: no se fuerza el color por defecto', () => {
+    const baseline = profileToEditForm(profile);
+    const current = { ...baseline, visualStyle: 'anime' as const };
+    expect(resolvePromptHairColor(baseline, current, { hairColor: null })).toBeUndefined();
+  });
+
+  it('perfil con color guardado y cambio solo de estilo: conserva el color', () => {
+    const baseline = profileToEditForm({ ...profile, hairColor: 'Pelirrojo' });
+    const current = { ...baseline, visualStyle: 'anime' as const };
+    expect(resolvePromptHairColor(baseline, current, { hairColor: 'Pelirrojo' })).toBe('Pelirrojo');
   });
 });

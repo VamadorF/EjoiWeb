@@ -171,4 +171,34 @@ describe('useRegeneration', () => {
       COMPANION_AVATAR_IMAGE_SIZE,
     );
   });
+
+  it('generatePortrait envía a C15 un prompt con el color elegido (SCRUM-192)', async () => {
+    vi.mocked(generateCompanionImage).mockResolvedValue({
+      fileUrl: 'https://example.com/new.jpg',
+      storagePath: 'avatars/new',
+    });
+    const queryClient = new QueryClient();
+    const profileWithHair = { ...profile, hairColor: 'Negro' };
+    const baseline = profileToEditForm(profileWithHair);
+    const values = { ...baseline, hairColor: 'Rubio' };
+
+    const { result } = renderHook(() =>
+      useRegeneration({
+        queryClient,
+        baseline,
+        values,
+        profile: profileWithHair,
+        onApplied: vi.fn(),
+      }),
+    );
+
+    await act(async () => {
+      await result.current.generatePortrait();
+    });
+
+    await waitFor(() => expect(result.current.phase).toBe('compare'));
+    expect(vi.mocked(generateCompanionImage).mock.calls.at(-1)![0].prompt).toContain(
+      'natural blonde hair',
+    );
+  });
 });
